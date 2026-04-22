@@ -15,3 +15,6 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+# Eclipse WST (Web Standard Tools)
+.settings/
+# Eclipse m2e specific files
