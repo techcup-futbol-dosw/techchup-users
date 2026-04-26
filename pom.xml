@@ -149,6 +149,12 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.12</version>
+        <!-- Excluye la clase principal: no se testea directamente -->
+        <configuration>
+          <excludes>
+            <exclude>**/App.class</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -168,9 +174,8 @@
               <goal>check</goal>
             </goals>
             <configuration>
-              <!-- Excluye la clase principal: no se testea directamente -->
               <excludes>
-                <exclude>edu/dosw/users/App.class</exclude>
+                <exclude>**/App.class</exclude>
               </excludes>
               <rules>
                 <rule>
