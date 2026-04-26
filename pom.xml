@@ -168,6 +168,10 @@
               <goal>check</goal>
             </goals>
             <configuration>
+              <!-- Excluye la clase principal: no se testea directamente -->
+              <excludes>
+                <exclude>edu/dosw/users/App.class</exclude>
+              </excludes>
               <rules>
                 <rule>
                   <element>BUNDLE</element>
