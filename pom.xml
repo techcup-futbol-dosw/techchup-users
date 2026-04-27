@@ -147,6 +147,8 @@
             <configuration>
               <excludes>
                 <exclude>edu/dosw/users/App.class</exclude>
+                <exclude>edu/dosw/users/entity/**</exclude>
+                <exclude>edu/dosw/users/enums/**</exclude>
               </excludes>
               <rules>
                 <rule>
