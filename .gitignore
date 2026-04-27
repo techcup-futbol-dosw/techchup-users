@@ -59,3 +59,8 @@ out/
 .DS_Store
 Thumbs.db
 HELP.md
+
+# =========================
+# Spring Boot - local config
+# =========================
+src/main/resources/application-local.properties
