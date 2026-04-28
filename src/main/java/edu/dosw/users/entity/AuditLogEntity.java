@@ -6,11 +6,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "audit_logs")
+@Table(
+    name = "audit_logs",
+    check = @CheckConstraint(
+        name = "chk_audit_log_has_reference",
+        constraint = "sport_profile_id IS NOT NULL OR invitation_id IS NOT NULL"
+    )
+)
 @Getter
 @Setter
 @Builder
