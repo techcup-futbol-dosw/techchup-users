@@ -12,10 +12,21 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link AuditLogMapper}.
+ *
+ * <p>Verifies bidirectional conversion between {@link AuditLogEntity} and
+ * {@link AuditLogModel}, including extraction of {@code sportProfile.id} and
+ * {@code invitation.id}, handling of null relationships, and the fact that
+ * both relationships are ignored in {@code toEntity}.</p>
+ */
 class AuditLogMapperTest {
 
     private AuditLogMapper mapper;
 
+    /**
+     * Initialises the MapStruct-generated implementation before each test.
+     */
     @BeforeEach
     void setUp() {
         mapper = new AuditLogMapperImpl();
@@ -23,6 +34,11 @@ class AuditLogMapperTest {
 
     // ── toModel ──────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toModel} correctly maps all entity fields to the
+     * model, extracting {@code sportProfile.id} and {@code invitation.id}
+     * into the flat fields of the model.
+     */
     @Test
     void toModel_mapsSportProfileIdAndInvitationId() {
         SportProfileEntity sportProfile = SportProfileEntity.builder().id(3L).build();
@@ -47,6 +63,10 @@ class AuditLogMapperTest {
         assertEquals("Perfil deportivo creado", model.getDetails());
     }
 
+    /**
+     * Verifies that when {@code sportProfile} is {@code null}, the
+     * {@code sportProfileId} field of the resulting model is also {@code null}.
+     */
     @Test
     void toModel_nullSportProfile_sportProfileIdIsNull() {
         InvitationEntity invitation = InvitationEntity.builder().id(7L).build();
@@ -65,6 +85,10 @@ class AuditLogMapperTest {
         assertEquals(AuditAction.UPDATE, model.getAction());
     }
 
+    /**
+     * Verifies that when {@code invitation} is {@code null}, the
+     * {@code invitationId} field of the resulting model is also {@code null}.
+     */
     @Test
     void toModel_nullInvitation_invitationIdIsNull() {
         SportProfileEntity sportProfile = SportProfileEntity.builder().id(3L).build();
@@ -83,6 +107,10 @@ class AuditLogMapperTest {
         assertEquals(AuditAction.DEACTIVATE, model.getAction());
     }
 
+    /**
+     * Verifies that {@code toModel} returns {@code null} when given a
+     * {@code null} entity.
+     */
     @Test
     void toModel_nullEntity_returnsNull() {
         assertNull(mapper.toModel(null));
@@ -90,6 +118,11 @@ class AuditLogMapperTest {
 
     // ── toEntity ─────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toEntity} correctly maps all model fields to the
+     * entity and that both relationships ({@code sportProfile} and
+     * {@code invitation}) are left as {@code null}.
+     */
     @Test
     void toEntity_mapsFields_andIgnoresBothRelations() {
         AuditLogModel model = AuditLogModel.builder()
@@ -111,6 +144,10 @@ class AuditLogMapperTest {
         assertNull(entity.getInvitation());
     }
 
+    /**
+     * Verifies that {@code toEntity} returns {@code null} when given a
+     * {@code null} model.
+     */
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));

@@ -11,17 +11,31 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link SportProfileMapper}.
+ *
+ * <p>Verifies bidirectional conversion between {@link SportProfileEntity}
+ * and {@link SportProfileModel}, including the mapping of the user identifier
+ * nested in {@code UserProfileEntity} and the handling of null values.</p>
+ */
 class SportProfileMapperTest {
 
     private SportProfileMapper mapper;
 
+    /**
+     * Initialises the MapStruct-generated implementation before each test.
+     */
     @BeforeEach
     void setUp() {
         mapper = new SportProfileMapperImpl();
     }
 
-    // ── toModel ──────────────────────────────────────────────────────────────
+    
 
+    /**
+     * Verifies that {@code toModel} correctly maps all entity fields to the
+     * model, including extraction of {@code userProfile.id} into {@code userId}.
+     */
     @Test
     void toModel_mapsUserProfileIdToUserId() {
         UserProfileEntity user = UserProfileEntity.builder().id(42L).build();
@@ -47,6 +61,10 @@ class SportProfileMapperTest {
         assertTrue(model.isAvailable());
     }
 
+    /**
+     * Verifies that when {@code userProfile} is {@code null}, the {@code userId}
+     * field of the resulting model is also {@code null}.
+     */
     @Test
     void toModel_nullUserProfile_userIdIsNull() {
         SportProfileEntity entity = SportProfileEntity.builder()
@@ -62,13 +80,21 @@ class SportProfileMapperTest {
         assertEquals(Position.DEFENDER, model.getPosition());
     }
 
+    /**
+     * Verifies that {@code toModel} returns {@code null} when given a
+     * {@code null} entity.
+     */
     @Test
     void toModel_nullEntity_returnsNull() {
         assertNull(mapper.toModel(null));
     }
 
-    // ── toEntity ─────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toEntity} correctly maps all model fields to the
+     * entity and that {@code userProfile} is left as {@code null} (field
+     * ignored by the mapper).
+     */
     @Test
     void toEntity_mapsFields_andIgnoresUserProfile() {
         SportProfileModel model = SportProfileModel.builder()
@@ -92,6 +118,10 @@ class SportProfileMapperTest {
         assertNull(entity.getUserProfile());
     }
 
+    /**
+     * Verifies that {@code toEntity} returns {@code null} when given a
+     * {@code null} model.
+     */
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));
