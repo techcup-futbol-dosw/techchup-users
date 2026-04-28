@@ -1,8 +1,10 @@
 package edu.dosw.users.model;
 
 import edu.dosw.users.enums.Position;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SportProfileModel {
 
     /** Unique identifier of the sport profile. */

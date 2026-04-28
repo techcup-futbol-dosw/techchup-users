@@ -2,8 +2,10 @@ package edu.dosw.users.model;
 
 import edu.dosw.users.enums.Gender;
 import edu.dosw.users.enums.SchoolRelation;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -24,6 +26,8 @@ import java.time.Period;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserProfileModel {
 
     /** Unique identifier of the user profile. */
