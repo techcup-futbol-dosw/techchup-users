@@ -1,0 +1,39 @@
+package edu.dosw.users.service;
+
+import edu.dosw.users.model.PlayerPhoto;
+import edu.dosw.users.repository.PlayerPhotoRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+@ConditionalOnBean(MongoTemplate.class)
+public class ImageServiceImpl implements ImageService {
+
+    private final PlayerPhotoRepository playerPhotoRepository;
+
+    @Override
+    public String upload(MultipartFile file, Long sportProfileId) {
+        try {
+            PlayerPhoto photo = new PlayerPhoto();
+            photo.setSportProfileId(sportProfileId);
+            photo.setContentType(file.getContentType());
+            photo.setData(file.getBytes());
+            photo.setUploadedAt(LocalDateTime.now());
+            return playerPhotoRepository.save(photo).getId();
+        } catch (IOException e) {
+            throw new RuntimeException("Error al leer el archivo de imagen", e);
+        }
+    }
+
+    @Override
+    public void delete(String photoId) {
+        playerPhotoRepository.deleteById(photoId);
+    }
+}

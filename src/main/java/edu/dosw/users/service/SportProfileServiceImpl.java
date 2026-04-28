@@ -1,0 +1,136 @@
+package edu.dosw.users.service;
+
+import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.entity.SportProfileEntity;
+import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.enums.AuditAction;
+import edu.dosw.users.exception.BusinessException;
+import edu.dosw.users.exception.ResourceNotFoundException;
+import edu.dosw.users.mapper.SportProfileMapper;
+import edu.dosw.users.model.SportProfileModel;
+import edu.dosw.users.repository.SportProfileRepository;
+import edu.dosw.users.repository.UserProfileRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+
+/**
+ * Default implementation of {@link ISportProfileService}.
+ *
+ * <p>Coordinates sport profile persistence with photo storage (MongoDB via
+ * {@link ImageService}), team membership checks (via {@link TeamsServiceClient}),
+ * and audit logging (via {@link IAuditService}).</p>
+ *
+ * <p>Because {@link SportProfileMapper} ignores the {@code userProfile}
+ * relationship, this class sets it manually using a partial entity reference
+ * (id only) after mapping.</p>
+ */
+@Service
+@RequiredArgsConstructor
+public class SportProfileServiceImpl implements ISportProfileService {
+
+    private final SportProfileRepository sportProfileRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final SportProfileMapper sportProfileMapper;
+    private final IAuditService auditService;
+    private final ImageService imageService;
+    private final TeamsServiceClient teamsServiceClient;
+
+    @Override
+    public SportProfileModel getById(Long id) {
+        return sportProfileRepository.findById(id)
+                .map(sportProfileMapper::toModel)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Sport profile not found with id: " + id));
+    }
+
+    @Override
+    public SportProfileModel getByUserId(Long userId) {
+        return sportProfileRepository.findByUserProfile_Id(userId)
+                .map(sportProfileMapper::toModel)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Sport profile not found for user id: " + userId));
+    }
+
+    @Override
+    public SportProfileModel create(Long userId, SportProfileModel model, MultipartFile photo) {
+        userProfileRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User profile not found with id: " + userId));
+
+        if (sportProfileRepository.findByUserProfile_Id(userId).isPresent()) {
+            throw new BusinessException(
+                    "User with id " + userId + " already has a sport profile");
+        }
+
+        String photoId = uploadIfPresent(photo, null);
+
+        LocalDateTime now = LocalDateTime.now();
+        SportProfileEntity entity = sportProfileMapper.toEntity(model);
+        entity.setUserProfile(UserProfileEntity.builder().id(userId).build());
+        entity.setPhotoId(photoId);
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
+
+        SportProfileModel saved = sportProfileMapper.toModel(sportProfileRepository.save(entity));
+        auditService.logSportProfile(saved.getId(), AuditAction.CREATE,
+                "Sport profile created for user " + userId);
+        return saved;
+    }
+
+    @Override
+    public SportProfileModel update(Long id, SportProfileModel model, MultipartFile photo) {
+        SportProfileEntity existing = sportProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Sport profile not found with id: " + id));
+
+        Long userId = existing.getUserProfile().getId();
+        if (teamsServiceClient.isPlayerAssignedToTeam(userId)) {
+            throw new BusinessException(
+                    "Cannot update sport profile while player is assigned to a team");
+        }
+
+        String photoId = uploadIfPresent(photo, existing.getPhotoId());
+
+        SportProfileEntity updated = sportProfileMapper.toEntity(model);
+        updated.setId(id);
+        updated.setUserProfile(existing.getUserProfile());
+        updated.setPhotoId(photoId);
+        updated.setCreatedAt(existing.getCreatedAt());
+        updated.setUpdatedAt(LocalDateTime.now());
+
+        SportProfileModel saved = sportProfileMapper.toModel(sportProfileRepository.save(updated));
+        auditService.logSportProfile(id, AuditAction.UPDATE,
+                "Sport profile updated for user " + userId);
+        return saved;
+    }
+
+    @Override
+    public void updateAvailability(Long id, boolean available) {
+        SportProfileEntity entity = sportProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Sport profile not found with id: " + id));
+        entity.setAvailable(available);
+        entity.setUpdatedAt(LocalDateTime.now());
+        sportProfileRepository.save(entity);
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Uploads a new photo and deletes the previous one when a new file is
+     * provided. Returns the current {@code photoId} unchanged when no file
+     * is given.
+     */
+    private String uploadIfPresent(MultipartFile photo, String currentPhotoId) {
+        if (photo == null || photo.isEmpty()) {
+            return currentPhotoId;
+        }
+        if (currentPhotoId != null) {
+            imageService.delete(currentPhotoId);
+        }
+        return imageService.upload(photo, null);
+    }
+}

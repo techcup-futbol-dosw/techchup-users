@@ -11,10 +11,21 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link InvitationMapper}.
+ *
+ * <p>Verifies bidirectional conversion between {@link InvitationEntity} and
+ * {@link InvitationModel}, including extraction of {@code player.id} into
+ * {@code playerId}, handling of a null player, and the fact that the
+ * {@code player} relationship is ignored in {@code toEntity}.</p>
+ */
 class InvitationMapperTest {
 
     private InvitationMapper mapper;
 
+    /**
+     * Initialises the MapStruct-generated implementation before each test.
+     */
     @BeforeEach
     void setUp() {
         mapper = new InvitationMapperImpl();
@@ -22,6 +33,10 @@ class InvitationMapperTest {
 
     // ── toModel ──────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toModel} correctly maps all entity fields to the
+     * model, extracting {@code player.id} into {@code playerId}.
+     */
     @Test
     void toModel_mapsPlayerIdAndAllFields() {
         UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
@@ -45,6 +60,10 @@ class InvitationMapperTest {
         assertNull(model.getRespondedAt());
     }
 
+    /**
+     * Verifies that when {@code player} is {@code null}, the {@code playerId}
+     * field of the resulting model is also {@code null}.
+     */
     @Test
     void toModel_nullPlayer_playerIdIsNull() {
         InvitationEntity entity = InvitationEntity.builder()
@@ -60,6 +79,10 @@ class InvitationMapperTest {
         assertEquals(InvitationStatus.ACCEPTED, model.getStatus());
     }
 
+    /**
+     * Verifies that {@code toModel} returns {@code null} when given a
+     * {@code null} entity.
+     */
     @Test
     void toModel_nullEntity_returnsNull() {
         assertNull(mapper.toModel(null));
@@ -67,6 +90,10 @@ class InvitationMapperTest {
 
     // ── toEntity ─────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toEntity} correctly maps all model fields to the
+     * entity and that the {@code player} relationship is left as {@code null}.
+     */
     @Test
     void toEntity_mapsFields_andIgnoresPlayer() {
         InvitationModel model = InvitationModel.builder()
@@ -87,6 +114,10 @@ class InvitationMapperTest {
         assertNull(entity.getPlayer());
     }
 
+    /**
+     * Verifies that {@code toEntity} returns {@code null} when given a
+     * {@code null} model.
+     */
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));

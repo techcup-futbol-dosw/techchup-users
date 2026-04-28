@@ -95,3 +95,30 @@ CREATE TABLE invitations (
     CONSTRAINT chk_invitations_responded_at
         CHECK (responded_at IS NULL OR responded_at >= sent_at)
 );
+
+
+-- -------------------------------------------------------------
+-- TABLA: audit_logs
+-- -------------------------------------------------------------
+CREATE TABLE audit_logs (
+    id                  BIGSERIAL       PRIMARY KEY,
+    action              VARCHAR(15)     NOT NULL,
+    action_timestamp    TIMESTAMP       NOT NULL,
+    details             TEXT,
+    sport_profile_id    BIGINT,
+    invitation_id       BIGINT,
+
+    CONSTRAINT fk_audit_logs_sport_profile
+        FOREIGN KEY (sport_profile_id)
+        REFERENCES sport_profiles (id),
+
+    CONSTRAINT fk_audit_logs_invitation
+        FOREIGN KEY (invitation_id)
+        REFERENCES invitations (id),
+
+    CONSTRAINT chk_audit_logs_action
+        CHECK (action IN ('CREATE', 'UPDATE', 'DEACTIVATE')),
+
+    CONSTRAINT chk_audit_log_has_reference
+        CHECK (sport_profile_id IS NOT NULL OR invitation_id IS NOT NULL)
+);

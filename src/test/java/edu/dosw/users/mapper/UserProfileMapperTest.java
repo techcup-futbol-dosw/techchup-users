@@ -12,10 +12,22 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link UserProfileMapper}.
+ *
+ * <p>Verifies bidirectional conversion between {@link UserProfileEntity} and
+ * {@link UserProfileModel}, including the mapping of the {@link Gender} and
+ * {@link SchoolRelation} enums to and from their {@code String} representations,
+ * handling of null optional fields, and the fact that {@code sportProfile} is
+ * ignored in {@code toEntity}.</p>
+ */
 class UserProfileMapperTest {
 
     private UserProfileMapper mapper;
 
+    /**
+     * Initialises the MapStruct-generated implementation before each test.
+     */
     @BeforeEach
     void setUp() {
         mapper = new UserProfileMapperImpl();
@@ -23,6 +35,11 @@ class UserProfileMapperTest {
 
     // ── toModel ──────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toModel} correctly maps all entity fields to the
+     * model, including conversion from {@code String} to {@link Gender} and
+     * {@link SchoolRelation}.
+     */
     @Test
     void toModel_mapsAllFields() {
         UserProfileEntity entity = UserProfileEntity.builder()
@@ -59,6 +76,10 @@ class UserProfileMapperTest {
         assertEquals(LocalDateTime.of(2024, 3, 1, 10, 30), model.getUpdatedAt());
     }
 
+    /**
+     * Verifies that when {@code gender} and {@code schoolRelation} are {@code null}
+     * in the entity, the corresponding model fields are also {@code null}.
+     */
     @Test
     void toModel_nullGenderAndSchoolRelation_mapsToNull() {
         UserProfileEntity entity = UserProfileEntity.builder()
@@ -76,6 +97,10 @@ class UserProfileMapperTest {
         assertNull(model.getSchoolRelation());
     }
 
+    /**
+     * Verifies that {@code toModel} returns {@code null} when given a
+     * {@code null} entity.
+     */
     @Test
     void toModel_nullEntity_returnsNull() {
         assertNull(mapper.toModel(null));
@@ -83,6 +108,11 @@ class UserProfileMapperTest {
 
     // ── toEntity ─────────────────────────────────────────────────────────────
 
+    /**
+     * Verifies that {@code toEntity} correctly maps all model fields to the
+     * entity, including conversion of {@link Gender} and {@link SchoolRelation}
+     * to their {@code String} representation.
+     */
     @Test
     void toEntity_mapsAllFields() {
         UserProfileModel model = UserProfileModel.builder()
@@ -112,6 +142,10 @@ class UserProfileMapperTest {
         assertNull(entity.getSportProfile());
     }
 
+    /**
+     * Verifies that the {@code sportProfile} relationship is ignored by the
+     * mapper and is left as {@code null} in the resulting entity.
+     */
     @Test
     void toEntity_sportProfile_isIgnored() {
         UserProfileModel model = UserProfileModel.builder()
@@ -128,6 +162,10 @@ class UserProfileMapperTest {
         assertNull(entity.getSportProfile());
     }
 
+    /**
+     * Verifies that {@code toEntity} returns {@code null} when given a
+     * {@code null} model.
+     */
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));
