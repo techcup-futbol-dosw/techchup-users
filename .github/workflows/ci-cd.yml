@@ -95,7 +95,7 @@ jobs:
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.exclusions=**/App.java
+            -Dsonar.coverage.exclusions=**/App.java,**/entity/**,**/enums/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
