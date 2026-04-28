@@ -1,8 +1,10 @@
 package edu.dosw.users.model;
 
 import edu.dosw.users.enums.AuditAction;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuditLogModel {
 
     /** Unique identifier of the audit log entry. */
