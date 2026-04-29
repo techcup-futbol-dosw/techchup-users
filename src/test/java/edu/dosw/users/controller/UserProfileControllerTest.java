@@ -2,7 +2,9 @@ package edu.dosw.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.dosw.users.dto.UserProfileRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
+import edu.dosw.users.mapper.UserProfileMapper;
 import edu.dosw.users.model.UserProfileModel;
 import edu.dosw.users.service.IUserProfileService;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserProfileControllerTest {
 
     @Autowired private WebApplicationContext context;
+    @Autowired private UserProfileMapper userProfileMapper;
     @MockitoBean private IUserProfileService userProfileService;
 
     private MockMvc mockMvc;
@@ -61,14 +64,16 @@ class UserProfileControllerTest {
     // ── GET /api/users/{id} ──────────────────────────────────────────────────
 
     @Test
-    void getById_found_returnsOk() throws Exception {
+    void getById_found_returnsOkWithNoPassword() throws Exception {
         when(userProfileService.getById(1L))
-                .thenReturn(UserProfileModel.builder().id(1L).fullName("Carlos").build());
+                .thenReturn(UserProfileModel.builder().id(1L).fullName("Carlos")
+                        .password("secret").email("c@eci.edu.co").build());
 
         mockMvc.perform(get("/api/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.fullName").value("Carlos"));
+                .andExpect(jsonPath("$.fullName").value("Carlos"))
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test
@@ -106,16 +111,16 @@ class UserProfileControllerTest {
 
     @Test
     void create_returnsCreated() throws Exception {
-        UserProfileModel input = UserProfileModel.builder()
+        UserProfileRequest request = UserProfileRequest.builder()
                 .fullName("Ana").email("ana@eci.edu.co")
                 .password("hash").identification("999")
                 .build();
-        UserProfileModel saved = UserProfileModel.builder().id(5L).fullName("Ana").build();
-        when(userProfileService.create(any())).thenReturn(saved);
+        when(userProfileService.create(any()))
+                .thenReturn(UserProfileModel.builder().id(5L).fullName("Ana").build());
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(5));
     }
@@ -124,13 +129,13 @@ class UserProfileControllerTest {
 
     @Test
     void update_returnsOk() throws Exception {
-        UserProfileModel input = UserProfileModel.builder().fullName("Nuevo nombre").build();
-        UserProfileModel updated = UserProfileModel.builder().id(1L).fullName("Nuevo nombre").build();
-        when(userProfileService.update(eq(1L), any())).thenReturn(updated);
+        UserProfileRequest request = UserProfileRequest.builder().fullName("Nuevo nombre").build();
+        when(userProfileService.update(eq(1L), any()))
+                .thenReturn(UserProfileModel.builder().id(1L).fullName("Nuevo nombre").build());
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fullName").value("Nuevo nombre"));
     }
@@ -143,7 +148,7 @@ class UserProfileControllerTest {
         mockMvc.perform(put("/api/users/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                UserProfileModel.builder().fullName("x").build())))
+                                UserProfileRequest.builder().fullName("x").build())))
                 .andExpect(status().isNotFound());
     }
 

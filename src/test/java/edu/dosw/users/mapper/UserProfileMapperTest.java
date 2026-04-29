@@ -1,5 +1,7 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.UserProfileRequest;
+import edu.dosw.users.dto.UserProfileResponse;
 import edu.dosw.users.entity.UserProfileEntity;
 import edu.dosw.users.enums.Gender;
 import edu.dosw.users.enums.SchoolRelation;
@@ -103,7 +105,7 @@ class UserProfileMapperTest {
      */
     @Test
     void toModel_nullEntity_returnsNull() {
-        assertNull(mapper.toModel(null));
+        assertNull(mapper.toModel((UserProfileEntity) null));
     }
 
     // ── toEntity ─────────────────────────────────────────────────────────────
@@ -169,5 +171,81 @@ class UserProfileMapperTest {
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));
+    }
+
+    // ── toModel(Request) ─────────────────────────────────────────────────────
+
+    @Test
+    void toModel_fromRequest_mapsFieldsAndIgnoresMetadata() {
+        UserProfileRequest request = UserProfileRequest.builder()
+                .fullName("Ana García")
+                .email("ana@escuelaing.edu.co")
+                .password("hashed")
+                .identification("87654321")
+                .birthDate(LocalDate.of(1999, 3, 20))
+                .gender(Gender.FEMALE)
+                .schoolRelation(SchoolRelation.STUDENT)
+                .academicProgram("Ingeniería Civil")
+                .semester(4)
+                .build();
+
+        UserProfileModel model = mapper.toModel(request);
+
+        assertNotNull(model);
+        assertNull(model.getId());
+        assertNull(model.getStatus());
+        assertNull(model.getProfileCreatedAt());
+        assertNull(model.getUpdatedAt());
+        assertEquals("Ana García", model.getFullName());
+        assertEquals("ana@escuelaing.edu.co", model.getEmail());
+        assertEquals("hashed", model.getPassword());
+        assertEquals("87654321", model.getIdentification());
+        assertEquals(LocalDate.of(1999, 3, 20), model.getBirthDate());
+        assertEquals(Gender.FEMALE, model.getGender());
+        assertEquals(SchoolRelation.STUDENT, model.getSchoolRelation());
+        assertEquals("Ingeniería Civil", model.getAcademicProgram());
+        assertEquals(4, model.getSemester());
+    }
+
+    // ── toResponse ───────────────────────────────────────────────────────────
+
+    @Test
+    void toResponse_mapsAllFieldsExceptPassword() {
+        UserProfileModel model = UserProfileModel.builder()
+                .id(7L)
+                .fullName("Luis Mora")
+                .email("luis@escuelaing.edu.co")
+                .password("should-be-excluded")
+                .identification("11223344")
+                .birthDate(LocalDate.of(2001, 7, 5))
+                .gender(Gender.MALE)
+                .schoolRelation(SchoolRelation.PROFESSOR)
+                .academicProgram("Matemáticas")
+                .semester(8)
+                .status("ACTIVE")
+                .profileCreatedAt(LocalDateTime.of(2024, 1, 1, 0, 0))
+                .updatedAt(LocalDateTime.of(2024, 6, 1, 0, 0))
+                .build();
+
+        UserProfileResponse response = mapper.toResponse(model);
+
+        assertNotNull(response);
+        assertEquals(7L, response.getId());
+        assertEquals("Luis Mora", response.getFullName());
+        assertEquals("luis@escuelaing.edu.co", response.getEmail());
+        assertEquals("11223344", response.getIdentification());
+        assertEquals(LocalDate.of(2001, 7, 5), response.getBirthDate());
+        assertEquals(Gender.MALE, response.getGender());
+        assertEquals(SchoolRelation.PROFESSOR, response.getSchoolRelation());
+        assertEquals("Matemáticas", response.getAcademicProgram());
+        assertEquals(8, response.getSemester());
+        assertEquals("ACTIVE", response.getStatus());
+        assertEquals(LocalDateTime.of(2024, 1, 1, 0, 0), response.getProfileCreatedAt());
+        assertEquals(LocalDateTime.of(2024, 6, 1, 0, 0), response.getUpdatedAt());
+    }
+
+    @Test
+    void toResponse_nullModel_returnsNull() {
+        assertNull(mapper.toResponse(null));
     }
 }

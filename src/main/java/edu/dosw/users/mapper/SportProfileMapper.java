@@ -1,5 +1,7 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.SportProfileRequest;
+import edu.dosw.users.dto.SportProfileResponse;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.model.SportProfileModel;
 import org.mapstruct.Mapper;
@@ -36,4 +38,15 @@ public interface SportProfileMapper {
      */
     @Mapping(target = "userProfile", ignore = true)
     SportProfileEntity toEntity(SportProfileModel model);
+
+    /** Converts a {@link SportProfileRequest} to its domain model. */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "photoId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    SportProfileModel toModel(SportProfileRequest request);
+
+    /** Converts a domain model to a {@link SportProfileResponse}. */
+    SportProfileResponse toResponse(SportProfileModel model);
 }

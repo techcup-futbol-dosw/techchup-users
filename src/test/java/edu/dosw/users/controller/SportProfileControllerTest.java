@@ -2,6 +2,7 @@ package edu.dosw.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.dosw.users.dto.SportProfileRequest;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.model.SportProfileModel;
@@ -95,7 +96,7 @@ class SportProfileControllerTest {
 
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileModel.builder().build()));
+                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
 
         mockMvc.perform(multipart("/api/sport-profiles/user/1")
                         .file(profilePart))
@@ -110,7 +111,7 @@ class SportProfileControllerTest {
 
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileModel.builder().build()));
+                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
 
         mockMvc.perform(multipart("/api/sport-profiles/user/99")
                         .file(profilePart))
@@ -124,7 +125,7 @@ class SportProfileControllerTest {
 
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileModel.builder().build()));
+                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
 
         mockMvc.perform(multipart("/api/sport-profiles/user/1")
                         .file(profilePart))
@@ -140,7 +141,7 @@ class SportProfileControllerTest {
 
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileModel.builder().build()));
+                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
 
         mockMvc.perform(multipart("/api/sport-profiles/1")
                         .file(profilePart)
@@ -156,7 +157,7 @@ class SportProfileControllerTest {
 
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileModel.builder().build()));
+                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
 
         mockMvc.perform(multipart("/api/sport-profiles/1")
                         .file(profilePart)

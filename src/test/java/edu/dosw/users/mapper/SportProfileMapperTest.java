@@ -1,5 +1,7 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.SportProfileRequest;
+import edu.dosw.users.dto.SportProfileResponse;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.entity.UserProfileEntity;
 import edu.dosw.users.enums.Position;
@@ -86,7 +88,7 @@ class SportProfileMapperTest {
      */
     @Test
     void toModel_nullEntity_returnsNull() {
-        assertNull(mapper.toModel(null));
+        assertNull(mapper.toModel((SportProfileEntity) null));
     }
 
 
@@ -125,5 +127,61 @@ class SportProfileMapperTest {
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));
+    }
+
+    // ── toModel(Request) ─────────────────────────────────────────────────────
+
+    @Test
+    void toModel_fromRequest_mapsFieldsAndIgnoresMetadata() {
+        SportProfileRequest request = SportProfileRequest.builder()
+                .position(Position.MIDFIELDER)
+                .dorsalNumber(8)
+                .available(true)
+                .build();
+
+        SportProfileModel model = mapper.toModel(request);
+
+        assertNotNull(model);
+        assertNull(model.getId());
+        assertNull(model.getUserId());
+        assertNull(model.getPhotoId());
+        assertNull(model.getCreatedAt());
+        assertNull(model.getUpdatedAt());
+        assertEquals(Position.MIDFIELDER, model.getPosition());
+        assertEquals(8, model.getDorsalNumber());
+        assertTrue(model.isAvailable());
+    }
+
+    // ── toResponse ───────────────────────────────────────────────────────────
+
+    @Test
+    void toResponse_mapsAllFields() {
+        SportProfileModel model = SportProfileModel.builder()
+                .id(4L)
+                .userId(20L)
+                .position(Position.DEFENDER)
+                .dorsalNumber(5)
+                .photoId("photo789")
+                .available(false)
+                .createdAt(LocalDateTime.of(2024, 3, 1, 10, 0))
+                .updatedAt(LocalDateTime.of(2024, 4, 1, 10, 0))
+                .build();
+
+        SportProfileResponse response = mapper.toResponse(model);
+
+        assertNotNull(response);
+        assertEquals(4L, response.getId());
+        assertEquals(20L, response.getUserId());
+        assertEquals(Position.DEFENDER, response.getPosition());
+        assertEquals(5, response.getDorsalNumber());
+        assertEquals("photo789", response.getPhotoId());
+        assertFalse(response.isAvailable());
+        assertEquals(LocalDateTime.of(2024, 3, 1, 10, 0), response.getCreatedAt());
+        assertEquals(LocalDateTime.of(2024, 4, 1, 10, 0), response.getUpdatedAt());
+    }
+
+    @Test
+    void toResponse_nullModel_returnsNull() {
+        assertNull(mapper.toResponse(null));
     }
 }
