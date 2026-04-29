@@ -122,9 +122,8 @@ class InvitationServiceImplTest {
 
     @Test
     void accept_pendingInvitation_changesStatusAndLogs() {
-        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
-                .id(1L).player(player).teamId(5L).status("PENDING").build();
+                .id(1L).player(UserEntity.builder().id(10L).build()).teamId(5L).status("PENDING").build();
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(1L).status(InvitationStatus.PENDING).build();
         when(invitationRepository.findById(1L)).thenReturn(Optional.of(existing));
@@ -162,9 +161,8 @@ class InvitationServiceImplTest {
 
     @Test
     void reject_pendingInvitation_changesStatus() {
-        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
-                .id(2L).player(player).build();
+                .id(2L).player(UserEntity.builder().id(10L).build()).build();
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(2L).status(InvitationStatus.PENDING).build();
         when(invitationRepository.findById(2L)).thenReturn(Optional.of(existing));
@@ -180,9 +178,8 @@ class InvitationServiceImplTest {
 
     @Test
     void cancel_pendingInvitation_changesStatus() {
-        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
-                .id(3L).player(player).build();
+                .id(3L).player(UserEntity.builder().id(10L).build()).build();
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(3L).status(InvitationStatus.PENDING).build();
         when(invitationRepository.findById(3L)).thenReturn(Optional.of(existing));
