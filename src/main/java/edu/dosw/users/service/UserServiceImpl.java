@@ -17,6 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
 
+    private static final String USER_NOT_FOUND_ID = "User not found with id: ";
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -25,7 +27,7 @@ public class UserServiceImpl implements IUserService {
         return userRepository.findById(id)
                 .map(userMapper::toModel)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "User profile not found with id: " + id));
+                        USER_NOT_FOUND_ID + id));
     }
 
     @Override
@@ -58,7 +60,7 @@ public class UserServiceImpl implements IUserService {
     public UserModel update(Long id, UserModel model) {
         userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "User profile not found with id: " + id));
+                        USER_NOT_FOUND_ID + id));
         model.setId(id);
         model.setUpdatedAt(LocalDateTime.now());
         return userMapper.toModel(
@@ -69,7 +71,7 @@ public class UserServiceImpl implements IUserService {
     public void deactivate(Long id) {
         var entity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "User profile not found with id: " + id));
+                        USER_NOT_FOUND_ID + id));
         entity.setStatus("INACTIVE");
         entity.setUpdatedAt(LocalDateTime.now());
         userRepository.save(entity);
