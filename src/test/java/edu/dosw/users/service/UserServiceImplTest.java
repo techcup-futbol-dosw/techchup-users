@@ -191,7 +191,6 @@ class UserServiceImplTest {
     void update_existingProfile_updatesAndReturnsModel() {
         UserEntity existing = UserEntity.builder().id(1L).status("ACTIVE").build();
         UserModel updateData = UserModel.builder().fullName("Nuevo").build();
-        UserEntity updatedEntity = UserEntity.builder().id(1L).build();
         UserModel updatedModel = UserModel.builder().id(1L).fullName("Nuevo").updatedAt(java.time.LocalDateTime.now()).build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
