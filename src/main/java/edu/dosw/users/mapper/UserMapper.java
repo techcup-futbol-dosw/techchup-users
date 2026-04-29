@@ -1,6 +1,7 @@
 package edu.dosw.users.mapper;
 
 import edu.dosw.users.dto.UserRequest;
+import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.model.UserModel;
@@ -43,6 +44,21 @@ public interface UserMapper {
     @Mapping(target = "profileCreatedAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     UserModel toModel(UserRequest request);
+
+    /**
+     * Converts an administrator update request to a domain model containing
+     * only the fields that are permitted to be changed by an administrator.
+     * The mapper ignores all protected fields so the service can apply the
+     * changes onto the existing entity without overwriting immutable values.
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "identification", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "profileCreatedAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    UserModel toModel(AdminUserUpdateRequest request);
 
     /** Converts a domain model to a {@link UserResponse} (no password). */
     UserResponse toResponse(UserModel model);

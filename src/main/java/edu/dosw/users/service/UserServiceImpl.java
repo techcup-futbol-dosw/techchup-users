@@ -1,9 +1,13 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.UserRepository;
+import edu.dosw.users.service.IAuditService;
+import edu.dosw.users.enums.AuditAction;
+import edu.dosw.users.enums.SchoolRelation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +28,7 @@ public class UserServiceImpl implements IUserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+        private final IAuditService auditService;
 
     /**
      * {@inheritDoc}
@@ -82,13 +87,37 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public UserModel update(Long id, UserModel model) {
-        userRepository.findById(id)
+        var entity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         USER_NOT_FOUND_ID + id));
-        model.setId(id);
-        model.setUpdatedAt(LocalDateTime.now());
-        return userMapper.toModel(
-                userRepository.save(userMapper.toEntity(model)));
+
+        if (!"ACTIVE".equalsIgnoreCase(entity.getStatus())) {
+            throw new BusinessException("Cannot update an inactive user.");
+        }
+
+        // Business rule: semester only allowed for STUDENT
+        if (model.getSchoolRelation() != null
+                && model.getSchoolRelation() != SchoolRelation.STUDENT
+                && model.getSemester() != null) {
+            throw new BusinessException("Semester can only be set for students.");
+        }
+
+        // Apply only the allowed fields to avoid overwriting protected values
+        entity.setFullName(model.getFullName());
+        entity.setSchoolRelation(model.getSchoolRelation() != null
+                ? model.getSchoolRelation().name() : null);
+        entity.setAcademicProgram(model.getAcademicProgram());
+        entity.setSemester(model.getSemester());
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        var saved = userRepository.save(entity);
+
+        if (saved.getSportProfile() != null && saved.getSportProfile().getId() != null) {
+            auditService.logSportProfile(saved.getSportProfile().getId(), AuditAction.UPDATE,
+                    "Admin updated user with id: " + id);
+        }
+
+        return userMapper.toModel(saved);
     }
 
     /**

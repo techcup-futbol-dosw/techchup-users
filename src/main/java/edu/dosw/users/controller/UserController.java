@@ -1,6 +1,7 @@
 package edu.dosw.users.controller;
 
 import edu.dosw.users.dto.UserRequest;
+import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.service.IUserService;
@@ -67,7 +68,7 @@ public class UserController {
     /** Replaces an existing user profile and returns the updated response. */
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> update(
-            @PathVariable Long id, @RequestBody UserRequest request) {
+            @PathVariable Long id, @RequestBody AdminUserUpdateRequest request) {
         return ResponseEntity.ok(
                 userMapper.toResponse(
                         userService.update(id, userMapper.toModel(request))));
