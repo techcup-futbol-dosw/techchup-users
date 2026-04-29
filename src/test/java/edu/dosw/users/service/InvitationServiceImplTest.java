@@ -127,12 +127,9 @@ class InvitationServiceImplTest {
                 .id(1L).player(player).teamId(5L).status("PENDING").build();
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(1L).status(InvitationStatus.PENDING).build();
-        InvitationEntity updatedEntity = InvitationEntity.builder().id(1L).build();
-
         when(invitationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(invitationMapper.toModel(existing)).thenReturn(pendingModel);
-        when(invitationMapper.toEntity(pendingModel)).thenReturn(updatedEntity);
-        when(invitationRepository.save(any())).thenReturn(updatedEntity);
+        when(invitationMapper.toEntity(pendingModel)).thenReturn(mock(InvitationEntity.class));
 
         service.accept(1L);
 
@@ -170,12 +167,9 @@ class InvitationServiceImplTest {
                 .id(2L).player(player).build();
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(2L).status(InvitationStatus.PENDING).build();
-        InvitationEntity updatedEntity = InvitationEntity.builder().id(2L).build();
-
         when(invitationRepository.findById(2L)).thenReturn(Optional.of(existing));
         when(invitationMapper.toModel(existing)).thenReturn(pendingModel);
-        when(invitationMapper.toEntity(pendingModel)).thenReturn(updatedEntity);
-        when(invitationRepository.save(any())).thenReturn(updatedEntity);
+        when(invitationMapper.toEntity(pendingModel)).thenReturn(mock(InvitationEntity.class));
 
         service.reject(2L);
 
@@ -191,12 +185,9 @@ class InvitationServiceImplTest {
                 .id(3L).player(player).build();
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(3L).status(InvitationStatus.PENDING).build();
-        InvitationEntity updatedEntity = InvitationEntity.builder().id(3L).build();
-
         when(invitationRepository.findById(3L)).thenReturn(Optional.of(existing));
         when(invitationMapper.toModel(existing)).thenReturn(pendingModel);
-        when(invitationMapper.toEntity(pendingModel)).thenReturn(updatedEntity);
-        when(invitationRepository.save(any())).thenReturn(updatedEntity);
+        when(invitationMapper.toEntity(pendingModel)).thenReturn(mock(InvitationEntity.class));
 
         service.cancel(3L);
 
