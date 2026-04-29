@@ -74,4 +74,13 @@ public interface IUserService {
      * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
      */
     void deactivate(Long id);
+
+    /**
+     * Inactivates a user profile after validating team participation.
+     *
+     * @param id identifier of the profile to inactivate
+     * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
+     * @throws edu.dosw.users.exception.BusinessException when business rules fail
+     */
+    void inactivate(Long id);
 }
