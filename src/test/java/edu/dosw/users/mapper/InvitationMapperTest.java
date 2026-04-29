@@ -1,5 +1,6 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.InvitationResponse;
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.entity.UserProfileEntity;
 import edu.dosw.users.enums.InvitationStatus;
@@ -121,5 +122,34 @@ class InvitationMapperTest {
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));
+    }
+
+    // ── toResponse ───────────────────────────────────────────────────────────
+
+    @Test
+    void toResponse_mapsAllFields() {
+        InvitationModel model = InvitationModel.builder()
+                .id(7L)
+                .playerId(10L)
+                .teamId(3L)
+                .status(InvitationStatus.ACCEPTED)
+                .sentAt(LocalDateTime.of(2024, 5, 1, 9, 0))
+                .respondedAt(LocalDateTime.of(2024, 5, 2, 11, 0))
+                .build();
+
+        InvitationResponse response = mapper.toResponse(model);
+
+        assertNotNull(response);
+        assertEquals(7L, response.getId());
+        assertEquals(10L, response.getPlayerId());
+        assertEquals(3L, response.getTeamId());
+        assertEquals(InvitationStatus.ACCEPTED, response.getStatus());
+        assertEquals(LocalDateTime.of(2024, 5, 1, 9, 0), response.getSentAt());
+        assertEquals(LocalDateTime.of(2024, 5, 2, 11, 0), response.getRespondedAt());
+    }
+
+    @Test
+    void toResponse_nullModel_returnsNull() {
+        assertNull(mapper.toResponse(null));
     }
 }

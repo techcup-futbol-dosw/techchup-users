@@ -1,6 +1,7 @@
 package edu.dosw.users.controller;
 
-import edu.dosw.users.model.InvitationModel;
+import edu.dosw.users.dto.InvitationResponse;
+import edu.dosw.users.mapper.InvitationMapper;
 import edu.dosw.users.service.IInvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,46 +26,51 @@ import java.util.List;
 public class InvitationController {
 
     private final IInvitationService invitationService;
+    private final InvitationMapper invitationMapper;
 
     /** Returns the invitation with the given identifier. */
     @GetMapping("/{id}")
-    public ResponseEntity<InvitationModel> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(invitationService.getById(id));
+    public ResponseEntity<InvitationResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                invitationMapper.toResponse(invitationService.getById(id)));
     }
 
     /** Returns all invitations received by the given player. */
     @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<InvitationModel>> getByPlayerId(@PathVariable Long playerId) {
-        return ResponseEntity.ok(invitationService.getByPlayerId(playerId));
+    public ResponseEntity<List<InvitationResponse>> getByPlayerId(@PathVariable Long playerId) {
+        return ResponseEntity.ok(
+                invitationService.getByPlayerId(playerId).stream()
+                        .map(invitationMapper::toResponse)
+                        .toList());
     }
 
-    /**
-     * Sends a new invitation to the specified player from the specified team.
-     * Returns 201 Created with the saved invitation.
-     */
+    /** Sends a new invitation. Returns 201 Created. */
     @PostMapping("/player/{playerId}/team/{teamId}")
-    public ResponseEntity<InvitationModel> send(
+    public ResponseEntity<InvitationResponse> send(
             @PathVariable Long playerId,
             @PathVariable Long teamId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(invitationService.send(playerId, teamId));
+                .body(invitationMapper.toResponse(invitationService.send(playerId, teamId)));
     }
 
     /** Accepts a pending invitation. */
     @PatchMapping("/{id}/accept")
-    public ResponseEntity<InvitationModel> accept(@PathVariable Long id) {
-        return ResponseEntity.ok(invitationService.accept(id));
+    public ResponseEntity<InvitationResponse> accept(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                invitationMapper.toResponse(invitationService.accept(id)));
     }
 
     /** Rejects a pending invitation. */
     @PatchMapping("/{id}/reject")
-    public ResponseEntity<InvitationModel> reject(@PathVariable Long id) {
-        return ResponseEntity.ok(invitationService.reject(id));
+    public ResponseEntity<InvitationResponse> reject(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                invitationMapper.toResponse(invitationService.reject(id)));
     }
 
     /** Cancels a pending invitation. */
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<InvitationModel> cancel(@PathVariable Long id) {
-        return ResponseEntity.ok(invitationService.cancel(id));
+    public ResponseEntity<InvitationResponse> cancel(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                invitationMapper.toResponse(invitationService.cancel(id)));
     }
 }

@@ -1,5 +1,6 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.InvitationResponse;
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.model.InvitationModel;
 import org.mapstruct.Mapper;
@@ -36,4 +37,7 @@ public interface InvitationMapper {
      */
     @Mapping(target = "player", ignore = true)
     InvitationEntity toEntity(InvitationModel model);
+
+    /** Converts a domain model to an {@link InvitationResponse}. */
+    InvitationResponse toResponse(InvitationModel model);
 }

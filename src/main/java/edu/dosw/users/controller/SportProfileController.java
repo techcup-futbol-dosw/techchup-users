@@ -1,6 +1,8 @@
 package edu.dosw.users.controller;
 
-import edu.dosw.users.model.SportProfileModel;
+import edu.dosw.users.dto.SportProfileRequest;
+import edu.dosw.users.dto.SportProfileResponse;
+import edu.dosw.users.mapper.SportProfileMapper;
 import edu.dosw.users.service.ISportProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,10 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
  * REST controller for sport profile management.
  *
  * <p>Base path: {@code /api/sport-profiles}</p>
- *
- * <p>Create and update endpoints accept {@code multipart/form-data} so that
- * the profile JSON and the optional photo file can be sent together in a
- * single request.</p>
  */
 @RestController
 @RequestMapping("/api/sport-profiles")
@@ -32,48 +30,54 @@ import org.springframework.web.multipart.MultipartFile;
 public class SportProfileController {
 
     private final ISportProfileService sportProfileService;
+    private final SportProfileMapper sportProfileMapper;
 
     /** Returns the sport profile with the given identifier. */
     @GetMapping("/{id}")
-    public ResponseEntity<SportProfileModel> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(sportProfileService.getById(id));
+    public ResponseEntity<SportProfileResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                sportProfileMapper.toResponse(sportProfileService.getById(id)));
     }
 
     /** Returns the sport profile associated with the given user. */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<SportProfileModel> getByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(sportProfileService.getByUserId(userId));
+    public ResponseEntity<SportProfileResponse> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(
+                sportProfileMapper.toResponse(sportProfileService.getByUserId(userId)));
     }
 
     /**
      * Creates a new sport profile for the specified user.
      *
      * @param userId  owner user identifier (path)
-     * @param profile profile data as a JSON part
+     * @param request profile data as a JSON part
      * @param photo   optional player photo
      */
     @PostMapping(value = "/user/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SportProfileModel> create(
+    public ResponseEntity<SportProfileResponse> create(
             @PathVariable Long userId,
-            @RequestPart("profile") SportProfileModel profile,
+            @RequestPart("profile") SportProfileRequest request,
             @RequestPart(value = "photo", required = false) MultipartFile photo) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(sportProfileService.create(userId, profile, photo));
+                .body(sportProfileMapper.toResponse(
+                        sportProfileService.create(userId, sportProfileMapper.toModel(request), photo)));
     }
 
     /**
      * Updates an existing sport profile.
      *
-     * @param id      identifier of the sport profile to update
-     * @param profile new profile data as a JSON part
-     * @param photo   optional new player photo; omitting it keeps the existing one
+     * @param id      identifier of the sport profile
+     * @param request new profile data as a JSON part
+     * @param photo   optional new photo; omitting it keeps the existing one
      */
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SportProfileModel> update(
+    public ResponseEntity<SportProfileResponse> update(
             @PathVariable Long id,
-            @RequestPart("profile") SportProfileModel profile,
+            @RequestPart("profile") SportProfileRequest request,
             @RequestPart(value = "photo", required = false) MultipartFile photo) {
-        return ResponseEntity.ok(sportProfileService.update(id, profile, photo));
+        return ResponseEntity.ok(
+                sportProfileMapper.toResponse(
+                        sportProfileService.update(id, sportProfileMapper.toModel(request), photo)));
     }
 
     /**
