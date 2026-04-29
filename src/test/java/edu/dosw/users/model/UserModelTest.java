@@ -7,14 +7,14 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for the business methods of {@link UserProfileModel}.
+ * Unit tests for the business methods of {@link UserModel}.
  *
- * <p>Verifies the behaviour of {@link UserProfileModel#isActive()} for
+ * <p>Verifies the behaviour of {@link UserModel#isActive()} for
  * different values of the {@code status} field (uppercase, lowercase, null)
- * and of {@link UserProfileModel#getAge()} for different birth dates,
+ * and of {@link UserModel#getAge()} for different birth dates,
  * including a null date and a birth date set to today.</p>
  */
-class UserProfileModelTest {
+class UserModelTest {
 
     /**
      * Verifies that {@code isActive} returns {@code true} when the status
@@ -22,7 +22,7 @@ class UserProfileModelTest {
      */
     @Test
     void isActive_returnsTrue_whenStatusIsACTIVE() {
-        UserProfileModel model = UserProfileModel.builder().status("ACTIVE").build();
+        UserModel model = UserModel.builder().status("ACTIVE").build();
         assertTrue(model.isActive());
     }
 
@@ -32,7 +32,7 @@ class UserProfileModelTest {
      */
     @Test
     void isActive_returnsTrue_whenStatusIsLowercase() {
-        UserProfileModel model = UserProfileModel.builder().status("active").build();
+        UserModel model = UserModel.builder().status("active").build();
         assertTrue(model.isActive());
     }
 
@@ -42,7 +42,7 @@ class UserProfileModelTest {
      */
     @Test
     void isActive_returnsFalse_whenStatusIsINACTIVE() {
-        UserProfileModel model = UserProfileModel.builder().status("INACTIVE").build();
+        UserModel model = UserModel.builder().status("INACTIVE").build();
         assertFalse(model.isActive());
     }
 
@@ -52,7 +52,7 @@ class UserProfileModelTest {
      */
     @Test
     void isActive_returnsFalse_whenStatusIsNull() {
-        UserProfileModel model = UserProfileModel.builder().status(null).build();
+        UserModel model = UserModel.builder().status(null).build();
         assertFalse(model.isActive());
     }
 
@@ -63,7 +63,7 @@ class UserProfileModelTest {
     @Test
     void getAge_returnsCorrectAge() {
         LocalDate birthDate = LocalDate.now().minusYears(20);
-        UserProfileModel model = UserProfileModel.builder().birthDate(birthDate).build();
+        UserModel model = UserModel.builder().birthDate(birthDate).build();
         assertEquals(20, model.getAge());
     }
 
@@ -73,7 +73,7 @@ class UserProfileModelTest {
      */
     @Test
     void getAge_returnsZero_whenBirthDateIsNull() {
-        UserProfileModel model = UserProfileModel.builder().build();
+        UserModel model = UserModel.builder().build();
         assertEquals(0, model.getAge());
     }
 
@@ -83,7 +83,7 @@ class UserProfileModelTest {
      */
     @Test
     void getAge_returnsZero_whenBornToday() {
-        UserProfileModel model = UserProfileModel.builder().birthDate(LocalDate.now()).build();
+        UserModel model = UserModel.builder().birthDate(LocalDate.now()).build();
         assertEquals(0, model.getAge());
     }
 }

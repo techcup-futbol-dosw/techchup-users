@@ -1,17 +1,17 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.model.UserProfileModel;
+import edu.dosw.users.model.UserModel;
 
 import java.util.List;
 
 /**
  * Service for managing user profiles.
  *
- * <p>Handles CRUD operations on {@link UserProfileModel}. Deactivation sets
+ * <p>Handles CRUD operations on {@link UserModel}. Deactivation sets
  * the profile status to {@code "INACTIVE"} without removing data from the
  * database.</p>
  */
-public interface IUserProfileService {
+public interface IUserService {
 
     /**
      * Retrieves a user profile by its identifier.
@@ -20,7 +20,7 @@ public interface IUserProfileService {
      * @return the corresponding model
      * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
      */
-    UserProfileModel getById(Long id);
+    UserModel getById(Long id);
 
     /**
      * Retrieves a user profile by the user's official identification number.
@@ -29,14 +29,14 @@ public interface IUserProfileService {
      * @return the corresponding model
      * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
      */
-    UserProfileModel getByIdentification(String identification);
+    UserModel getByIdentification(String identification);
 
     /**
      * Returns all user profiles stored in the system.
      *
      * @return list of all models, may be empty
      */
-    List<UserProfileModel> getAll();
+    List<UserModel> getAll();
 
     /**
      * Persists a new user profile. Sets {@code profileCreatedAt}, {@code updatedAt}
@@ -45,7 +45,7 @@ public interface IUserProfileService {
      * @param model profile data to create
      * @return the saved model with its generated identifier
      */
-    UserProfileModel create(UserProfileModel model);
+    UserModel create(UserModel model);
 
     /**
      * Updates an existing user profile with the data provided.
@@ -55,7 +55,7 @@ public interface IUserProfileService {
      * @return the updated model
      * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
      */
-    UserProfileModel update(Long id, UserProfileModel model);
+    UserModel update(Long id, UserModel model);
 
     /**
      * Deactivates a user profile by setting its status to {@code "INACTIVE"}.

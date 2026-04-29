@@ -25,7 +25,7 @@ public interface SportProfileMapper {
      * @param entity source entity; may be {@code null}
      * @return resulting model, or {@code null} if the entity is {@code null}
      */
-    @Mapping(source = "userProfile.id", target = "userId")
+    @Mapping(source = "user.id", target = "userId")
     SportProfileModel toModel(SportProfileEntity entity);
 
     /**
@@ -36,7 +36,7 @@ public interface SportProfileMapper {
      * @param model source model; may be {@code null}
      * @return resulting entity, or {@code null} if the model is {@code null}
      */
-    @Mapping(target = "userProfile", ignore = true)
+    @Mapping(target = "user", ignore = true)
     SportProfileEntity toEntity(SportProfileModel model);
 
     /** Converts a {@link SportProfileRequest} to its domain model. */

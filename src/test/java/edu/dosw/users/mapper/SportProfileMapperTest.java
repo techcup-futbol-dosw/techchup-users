@@ -3,7 +3,7 @@ package edu.dosw.users.mapper;
 import edu.dosw.users.dto.SportProfileRequest;
 import edu.dosw.users.dto.SportProfileResponse;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.Position;
 import edu.dosw.users.model.SportProfileModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p>Verifies bidirectional conversion between {@link SportProfileEntity}
  * and {@link SportProfileModel}, including the mapping of the user identifier
- * nested in {@code UserProfileEntity} and the handling of null values.</p>
+ * nested in {@code UserEntity} and the handling of null values.</p>
  */
 class SportProfileMapperTest {
 
@@ -40,10 +40,10 @@ class SportProfileMapperTest {
      */
     @Test
     void toModel_mapsUserProfileIdToUserId() {
-        UserProfileEntity user = UserProfileEntity.builder().id(42L).build();
+        UserEntity user = UserEntity.builder().id(42L).build();
         SportProfileEntity entity = SportProfileEntity.builder()
                 .id(1L)
-                .userProfile(user)
+                .user(user)
                 .position("GOALKEEPER")
                 .dorsalNumber(1)
                 .photoId("abc123def456abc123def456")
@@ -71,7 +71,7 @@ class SportProfileMapperTest {
     void toModel_nullUserProfile_userIdIsNull() {
         SportProfileEntity entity = SportProfileEntity.builder()
                 .id(1L)
-                .userProfile(null)
+                .user(null)
                 .position("DEFENDER")
                 .available(false)
                 .build();
@@ -117,7 +117,7 @@ class SportProfileMapperTest {
         assertEquals("FORWARD", entity.getPosition());
         assertEquals(9, entity.getDorsalNumber());
         assertTrue(entity.isAvailable());
-        assertNull(entity.getUserProfile());
+        assertNull(entity.getUser());
     }
 
     /**

@@ -1,7 +1,7 @@
 package edu.dosw.users.repository;
 
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class SportProfileRepositoryTest {
 
     @Autowired
-    private UserProfileRepository userProfileRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private SportProfileRepository repository;
 
-    private UserProfileEntity savedUser(String identification, String email) {
-        return userProfileRepository.save(UserProfileEntity.builder()
+    private UserEntity savedUser(String identification, String email) {
+        return userRepository.save(UserEntity.builder()
                 .fullName("Test User")
                 .email(email)
                 .password("hashed")
@@ -31,38 +31,38 @@ class SportProfileRepositoryTest {
                 .build());
     }
 
-    private SportProfileEntity savedSportProfile(UserProfileEntity user) {
+    private SportProfileEntity savedSportProfile(UserEntity user) {
         return repository.save(SportProfileEntity.builder()
-                .userProfile(user)
+                .user(user)
                 .position("MIDFIELDER")
                 .available(true)
                 .build());
     }
 
     @Test
-    void findByUserProfile_Id_returnsSportProfile_whenExists() {
-        UserProfileEntity user = savedUser("12345678", "user@test.com");
+    void findByUser_Id_returnsSportProfile_whenExists() {
+        UserEntity user = savedUser("12345678", "user@test.com");
         savedSportProfile(user);
 
-        Optional<SportProfileEntity> result = repository.findByUserProfile_Id(user.getId());
+        Optional<SportProfileEntity> result = repository.findByUser_Id(user.getId());
 
         assertTrue(result.isPresent());
-        assertEquals(user.getId(), result.get().getUserProfile().getId());
+        assertEquals(user.getId(), result.get().getUser().getId());
         assertEquals("MIDFIELDER", result.get().getPosition());
     }
 
     @Test
-    void findByUserProfile_Id_returnsEmpty_whenUserHasNoSportProfile() {
-        UserProfileEntity user = savedUser("12345678", "user@test.com");
+    void findByUser_Id_returnsEmpty_whenUserHasNoSportProfile() {
+        UserEntity user = savedUser("12345678", "user@test.com");
 
-        Optional<SportProfileEntity> result = repository.findByUserProfile_Id(user.getId());
+        Optional<SportProfileEntity> result = repository.findByUser_Id(user.getId());
 
         assertFalse(result.isPresent());
     }
 
     @Test
-    void findByUserProfile_Id_returnsEmpty_whenUserDoesNotExist() {
-        Optional<SportProfileEntity> result = repository.findByUserProfile_Id(999L);
+    void findByUser_Id_returnsEmpty_whenUserDoesNotExist() {
+        Optional<SportProfileEntity> result = repository.findByUser_Id(999L);
 
         assertFalse(result.isPresent());
     }

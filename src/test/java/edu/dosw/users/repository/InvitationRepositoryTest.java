@@ -1,7 +1,7 @@
 package edu.dosw.users.repository;
 
 import edu.dosw.users.entity.InvitationEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class InvitationRepositoryTest {
 
     @Autowired
-    private UserProfileRepository userProfileRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private InvitationRepository repository;
 
-    private UserProfileEntity player;
+    private UserEntity player;
 
     @BeforeEach
     void setUp() {
-        player = userProfileRepository.save(UserProfileEntity.builder()
+        player = userRepository.save(UserEntity.builder()
                 .fullName("Test Player")
                 .email("player@test.com")
                 .password("hashed")
@@ -36,7 +36,7 @@ class InvitationRepositoryTest {
                 .build());
     }
 
-    private InvitationEntity savedInvitation(UserProfileEntity p, Long teamId, String status) {
+    private InvitationEntity savedInvitation(UserEntity p, Long teamId, String status) {
         return repository.save(InvitationEntity.builder()
                 .player(p)
                 .teamId(teamId)
