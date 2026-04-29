@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 
 @Service
@@ -28,7 +29,7 @@ public class ImageServiceImpl implements ImageService {
             photo.setUploadedAt(LocalDateTime.now());
             return playerPhotoRepository.save(photo).getId();
         } catch (IOException e) {
-            throw new RuntimeException("Error al leer el archivo de imagen", e);
+            throw new UncheckedIOException("Error al leer el archivo de imagen", e);
         }
     }
 
