@@ -12,6 +12,9 @@ import java.util.List;
 
 /**
  * Default implementation of {@link IUserService}.
+ *
+ * <p>Coordinates user profile persistence through {@link UserRepository} and
+ * maps between persistence entities and domain models through {@link UserMapper}.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,9 @@ public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserModel getById(Long id) {
         return userRepository.findById(id)
@@ -30,6 +36,9 @@ public class UserServiceImpl implements IUserService {
                         USER_NOT_FOUND_ID + id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserModel getByIdentification(String identification) {
         return userRepository.findByIdentification(identification)
@@ -38,6 +47,9 @@ public class UserServiceImpl implements IUserService {
                         "User profile not found with identification: " + identification));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<UserModel> getAll() {
         return userRepository.findAll()
@@ -46,6 +58,12 @@ public class UserServiceImpl implements IUserService {
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Initializes the profile status and timestamps before persisting the
+     * new user.</p>
+     */
     @Override
     public UserModel create(UserModel model) {
         LocalDateTime now = LocalDateTime.now();
@@ -56,6 +74,12 @@ public class UserServiceImpl implements IUserService {
                 userRepository.save(userMapper.toEntity(model)));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Verifies that the user exists, preserves the requested identifier,
+     * and refreshes the update timestamp before saving.</p>
+     */
     @Override
     public UserModel update(Long id, UserModel model) {
         userRepository.findById(id)
@@ -67,6 +91,12 @@ public class UserServiceImpl implements IUserService {
                 userRepository.save(userMapper.toEntity(model)));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Performs a logical deactivation by changing the status instead of
+     * deleting the row.</p>
+     */
     @Override
     public void deactivate(Long id) {
         var entity = userRepository.findById(id)

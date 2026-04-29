@@ -11,6 +11,12 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for {@link SportProfileRepository}.
+ *
+ * <p>Verifies the derived query used to locate a sport profile by the owning
+ * user's identifier.</p>
+ */
 @SpringBootTest
 @Transactional
 class SportProfileRepositoryTest {
@@ -21,6 +27,13 @@ class SportProfileRepositoryTest {
     @Autowired
     private SportProfileRepository repository;
 
+    /**
+     * Persists a user with unique identification and email values.
+     *
+     * @param identification identification number to assign to the user
+     * @param email email address to assign to the user
+     * @return saved user entity
+     */
     private UserEntity savedUser(String identification, String email) {
         return userRepository.save(UserEntity.builder()
                 .fullName("Test User")
@@ -31,6 +44,12 @@ class SportProfileRepositoryTest {
                 .build());
     }
 
+    /**
+     * Persists a sport profile associated with the provided user.
+     *
+     * @param user owner of the sport profile
+     * @return saved sport profile entity
+     */
     private SportProfileEntity savedSportProfile(UserEntity user) {
         return repository.save(SportProfileEntity.builder()
                 .user(user)

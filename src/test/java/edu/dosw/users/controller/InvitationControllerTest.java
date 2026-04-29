@@ -23,6 +23,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Web layer tests for invitation endpoints.
+ *
+ * <p>Uses {@link MockMvc} with a mocked {@link IInvitationService} to verify
+ * HTTP status codes and JSON responses produced by the invitation controller,
+ * including successful operations and expected error mappings.</p>
+ */
 @SpringBootTest
 class InvitationControllerTest {
 
@@ -31,6 +38,10 @@ class InvitationControllerTest {
 
     private MockMvc mockMvc;
 
+    /**
+     * Builds the {@link MockMvc} instance from the web application context
+     * before each test case.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();

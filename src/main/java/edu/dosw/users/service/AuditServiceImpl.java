@@ -28,6 +28,12 @@ public class AuditServiceImpl implements IAuditService {
     private final AuditLogRepository auditLogRepository;
     private final AuditLogMapper auditLogMapper;
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Creates an audit entry with an id-only {@link SportProfileEntity}
+     * reference to persist the foreign key without loading the full profile.</p>
+     */
     @Override
     public void logSportProfile(Long sportProfileId, AuditAction action, String details) {
         AuditLogModel logModel = AuditLogModel.builder()
@@ -41,6 +47,12 @@ public class AuditServiceImpl implements IAuditService {
         auditLogRepository.save(entity);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Creates an audit entry with an id-only {@link InvitationEntity}
+     * reference to persist the foreign key without loading the full invitation.</p>
+     */
     @Override
     public void logInvitation(Long invitationId, AuditAction action, String details) {
         AuditLogModel logModel = AuditLogModel.builder()
@@ -54,6 +66,9 @@ public class AuditServiceImpl implements IAuditService {
         auditLogRepository.save(entity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<AuditLogModel> getLogsForSportProfile(Long sportProfileId) {
         return auditLogRepository.findBySportProfile_Id(sportProfileId)
@@ -62,6 +77,9 @@ public class AuditServiceImpl implements IAuditService {
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<AuditLogModel> getLogsForInvitation(Long invitationId) {
         return auditLogRepository.findByInvitation_Id(invitationId)

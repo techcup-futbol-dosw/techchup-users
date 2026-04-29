@@ -40,6 +40,9 @@ public class SportProfileServiceImpl implements ISportProfileService {
     private final ImageService imageService;
     private final TeamsServiceClient teamsServiceClient;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SportProfileModel getById(Long id) {
         return sportProfileRepository.findById(id)
@@ -48,6 +51,9 @@ public class SportProfileServiceImpl implements ISportProfileService {
                         SPORT_PROFILE_NOT_FOUND_ID + id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SportProfileModel getByUserId(Long userId) {
         return sportProfileRepository.findByUser_Id(userId)
@@ -56,6 +62,13 @@ public class SportProfileServiceImpl implements ISportProfileService {
                         "Sport profile not found for user id: " + userId));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Creates the profile only when the user exists and does not already
+     * have one. If a photo is provided, it is uploaded before the profile is
+     * saved and the generated photo id is stored in the relational entity.</p>
+     */
     @Override
     public SportProfileModel create(Long userId, SportProfileModel model, MultipartFile photo) {
         userRepository.findById(userId)
@@ -82,6 +95,12 @@ public class SportProfileServiceImpl implements ISportProfileService {
         return saved;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Prevents updates while the player is assigned to a team. When a new
+     * photo is provided, the previous stored photo is deleted and replaced.</p>
+     */
     @Override
     public SportProfileModel update(Long id, SportProfileModel model, MultipartFile photo) {
         SportProfileEntity existing = sportProfileRepository.findById(id)
@@ -109,6 +128,11 @@ public class SportProfileServiceImpl implements ISportProfileService {
         return saved;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Updates only the availability flag and the modification timestamp.</p>
+     */
     @Override
     public void updateAvailability(Long id, boolean available) {
         SportProfileEntity entity = sportProfileRepository.findById(id)
@@ -125,6 +149,10 @@ public class SportProfileServiceImpl implements ISportProfileService {
      * Uploads a new photo and deletes the previous one when a new file is
      * provided. Returns the current {@code photoId} unchanged when no file
      * is given.
+     *
+     * @param photo optional multipart file to upload
+     * @param currentPhotoId current stored photo identifier
+     * @return new photo identifier, or the current one when no new file exists
      */
     private String uploadIfPresent(MultipartFile photo, String currentPhotoId) {
         if (photo == null || photo.isEmpty()) {

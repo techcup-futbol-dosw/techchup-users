@@ -19,6 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link AuditServiceImpl}.
+ *
+ * <p>Uses Mockito to verify that audit events are mapped, enriched with the
+ * expected id-only relationship references, saved through the repository, and
+ * converted back to models for query operations.</p>
+ */
 @ExtendWith(MockitoExtension.class)
 class AuditServiceImplTest {
 

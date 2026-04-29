@@ -31,6 +31,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Web layer tests for user profile endpoints.
+ *
+ * <p>Uses {@link MockMvc} with a mocked {@link IUserService} to validate the
+ * controller contract for listing, retrieving, creating, updating, and
+ * deactivating user profiles.</p>
+ */
 @SpringBootTest
 class UserControllerTest {
 
@@ -42,6 +49,10 @@ class UserControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
+    /**
+     * Builds the {@link MockMvc} instance from the web application context
+     * before each test case.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();

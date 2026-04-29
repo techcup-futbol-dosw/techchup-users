@@ -15,6 +15,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for {@link AuditLogRepository}.
+ *
+ * <p>Runs against the Spring test context and transactional database state to
+ * verify the derived queries that retrieve audit logs by sport profile and by
+ * invitation.</p>
+ */
 @SpringBootTest
 @Transactional
 class AuditLogRepositoryTest {
@@ -34,6 +41,10 @@ class AuditLogRepositoryTest {
     private SportProfileEntity sportProfile;
     private InvitationEntity invitation;
 
+    /**
+     * Creates the user, sport profile, and invitation records required by the
+     * repository query tests.
+     */
     @BeforeEach
     void setUp() {
         UserEntity user = userRepository.save(UserEntity.builder()
@@ -58,6 +69,15 @@ class AuditLogRepositoryTest {
                 .build());
     }
 
+    /**
+     * Persists an audit log entry linked to either a sport profile or an
+     * invitation.
+     *
+     * @param sp sport profile reference to associate, or {@code null}
+     * @param inv invitation reference to associate, or {@code null}
+     * @param action action value to store in the audit entry
+     * @return saved audit log entity
+     */
     private AuditLogEntity savedLog(SportProfileEntity sp, InvitationEntity inv, String action) {
         return repository.save(AuditLogEntity.builder()
                 .sportProfile(sp)

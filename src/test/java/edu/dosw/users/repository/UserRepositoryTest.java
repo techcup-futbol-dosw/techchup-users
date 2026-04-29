@@ -10,6 +10,12 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for {@link UserRepository}.
+ *
+ * <p>Verifies that users can be located by their unique identification number
+ * and that missing identifiers return an empty result.</p>
+ */
 @SpringBootTest
 @Transactional
 class UserRepositoryTest {
@@ -17,6 +23,13 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository repository;
 
+    /**
+     * Builds a user entity with the required fields for persistence tests.
+     *
+     * @param identification identification number to assign
+     * @param email email address to assign
+     * @return unsaved user entity
+     */
     private UserEntity buildUser(String identification, String email) {
         return UserEntity.builder()
                 .fullName("Test User")

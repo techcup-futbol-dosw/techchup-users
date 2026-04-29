@@ -29,6 +29,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Web layer tests for sport profile endpoints.
+ *
+ * <p>Uses {@link MockMvc} with a mocked {@link ISportProfileService} to verify
+ * multipart request handling, successful responses, and exception-to-status
+ * mappings for sport profile operations.</p>
+ */
 @SpringBootTest
 class SportProfileControllerTest {
 
@@ -39,6 +46,10 @@ class SportProfileControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
+    /**
+     * Builds the {@link MockMvc} instance from the web application context
+     * before each test case.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();

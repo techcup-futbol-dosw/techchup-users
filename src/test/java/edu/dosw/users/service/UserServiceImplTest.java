@@ -18,6 +18,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link UserServiceImpl}.
+ *
+ * <p>Uses mocked repository and mapper dependencies to verify user lookup,
+ * listing, creation defaults, update timestamps, and logical deactivation.</p>
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 

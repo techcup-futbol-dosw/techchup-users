@@ -13,6 +13,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for {@link InvitationRepository}.
+ *
+ * <p>Verifies Spring Data derived queries for retrieving invitations by player
+ * and by player/status using transactional database state.</p>
+ */
 @SpringBootTest
 @Transactional
 class InvitationRepositoryTest {
@@ -25,6 +31,9 @@ class InvitationRepositoryTest {
 
     private UserEntity player;
 
+    /**
+     * Creates the player used by the repository query tests.
+     */
     @BeforeEach
     void setUp() {
         player = userRepository.save(UserEntity.builder()
@@ -36,6 +45,14 @@ class InvitationRepositoryTest {
                 .build());
     }
 
+    /**
+     * Persists an invitation for the supplied player, team, and status.
+     *
+     * @param p player receiving the invitation
+     * @param teamId team identifier associated with the invitation
+     * @param status invitation status to persist
+     * @return saved invitation entity
+     */
     private InvitationEntity savedInvitation(UserEntity p, Long teamId, String status) {
         return repository.save(InvitationEntity.builder()
                 .player(p)

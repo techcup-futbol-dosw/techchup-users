@@ -33,6 +33,9 @@ public class InvitationServiceImpl implements IInvitationService {
     private final InvitationMapper invitationMapper;
     private final IAuditService auditService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvitationModel getById(Long id) {
         return invitationRepository.findById(id)
@@ -41,6 +44,9 @@ public class InvitationServiceImpl implements IInvitationService {
                         "Invitation not found with id: " + id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<InvitationModel> getByPlayerId(Long playerId) {
         return invitationRepository.findByPlayer_Id(playerId)
@@ -49,6 +55,12 @@ public class InvitationServiceImpl implements IInvitationService {
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Validates that the player exists and that there is no pending
+     * invitation from the same team before creating the new invitation.</p>
+     */
     @Override
     public InvitationModel send(Long playerId, Long teamId) {
         userRepository.findById(playerId)
@@ -77,18 +89,27 @@ public class InvitationServiceImpl implements IInvitationService {
         return saved;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvitationModel accept(Long id) {
         return respondToInvitation(id, InvitationModel::accept, AuditAction.UPDATE,
                 "Invitation accepted");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvitationModel reject(Long id) {
         return respondToInvitation(id, InvitationModel::reject, AuditAction.UPDATE,
                 "Invitation rejected");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvitationModel cancel(Long id) {
         return respondToInvitation(id, InvitationModel::cancel, AuditAction.UPDATE,
@@ -102,6 +123,16 @@ public class InvitationServiceImpl implements IInvitationService {
         void apply(InvitationModel model);
     }
 
+    /**
+     * Applies a state transition to a pending invitation, persists it, and
+     * records the corresponding audit log entry.
+     *
+     * @param id identifier of the invitation to modify
+     * @param action state transition to apply to the invitation model
+     * @param auditAction audit action to record after saving
+     * @param details audit details describing the transition
+     * @return updated invitation model
+     */
     private InvitationModel respondToInvitation(Long id, InvitationAction action,
                                                 AuditAction auditAction, String details) {
         InvitationEntity existing = invitationRepository.findById(id)

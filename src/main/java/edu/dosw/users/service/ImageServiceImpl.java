@@ -12,6 +12,16 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 
+/**
+ * MongoDB-backed implementation of {@link ImageService}.
+ *
+ * <p>The service is only registered when a {@link MongoTemplate} bean is
+ * available, allowing the application to start with an alternative fallback
+ * when MongoDB is not configured.</p>
+ *
+ * @see PlayerPhotoRepository
+ * @see PlayerPhoto
+ */
 @Service
 @RequiredArgsConstructor
 @ConditionalOnBean(MongoTemplate.class)
@@ -19,6 +29,13 @@ public class ImageServiceImpl implements ImageService {
 
     private final PlayerPhotoRepository playerPhotoRepository;
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Reads the multipart file into a {@link PlayerPhoto} document and
+     * stores its content type, binary data, owner sport profile identifier,
+     * and upload timestamp.</p>
+     */
     @Override
     public String upload(MultipartFile file, Long sportProfileId) {
         try {
@@ -33,6 +50,9 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(String photoId) {
         playerPhotoRepository.deleteById(photoId);

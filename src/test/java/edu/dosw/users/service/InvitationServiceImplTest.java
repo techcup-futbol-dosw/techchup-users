@@ -25,6 +25,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link InvitationServiceImpl}.
+ *
+ * <p>Uses mocked repositories, mapper, and audit service to verify invitation
+ * retrieval, creation, duplicate-pending validation, and status transitions for
+ * accept, reject, and cancel operations.</p>
+ */
 @ExtendWith(MockitoExtension.class)
 class InvitationServiceImplTest {
 

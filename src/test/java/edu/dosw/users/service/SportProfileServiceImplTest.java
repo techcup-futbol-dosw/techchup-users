@@ -24,6 +24,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link SportProfileServiceImpl}.
+ *
+ * <p>Uses mocked collaborators to verify sport profile lookup, creation,
+ * update restrictions based on team assignment, photo replacement behaviour,
+ * audit logging, and availability updates.</p>
+ */
 @ExtendWith(MockitoExtension.class)
 class SportProfileServiceImplTest {
 

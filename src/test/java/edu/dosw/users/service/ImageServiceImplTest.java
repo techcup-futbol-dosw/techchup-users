@@ -14,6 +14,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link ImageServiceImpl}.
+ *
+ * <p>Verifies that multipart files are transformed into {@link PlayerPhoto}
+ * documents, that upload failures are propagated as runtime exceptions, and
+ * that delete operations are delegated to {@link PlayerPhotoRepository}.</p>
+ */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceImplTest {
 
