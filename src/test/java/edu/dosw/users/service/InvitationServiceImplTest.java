@@ -139,7 +139,7 @@ class InvitationServiceImplTest {
         when(invitationRepository.save(any())).thenReturn(updatedEntity);
         when(invitationMapper.toModel(updatedEntity)).thenReturn(acceptedModel);
 
-        InvitationModel result = service.accept(1L);
+        service.accept(1L);
 
         assertEquals(InvitationStatus.ACCEPTED, pendingModel.getStatus());
         assertNotNull(pendingModel.getRespondedAt());
@@ -185,7 +185,7 @@ class InvitationServiceImplTest {
         when(invitationRepository.save(any())).thenReturn(updatedEntity);
         when(invitationMapper.toModel(updatedEntity)).thenReturn(rejectedModel);
 
-        InvitationModel result = service.reject(2L);
+        service.reject(2L);
 
         assertEquals(InvitationStatus.REJECTED, pendingModel.getStatus());
     }
@@ -209,7 +209,7 @@ class InvitationServiceImplTest {
         when(invitationRepository.save(any())).thenReturn(updatedEntity);
         when(invitationMapper.toModel(updatedEntity)).thenReturn(cancelledModel);
 
-        InvitationModel result = service.cancel(3L);
+        service.cancel(3L);
 
         assertEquals(InvitationStatus.CANCELLED, pendingModel.getStatus());
     }
