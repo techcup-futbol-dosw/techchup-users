@@ -1,7 +1,7 @@
 package edu.dosw.users.service;
 
 import edu.dosw.users.entity.InvitationEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.InvitationStatus;
 import edu.dosw.users.exception.BusinessException;
@@ -9,7 +9,7 @@ import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.InvitationMapper;
 import edu.dosw.users.model.InvitationModel;
 import edu.dosw.users.repository.InvitationRepository;
-import edu.dosw.users.repository.UserProfileRepository;
+import edu.dosw.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +29,7 @@ import java.util.List;
 public class InvitationServiceImpl implements IInvitationService {
 
     private final InvitationRepository invitationRepository;
-    private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
     private final InvitationMapper invitationMapper;
     private final IAuditService auditService;
 
@@ -51,7 +51,7 @@ public class InvitationServiceImpl implements IInvitationService {
 
     @Override
     public InvitationModel send(Long playerId, Long teamId) {
-        userProfileRepository.findById(playerId)
+        userRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Player not found with id: " + playerId));
 
@@ -65,7 +65,7 @@ public class InvitationServiceImpl implements IInvitationService {
         }
 
         InvitationEntity entity = InvitationEntity.builder()
-                .player(UserProfileEntity.builder().id(playerId).build())
+                .player(UserEntity.builder().id(playerId).build())
                 .teamId(teamId)
                 .status(InvitationStatus.PENDING.name())
                 .sentAt(LocalDateTime.now())

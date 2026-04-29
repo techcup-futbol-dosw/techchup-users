@@ -2,11 +2,11 @@ package edu.dosw.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import edu.dosw.users.dto.UserProfileRequest;
+import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
-import edu.dosw.users.mapper.UserProfileMapper;
-import edu.dosw.users.model.UserProfileModel;
-import edu.dosw.users.service.IUserProfileService;
+import edu.dosw.users.mapper.UserMapper;
+import edu.dosw.users.model.UserModel;
+import edu.dosw.users.service.IUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-class UserProfileControllerTest {
+class UserControllerTest {
 
     @Autowired private WebApplicationContext context;
-    @Autowired private UserProfileMapper userProfileMapper;
-    @MockitoBean private IUserProfileService userProfileService;
+    @Autowired private UserMapper userMapper;
+    @MockitoBean private IUserService userService;
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -51,9 +51,9 @@ class UserProfileControllerTest {
 
     @Test
     void getAll_returnsOkWithList() throws Exception {
-        UserProfileModel m1 = UserProfileModel.builder().id(1L).fullName("Carlos").build();
-        UserProfileModel m2 = UserProfileModel.builder().id(2L).fullName("Maria").build();
-        when(userProfileService.getAll()).thenReturn(List.of(m1, m2));
+        UserModel m1 = UserModel.builder().id(1L).fullName("Carlos").build();
+        UserModel m2 = UserModel.builder().id(2L).fullName("Maria").build();
+        when(userService.getAll()).thenReturn(List.of(m1, m2));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -65,8 +65,8 @@ class UserProfileControllerTest {
 
     @Test
     void getById_found_returnsOkWithNoPassword() throws Exception {
-        when(userProfileService.getById(1L))
-                .thenReturn(UserProfileModel.builder().id(1L).fullName("Carlos")
+        when(userService.getById(1L))
+                .thenReturn(UserModel.builder().id(1L).fullName("Carlos")
                         .password("secret").email("c@eci.edu.co").build());
 
         mockMvc.perform(get("/api/users/1"))
@@ -78,7 +78,7 @@ class UserProfileControllerTest {
 
     @Test
     void getById_notFound_returns404() throws Exception {
-        when(userProfileService.getById(99L))
+        when(userService.getById(99L))
                 .thenThrow(new ResourceNotFoundException("not found"));
 
         mockMvc.perform(get("/api/users/99"))
@@ -90,8 +90,8 @@ class UserProfileControllerTest {
 
     @Test
     void getByIdentification_found_returnsOk() throws Exception {
-        when(userProfileService.getByIdentification("12345"))
-                .thenReturn(UserProfileModel.builder().id(1L).identification("12345").build());
+        when(userService.getByIdentification("12345"))
+                .thenReturn(UserModel.builder().id(1L).identification("12345").build());
 
         mockMvc.perform(get("/api/users/identification/12345"))
                 .andExpect(status().isOk())
@@ -100,7 +100,7 @@ class UserProfileControllerTest {
 
     @Test
     void getByIdentification_notFound_returns404() throws Exception {
-        when(userProfileService.getByIdentification("xxx"))
+        when(userService.getByIdentification("xxx"))
                 .thenThrow(new ResourceNotFoundException("not found"));
 
         mockMvc.perform(get("/api/users/identification/xxx"))
@@ -111,12 +111,12 @@ class UserProfileControllerTest {
 
     @Test
     void create_returnsCreated() throws Exception {
-        UserProfileRequest request = UserProfileRequest.builder()
+        UserRequest request = UserRequest.builder()
                 .fullName("Ana").email("ana@eci.edu.co")
                 .password("hash").identification("999")
                 .build();
-        when(userProfileService.create(any()))
-                .thenReturn(UserProfileModel.builder().id(5L).fullName("Ana").build());
+        when(userService.create(any()))
+                .thenReturn(UserModel.builder().id(5L).fullName("Ana").build());
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -129,9 +129,9 @@ class UserProfileControllerTest {
 
     @Test
     void update_returnsOk() throws Exception {
-        UserProfileRequest request = UserProfileRequest.builder().fullName("Nuevo nombre").build();
-        when(userProfileService.update(eq(1L), any()))
-                .thenReturn(UserProfileModel.builder().id(1L).fullName("Nuevo nombre").build());
+        UserRequest request = UserRequest.builder().fullName("Nuevo nombre").build();
+        when(userService.update(eq(1L), any()))
+                .thenReturn(UserModel.builder().id(1L).fullName("Nuevo nombre").build());
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -142,13 +142,13 @@ class UserProfileControllerTest {
 
     @Test
     void update_notFound_returns404() throws Exception {
-        when(userProfileService.update(eq(99L), any()))
+        when(userService.update(eq(99L), any()))
                 .thenThrow(new ResourceNotFoundException("not found"));
 
         mockMvc.perform(put("/api/users/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                UserProfileRequest.builder().fullName("x").build())))
+                                UserRequest.builder().fullName("x").build())))
                 .andExpect(status().isNotFound());
     }
 
@@ -156,7 +156,7 @@ class UserProfileControllerTest {
 
     @Test
     void deactivate_returnsNoContent() throws Exception {
-        doNothing().when(userProfileService).deactivate(1L);
+        doNothing().when(userService).deactivate(1L);
 
         mockMvc.perform(patch("/api/users/1/deactivate"))
                 .andExpect(status().isNoContent());
@@ -165,7 +165,7 @@ class UserProfileControllerTest {
     @Test
     void deactivate_notFound_returns404() throws Exception {
         doThrow(new ResourceNotFoundException("not found"))
-                .when(userProfileService).deactivate(99L);
+                .when(userService).deactivate(99L);
 
         mockMvc.perform(patch("/api/users/99/deactivate"))
                 .andExpect(status().isNotFound());

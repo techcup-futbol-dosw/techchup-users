@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface SportProfileRepository extends JpaRepository<SportProfileEntity, Long> {
 
-    Optional<SportProfileEntity> findByUserProfile_Id(Long userId);
+    Optional<SportProfileEntity> findByUser_Id(Long userId);
 }

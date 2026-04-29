@@ -21,7 +21,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileRequest {
+public class UserRequest {
 
     private String fullName;
     private String email;

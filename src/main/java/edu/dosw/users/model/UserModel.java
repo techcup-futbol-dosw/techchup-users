@@ -20,15 +20,15 @@ import java.time.Period;
  * institution. Authentication and password management are the exclusive
  * responsibility of the identity service.</p>
  *
- * @see edu.dosw.users.entity.UserProfileEntity
- * @see edu.dosw.users.mapper.UserProfileMapper
+ * @see edu.dosw.users.entity.UserEntity
+ * @see edu.dosw.users.mapper.UserMapper
  */
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileModel {
+public class UserModel {
 
     /** Unique identifier of the user profile. */
     private Long id;

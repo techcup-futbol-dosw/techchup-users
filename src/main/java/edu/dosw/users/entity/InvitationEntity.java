@@ -52,5 +52,5 @@ public class InvitationEntity {
     /** Player who receives the invitation. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", nullable = false)
-    private UserProfileEntity player;
+    private UserEntity player;
 }
