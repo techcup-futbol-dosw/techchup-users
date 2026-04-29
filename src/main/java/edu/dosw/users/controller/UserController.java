@@ -93,4 +93,11 @@ public class UserController {
         userService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
+
+        /** Inactivates the user profile after validating tournament participation. */
+        @PatchMapping("/{id}/inactivate")
+        public ResponseEntity<Void> inactivate(@PathVariable Long id) {
+                userService.inactivate(id);
+                return ResponseEntity.noContent().build();
+        }
 }

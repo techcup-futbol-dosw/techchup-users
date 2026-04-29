@@ -1,7 +1,9 @@
 package edu.dosw.users.service;
 
 import edu.dosw.users.exception.BusinessException;
+import edu.dosw.users.client.TeamsServiceClient;
 import edu.dosw.users.entity.UserEntity;
+import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
@@ -30,6 +32,7 @@ public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
         private final IAuditService auditService;
+        private final TeamsServiceClient teamsServiceClient;
 
     /**
      * {@inheritDoc}
@@ -152,6 +155,26 @@ public class UserServiceImpl implements IUserService {
         var entity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         USER_NOT_FOUND_ID + id));
+        entity.setStatus("INACTIVE");
+        entity.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(entity);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void inactivate(Long id) {
+        var entity = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        USER_NOT_FOUND_ID + id));
+        if (!"ACTIVE".equalsIgnoreCase(entity.getStatus())) {
+            throw new BusinessException("La cuenta ya se encuentra inactiva");
+        }
+        if (teamsServiceClient.isPlayerAssignedToTeam(id)) {
+            throw new BusinessException(
+                    "No es posible inactivar la cuenta mientras el usuario participa en un torneo activo");
+        }
         entity.setStatus("INACTIVE");
         entity.setUpdatedAt(LocalDateTime.now());
         userRepository.save(entity);

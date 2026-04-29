@@ -8,6 +8,7 @@ import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.UserRepository;
+import edu.dosw.users.client.TeamsServiceClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +35,7 @@ class UserServiceImplTest {
     @Mock private UserRepository userRepository;
     @Mock private UserMapper userMapper;
     @Mock private IAuditService auditService;
+    @Mock private TeamsServiceClient teamsServiceClient;
 
     @InjectMocks private UserServiceImpl service;
 
@@ -283,5 +285,39 @@ class UserServiceImplTest {
         when(userRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.deactivate(5L));
+    }
+
+    // ── inactivate ─────────────────────────────────────────────────────────
+
+    @Test
+    void inactivate_activeUserWithoutTeam_setsInactive() {
+        UserEntity entity = UserEntity.builder().id(2L).status("ACTIVE").build();
+        when(userRepository.findById(2L)).thenReturn(Optional.of(entity));
+        when(teamsServiceClient.isPlayerAssignedToTeam(2L)).thenReturn(false);
+
+        service.inactivate(2L);
+
+        assertEquals("INACTIVE", entity.getStatus());
+        assertNotNull(entity.getUpdatedAt());
+        verify(userRepository).save(entity);
+    }
+
+    @Test
+    void inactivate_alreadyInactive_throwsBusinessException() {
+        UserEntity entity = UserEntity.builder().id(3L).status("INACTIVE").build();
+        when(userRepository.findById(3L)).thenReturn(Optional.of(entity));
+
+        assertThrows(BusinessException.class, () -> service.inactivate(3L));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void inactivate_userInActiveTeam_throwsBusinessException() {
+        UserEntity entity = UserEntity.builder().id(4L).status("ACTIVE").build();
+        when(userRepository.findById(4L)).thenReturn(Optional.of(entity));
+        when(teamsServiceClient.isPlayerAssignedToTeam(4L)).thenReturn(true);
+
+        assertThrows(BusinessException.class, () -> service.inactivate(4L));
+        verify(userRepository, never()).save(any());
     }
 }
