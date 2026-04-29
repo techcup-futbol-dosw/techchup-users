@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -129,15 +128,11 @@ class InvitationServiceImplTest {
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(1L).status(InvitationStatus.PENDING).build();
         InvitationEntity updatedEntity = InvitationEntity.builder().id(1L).build();
-        InvitationModel acceptedModel = InvitationModel.builder()
-                .id(1L).status(InvitationStatus.ACCEPTED)
-                .respondedAt(LocalDateTime.now()).build();
 
         when(invitationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(invitationMapper.toModel(existing)).thenReturn(pendingModel);
         when(invitationMapper.toEntity(pendingModel)).thenReturn(updatedEntity);
         when(invitationRepository.save(any())).thenReturn(updatedEntity);
-        when(invitationMapper.toModel(updatedEntity)).thenReturn(acceptedModel);
 
         service.accept(1L);
 
@@ -176,14 +171,11 @@ class InvitationServiceImplTest {
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(2L).status(InvitationStatus.PENDING).build();
         InvitationEntity updatedEntity = InvitationEntity.builder().id(2L).build();
-        InvitationModel rejectedModel = InvitationModel.builder()
-                .id(2L).status(InvitationStatus.REJECTED).build();
 
         when(invitationRepository.findById(2L)).thenReturn(Optional.of(existing));
         when(invitationMapper.toModel(existing)).thenReturn(pendingModel);
         when(invitationMapper.toEntity(pendingModel)).thenReturn(updatedEntity);
         when(invitationRepository.save(any())).thenReturn(updatedEntity);
-        when(invitationMapper.toModel(updatedEntity)).thenReturn(rejectedModel);
 
         service.reject(2L);
 
@@ -200,14 +192,11 @@ class InvitationServiceImplTest {
         InvitationModel pendingModel = InvitationModel.builder()
                 .id(3L).status(InvitationStatus.PENDING).build();
         InvitationEntity updatedEntity = InvitationEntity.builder().id(3L).build();
-        InvitationModel cancelledModel = InvitationModel.builder()
-                .id(3L).status(InvitationStatus.CANCELLED).build();
 
         when(invitationRepository.findById(3L)).thenReturn(Optional.of(existing));
         when(invitationMapper.toModel(existing)).thenReturn(pendingModel);
         when(invitationMapper.toEntity(pendingModel)).thenReturn(updatedEntity);
         when(invitationRepository.save(any())).thenReturn(updatedEntity);
-        when(invitationMapper.toModel(updatedEntity)).thenReturn(cancelledModel);
 
         service.cancel(3L);
 
