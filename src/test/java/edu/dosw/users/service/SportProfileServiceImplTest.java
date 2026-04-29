@@ -129,8 +129,9 @@ class SportProfileServiceImplTest {
     void create_userNotFound_throwsResourceNotFoundException() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
+        SportProfileModel emptyModel = SportProfileModel.builder().build();
         assertThrows(ResourceNotFoundException.class,
-                () -> service.create(99L, SportProfileModel.builder().build(), null));
+                () -> service.create(99L, emptyModel, null));
     }
 
     @Test
@@ -140,8 +141,9 @@ class SportProfileServiceImplTest {
         when(sportProfileRepository.findByUser_Id(1L))
                 .thenReturn(Optional.of(SportProfileEntity.builder().id(3L).build()));
 
+        SportProfileModel emptyModel = SportProfileModel.builder().build();
         assertThrows(BusinessException.class,
-                () -> service.create(1L, SportProfileModel.builder().build(), null));
+                () -> service.create(1L, emptyModel, null));
     }
 
     // ── update ───────────────────────────────────────────────────────────────
@@ -175,16 +177,18 @@ class SportProfileServiceImplTest {
         when(sportProfileRepository.findById(3L)).thenReturn(Optional.of(existing));
         when(teamsServiceClient.isPlayerAssignedToTeam(1L)).thenReturn(true);
 
+        SportProfileModel emptyModel = SportProfileModel.builder().build();
         assertThrows(BusinessException.class,
-                () -> service.update(3L, SportProfileModel.builder().build(), null));
+                () -> service.update(3L, emptyModel, null));
     }
 
     @Test
     void update_notFound_throwsResourceNotFoundException() {
         when(sportProfileRepository.findById(99L)).thenReturn(Optional.empty());
 
+        SportProfileModel emptyModel = SportProfileModel.builder().build();
         assertThrows(ResourceNotFoundException.class,
-                () -> service.update(99L, SportProfileModel.builder().build(), null));
+                () -> service.update(99L, emptyModel, null));
     }
 
     @Test
