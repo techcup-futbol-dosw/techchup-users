@@ -1,6 +1,7 @@
 package edu.dosw.users.service;
 
 import edu.dosw.users.exception.BusinessException;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
@@ -118,6 +119,26 @@ public class UserServiceImpl implements IUserService {
         }
 
         return userMapper.toModel(saved);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserModel updateProfile(Long userId, UserModel model) {
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        USER_NOT_FOUND_ID + userId));
+        UserEntity updated = userMapper.toEntity(model);
+        entity.setFullName(updated.getFullName());
+        entity.setIdentification(updated.getIdentification());
+        entity.setBirthDate(updated.getBirthDate());
+        entity.setGender(updated.getGender());
+        entity.setSchoolRelation(updated.getSchoolRelation());
+        entity.setAcademicProgram(updated.getAcademicProgram());
+        entity.setSemester(updated.getSemester());
+        entity.setUpdatedAt(LocalDateTime.now());
+        return userMapper.toModel(userRepository.save(entity));
     }
 
     /**

@@ -10,6 +10,7 @@ import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -210,6 +211,60 @@ class UserServiceImplTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> service.update(99L, emptyModel));
     }
+
+        // ── updateProfile ──────────────────────────────────────────────────────
+
+        @Test
+        void updateProfile_updatesAllowedFieldsAndPreservesCredentials() {
+        UserEntity existing = UserEntity.builder()
+            .id(1L)
+            .fullName("Anterior")
+            .email("old@eci.edu.co")
+            .password("secret")
+            .identification("111")
+            .build();
+        UserEntity updateData = UserEntity.builder()
+            .fullName("Nuevo")
+            .identification("222")
+            .birthDate(java.time.LocalDate.of(2000, 1, 1))
+            .gender("MALE")
+            .schoolRelation("STUDENT")
+            .academicProgram("Ingenieria")
+            .semester(4)
+            .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(userMapper.toEntity(any())).thenReturn(updateData);
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userMapper.toModel(any(UserEntity.class)))
+            .thenReturn(UserModel.builder().id(1L).fullName("Nuevo").build());
+
+        UserModel result = service.updateProfile(1L, UserModel.builder().build());
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+        UserEntity saved = captor.getValue();
+        assertEquals("Nuevo", saved.getFullName());
+        assertEquals("222", saved.getIdentification());
+        assertEquals("MALE", saved.getGender());
+        assertEquals("STUDENT", saved.getSchoolRelation());
+        assertEquals("Ingenieria", saved.getAcademicProgram());
+        assertEquals(4, saved.getSemester());
+        assertEquals("old@eci.edu.co", saved.getEmail());
+        assertEquals("secret", saved.getPassword());
+        assertNotNull(saved.getUpdatedAt());
+        assertEquals("Nuevo", result.getFullName());
+        }
+
+        @Test
+        void updateProfile_notFound_throwsResourceNotFoundException() {
+        when(userRepository.findById(55L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+            () -> service.updateProfile(55L, UserModel.builder().build()));
+        }
+
+    // ── deactivate ───────────────────────────────────────────────────────────
 
     @Test
     void deactivate_setsStatusInactiveAndSaves() {
