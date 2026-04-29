@@ -1,5 +1,6 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.entity.UserEntity;
@@ -205,6 +206,36 @@ class UserMapperTest {
         assertEquals(SchoolRelation.STUDENT, model.getSchoolRelation());
         assertEquals("Ingeniería Civil", model.getAcademicProgram());
         assertEquals(4, model.getSemester());
+    }
+
+    @Test
+    void toModel_fromProfileUpdateRequest_mapsFieldsAndIgnoresCredentials() {
+        UserProfileUpdateRequest request = UserProfileUpdateRequest.builder()
+                .fullName("Juliana Gomez")
+                .identification("555666")
+                .birthDate(LocalDate.of(1998, 9, 12))
+                .gender(Gender.FEMALE)
+                .schoolRelation(SchoolRelation.GRADUATE)
+                .academicProgram("Ingeniería Industrial")
+                .semester(8)
+                .build();
+
+        UserModel model = mapper.toModel(request);
+
+        assertNotNull(model);
+        assertNull(model.getId());
+        assertNull(model.getStatus());
+        assertNull(model.getProfileCreatedAt());
+        assertNull(model.getUpdatedAt());
+        assertNull(model.getEmail());
+        assertNull(model.getPassword());
+        assertEquals("Juliana Gomez", model.getFullName());
+        assertEquals("555666", model.getIdentification());
+        assertEquals(LocalDate.of(1998, 9, 12), model.getBirthDate());
+        assertEquals(Gender.FEMALE, model.getGender());
+        assertEquals(SchoolRelation.GRADUATE, model.getSchoolRelation());
+        assertEquals("Ingeniería Industrial", model.getAcademicProgram());
+        assertEquals(8, model.getSemester());
     }
 
     // ── toResponse ───────────────────────────────────────────────────────────

@@ -2,8 +2,11 @@ package edu.dosw.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
+import edu.dosw.users.enums.Gender;
+import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.service.IUserService;
@@ -17,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -161,6 +165,42 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 UserRequest.builder().fullName("x").build())))
                 .andExpect(status().isNotFound());
+    }
+
+    // ── PUT /api/users/me ───────────────────────────────────────────────────
+
+    @Test
+    void updateMe_returnsOk() throws Exception {
+        UserProfileUpdateRequest request = UserProfileUpdateRequest.builder()
+                .fullName("Nuevo Nombre")
+                .identification("123456")
+                .birthDate(LocalDate.of(2001, 6, 10))
+                .gender(Gender.MALE)
+                .schoolRelation(SchoolRelation.STUDENT)
+                .academicProgram("Ingenieria de Sistemas")
+                .semester(6)
+                .build();
+        when(userService.updateProfile(eq(7L), any()))
+                .thenReturn(UserModel.builder().id(7L).fullName("Nuevo Nombre").build());
+
+        mockMvc.perform(put("/api/users/me")
+                        .header("X-User-Id", 7L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(7))
+                .andExpect(jsonPath("$.fullName").value("Nuevo Nombre"));
+    }
+
+    @Test
+    void updateMe_invalidPayload_returns400() throws Exception {
+        UserProfileUpdateRequest request = UserProfileUpdateRequest.builder().build();
+
+        mockMvc.perform(put("/api/users/me")
+                        .header("X-User-Id", 7L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     // ── PATCH /api/users/{id}/deactivate ─────────────────────────────────────
