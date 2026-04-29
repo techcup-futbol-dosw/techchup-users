@@ -31,6 +31,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class SportProfileServiceImpl implements ISportProfileService {
 
+    private static final String SPORT_PROFILE_NOT_FOUND_ID = "Sport profile not found with id: ";
+
     private final SportProfileRepository sportProfileRepository;
     private final UserRepository userRepository;
     private final SportProfileMapper sportProfileMapper;
@@ -43,7 +45,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
         return sportProfileRepository.findById(id)
                 .map(sportProfileMapper::toModel)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Sport profile not found with id: " + id));
+                        SPORT_PROFILE_NOT_FOUND_ID + id));
     }
 
     @Override
@@ -84,7 +86,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
     public SportProfileModel update(Long id, SportProfileModel model, MultipartFile photo) {
         SportProfileEntity existing = sportProfileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Sport profile not found with id: " + id));
+                        SPORT_PROFILE_NOT_FOUND_ID + id));
 
         Long userId = existing.getUser().getId();
         if (teamsServiceClient.isPlayerAssignedToTeam(userId)) {
@@ -111,7 +113,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
     public void updateAvailability(Long id, boolean available) {
         SportProfileEntity entity = sportProfileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Sport profile not found with id: " + id));
+                        SPORT_PROFILE_NOT_FOUND_ID + id));
         entity.setAvailable(available);
         entity.setUpdatedAt(LocalDateTime.now());
         sportProfileRepository.save(entity);
