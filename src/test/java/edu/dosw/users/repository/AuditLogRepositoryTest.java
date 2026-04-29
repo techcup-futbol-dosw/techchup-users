@@ -3,7 +3,7 @@ package edu.dosw.users.repository;
 import edu.dosw.users.entity.AuditLogEntity;
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AuditLogRepositoryTest {
 
     @Autowired
-    private UserProfileRepository userProfileRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private SportProfileRepository sportProfileRepository;
@@ -36,7 +36,7 @@ class AuditLogRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        UserProfileEntity user = userProfileRepository.save(UserProfileEntity.builder()
+        UserEntity user = userRepository.save(UserEntity.builder()
                 .fullName("Test User")
                 .email("user@test.com")
                 .password("hashed")
@@ -45,7 +45,7 @@ class AuditLogRepositoryTest {
                 .build());
 
         sportProfile = sportProfileRepository.save(SportProfileEntity.builder()
-                .userProfile(user)
+                .user(user)
                 .position("FORWARD")
                 .available(true)
                 .build());

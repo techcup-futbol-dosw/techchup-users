@@ -2,7 +2,7 @@ package edu.dosw.users.mapper;
 
 import edu.dosw.users.dto.InvitationResponse;
 import edu.dosw.users.entity.InvitationEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.InvitationStatus;
 import edu.dosw.users.model.InvitationModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ class InvitationMapperTest {
      */
     @Test
     void toModel_mapsPlayerIdAndAllFields() {
-        UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
+        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity entity = InvitationEntity.builder()
                 .id(1L)
                 .player(player)

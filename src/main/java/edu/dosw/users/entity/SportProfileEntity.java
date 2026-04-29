@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * JPA entity representing a player's sport profile.
  *
  * <p>Mapped to the {@code sport_profiles} table. Holds a {@code OneToOne}
- * relationship with {@link UserProfileEntity} through the {@code user_id}
+ * relationship with {@link UserEntity} through the {@code user_id}
  * column. The {@code photoId} field stores the {@code ObjectId} of the
  * {@code PlayerPhoto} document in MongoDB.</p>
  *
@@ -61,5 +61,5 @@ public class SportProfileEntity {
     /** User profile that owns this sport profile. */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private UserProfileEntity userProfile;
+    private UserEntity user;
 }

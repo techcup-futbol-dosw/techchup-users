@@ -1,7 +1,7 @@
 package edu.dosw.users.service;
 
 import edu.dosw.users.entity.InvitationEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.InvitationStatus;
 import edu.dosw.users.exception.BusinessException;
@@ -9,7 +9,7 @@ import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.InvitationMapper;
 import edu.dosw.users.model.InvitationModel;
 import edu.dosw.users.repository.InvitationRepository;
-import edu.dosw.users.repository.UserProfileRepository;
+import edu.dosw.users.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 class InvitationServiceImplTest {
 
     @Mock private InvitationRepository invitationRepository;
-    @Mock private UserProfileRepository userProfileRepository;
+    @Mock private UserRepository userRepository;
     @Mock private InvitationMapper invitationMapper;
     @Mock private IAuditService auditService;
 
@@ -75,12 +75,12 @@ class InvitationServiceImplTest {
 
     @Test
     void send_validRequest_savesAndLogsAndReturnsModel() {
-        UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
+        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity savedEntity = InvitationEntity.builder().id(1L).build();
         InvitationModel savedModel = InvitationModel.builder().id(1L)
                 .playerId(10L).teamId(5L).status(InvitationStatus.PENDING).build();
 
-        when(userProfileRepository.findById(10L)).thenReturn(Optional.of(player));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(player));
         when(invitationRepository.findByPlayer_IdAndStatus(10L, "PENDING"))
                 .thenReturn(List.of());
         when(invitationRepository.save(any())).thenReturn(savedEntity);
@@ -94,18 +94,18 @@ class InvitationServiceImplTest {
 
     @Test
     void send_playerNotFound_throwsResourceNotFoundException() {
-        when(userProfileRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.send(99L, 5L));
     }
 
     @Test
     void send_alreadyHasPendingFromSameTeam_throwsBusinessException() {
-        UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
+        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
                 .id(3L).teamId(5L).status("PENDING").build();
 
-        when(userProfileRepository.findById(10L)).thenReturn(Optional.of(player));
+        when(userRepository.findById(10L)).thenReturn(Optional.of(player));
         when(invitationRepository.findByPlayer_IdAndStatus(10L, "PENDING"))
                 .thenReturn(List.of(existing));
 
@@ -116,7 +116,7 @@ class InvitationServiceImplTest {
 
     @Test
     void accept_pendingInvitation_changesStatusAndLogs() {
-        UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
+        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
                 .id(1L).player(player).teamId(5L).status("PENDING").build();
         InvitationModel pendingModel = InvitationModel.builder()
@@ -142,7 +142,7 @@ class InvitationServiceImplTest {
     @Test
     void accept_nonPendingInvitation_throwsBusinessException() {
         InvitationEntity existing = InvitationEntity.builder()
-                .id(1L).player(UserProfileEntity.builder().id(1L).build()).build();
+                .id(1L).player(UserEntity.builder().id(1L).build()).build();
         InvitationModel alreadyAccepted = InvitationModel.builder()
                 .id(1L).status(InvitationStatus.ACCEPTED).build();
 
@@ -163,7 +163,7 @@ class InvitationServiceImplTest {
 
     @Test
     void reject_pendingInvitation_changesStatus() {
-        UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
+        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
                 .id(2L).player(player).build();
         InvitationModel pendingModel = InvitationModel.builder()
@@ -187,7 +187,7 @@ class InvitationServiceImplTest {
 
     @Test
     void cancel_pendingInvitation_changesStatus() {
-        UserProfileEntity player = UserProfileEntity.builder().id(10L).build();
+        UserEntity player = UserEntity.builder().id(10L).build();
         InvitationEntity existing = InvitationEntity.builder()
                 .id(3L).player(player).build();
         InvitationModel pendingModel = InvitationModel.builder()

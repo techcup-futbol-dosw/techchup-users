@@ -1,11 +1,11 @@
 package edu.dosw.users.mapper;
 
-import edu.dosw.users.dto.UserProfileRequest;
-import edu.dosw.users.dto.UserProfileResponse;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.dto.UserRequest;
+import edu.dosw.users.dto.UserResponse;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.Gender;
 import edu.dosw.users.enums.SchoolRelation;
-import edu.dosw.users.model.UserProfileModel;
+import edu.dosw.users.model.UserModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,24 +15,24 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for {@link UserProfileMapper}.
+ * Unit tests for {@link UserMapper}.
  *
- * <p>Verifies bidirectional conversion between {@link UserProfileEntity} and
- * {@link UserProfileModel}, including the mapping of the {@link Gender} and
+ * <p>Verifies bidirectional conversion between {@link UserEntity} and
+ * {@link UserModel}, including the mapping of the {@link Gender} and
  * {@link SchoolRelation} enums to and from their {@code String} representations,
  * handling of null optional fields, and the fact that {@code sportProfile} is
  * ignored in {@code toEntity}.</p>
  */
-class UserProfileMapperTest {
+class UserMapperTest {
 
-    private UserProfileMapper mapper;
+    private UserMapper mapper;
 
     /**
      * Initialises the MapStruct-generated implementation before each test.
      */
     @BeforeEach
     void setUp() {
-        mapper = new UserProfileMapperImpl();
+        mapper = new UserMapperImpl();
     }
 
     // ── toModel ──────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ class UserProfileMapperTest {
      */
     @Test
     void toModel_mapsAllFields() {
-        UserProfileEntity entity = UserProfileEntity.builder()
+        UserEntity entity = UserEntity.builder()
                 .id(1L)
                 .fullName("Carlos Perez")
                 .email("carlos@escuelaing.edu.co")
@@ -60,7 +60,7 @@ class UserProfileMapperTest {
                 .updatedAt(LocalDateTime.of(2024, 3, 1, 10, 30))
                 .build();
 
-        UserProfileModel model = mapper.toModel(entity);
+        UserModel model = mapper.toModel(entity);
 
         assertNotNull(model);
         assertEquals(1L, model.getId());
@@ -84,7 +84,7 @@ class UserProfileMapperTest {
      */
     @Test
     void toModel_nullGenderAndSchoolRelation_mapsToNull() {
-        UserProfileEntity entity = UserProfileEntity.builder()
+        UserEntity entity = UserEntity.builder()
                 .id(2L)
                 .fullName("Sin datos opcionales")
                 .email("test@test.com")
@@ -93,7 +93,7 @@ class UserProfileMapperTest {
                 .status("ACTIVE")
                 .build();
 
-        UserProfileModel model = mapper.toModel(entity);
+        UserModel model = mapper.toModel(entity);
 
         assertNull(model.getGender());
         assertNull(model.getSchoolRelation());
@@ -105,7 +105,7 @@ class UserProfileMapperTest {
      */
     @Test
     void toModel_nullEntity_returnsNull() {
-        assertNull(mapper.toModel((UserProfileEntity) null));
+        assertNull(mapper.toModel((UserEntity) null));
     }
 
     // ── toEntity ─────────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ class UserProfileMapperTest {
      */
     @Test
     void toEntity_mapsAllFields() {
-        UserProfileModel model = UserProfileModel.builder()
+        UserModel model = UserModel.builder()
                 .id(1L)
                 .fullName("Carlos Perez")
                 .email("carlos@escuelaing.edu.co")
@@ -133,7 +133,7 @@ class UserProfileMapperTest {
                 .updatedAt(LocalDateTime.of(2024, 3, 1, 10, 30))
                 .build();
 
-        UserProfileEntity entity = mapper.toEntity(model);
+        UserEntity entity = mapper.toEntity(model);
 
         assertNotNull(entity);
         assertEquals(1L, entity.getId());
@@ -150,7 +150,7 @@ class UserProfileMapperTest {
      */
     @Test
     void toEntity_sportProfile_isIgnored() {
-        UserProfileModel model = UserProfileModel.builder()
+        UserModel model = UserModel.builder()
                 .id(1L)
                 .fullName("Test")
                 .email("t@t.com")
@@ -159,7 +159,7 @@ class UserProfileMapperTest {
                 .status("ACTIVE")
                 .build();
 
-        UserProfileEntity entity = mapper.toEntity(model);
+        UserEntity entity = mapper.toEntity(model);
 
         assertNull(entity.getSportProfile());
     }
@@ -177,7 +177,7 @@ class UserProfileMapperTest {
 
     @Test
     void toModel_fromRequest_mapsFieldsAndIgnoresMetadata() {
-        UserProfileRequest request = UserProfileRequest.builder()
+        UserRequest request = UserRequest.builder()
                 .fullName("Ana García")
                 .email("ana@escuelaing.edu.co")
                 .password("hashed")
@@ -189,7 +189,7 @@ class UserProfileMapperTest {
                 .semester(4)
                 .build();
 
-        UserProfileModel model = mapper.toModel(request);
+        UserModel model = mapper.toModel(request);
 
         assertNotNull(model);
         assertNull(model.getId());
@@ -211,7 +211,7 @@ class UserProfileMapperTest {
 
     @Test
     void toResponse_mapsAllFieldsExceptPassword() {
-        UserProfileModel model = UserProfileModel.builder()
+        UserModel model = UserModel.builder()
                 .id(7L)
                 .fullName("Luis Mora")
                 .email("luis@escuelaing.edu.co")
@@ -227,7 +227,7 @@ class UserProfileMapperTest {
                 .updatedAt(LocalDateTime.of(2024, 6, 1, 0, 0))
                 .build();
 
-        UserProfileResponse response = mapper.toResponse(model);
+        UserResponse response = mapper.toResponse(model);
 
         assertNotNull(response);
         assertEquals(7L, response.getId());

@@ -2,14 +2,14 @@ package edu.dosw.users.service;
 
 import edu.dosw.users.client.TeamsServiceClient;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserProfileEntity;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.SportProfileMapper;
 import edu.dosw.users.model.SportProfileModel;
 import edu.dosw.users.repository.SportProfileRepository;
-import edu.dosw.users.repository.UserProfileRepository;
+import edu.dosw.users.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 class SportProfileServiceImplTest {
 
     @Mock private SportProfileRepository sportProfileRepository;
-    @Mock private UserProfileRepository userProfileRepository;
+    @Mock private UserRepository userRepository;
     @Mock private SportProfileMapper sportProfileMapper;
     @Mock private IAuditService auditService;
     @Mock private ImageService imageService;
@@ -61,7 +61,7 @@ class SportProfileServiceImplTest {
     void getByUserId_found_returnsModel() {
         SportProfileEntity entity = SportProfileEntity.builder().id(2L).build();
         SportProfileModel model = SportProfileModel.builder().id(2L).userId(10L).build();
-        when(sportProfileRepository.findByUserProfile_Id(10L)).thenReturn(Optional.of(entity));
+        when(sportProfileRepository.findByUser_Id(10L)).thenReturn(Optional.of(entity));
         when(sportProfileMapper.toModel(entity)).thenReturn(model);
 
         assertEquals(10L, service.getByUserId(10L).getUserId());
@@ -69,7 +69,7 @@ class SportProfileServiceImplTest {
 
     @Test
     void getByUserId_notFound_throwsResourceNotFoundException() {
-        when(sportProfileRepository.findByUserProfile_Id(99L)).thenReturn(Optional.empty());
+        when(sportProfileRepository.findByUser_Id(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.getByUserId(99L));
     }
@@ -78,14 +78,14 @@ class SportProfileServiceImplTest {
 
     @Test
     void create_newProfile_savesAndLogsAndReturnsModel() {
-        UserProfileEntity user = UserProfileEntity.builder().id(1L).build();
+        UserEntity user = UserEntity.builder().id(1L).build();
         SportProfileModel input = SportProfileModel.builder().build();
         SportProfileEntity mappedEntity = SportProfileEntity.builder().build();
         SportProfileEntity savedEntity = SportProfileEntity.builder().id(5L).build();
         SportProfileModel savedModel = SportProfileModel.builder().id(5L).userId(1L).build();
 
-        when(userProfileRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(sportProfileRepository.findByUserProfile_Id(1L)).thenReturn(Optional.empty());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(sportProfileRepository.findByUser_Id(1L)).thenReturn(Optional.empty());
         when(sportProfileMapper.toEntity(input)).thenReturn(mappedEntity);
         when(sportProfileRepository.save(any())).thenReturn(savedEntity);
         when(sportProfileMapper.toModel(savedEntity)).thenReturn(savedModel);
@@ -101,14 +101,14 @@ class SportProfileServiceImplTest {
     void create_withPhoto_uploadsPhotoAndSetsPhotoId() {
         MockMultipartFile photo = new MockMultipartFile("photo", "p.jpg",
                 "image/jpeg", new byte[]{1, 2, 3});
-        UserProfileEntity user = UserProfileEntity.builder().id(1L).build();
+        UserEntity user = UserEntity.builder().id(1L).build();
         SportProfileModel input = SportProfileModel.builder().build();
         SportProfileEntity mappedEntity = SportProfileEntity.builder().build();
         SportProfileEntity savedEntity = SportProfileEntity.builder().id(6L).build();
         SportProfileModel savedModel = SportProfileModel.builder().id(6L).build();
 
-        when(userProfileRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(sportProfileRepository.findByUserProfile_Id(1L)).thenReturn(Optional.empty());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(sportProfileRepository.findByUser_Id(1L)).thenReturn(Optional.empty());
         when(sportProfileMapper.toEntity(input)).thenReturn(mappedEntity);
         when(imageService.upload(photo, null)).thenReturn("abc123");
         when(sportProfileRepository.save(any())).thenReturn(savedEntity);
@@ -121,7 +121,7 @@ class SportProfileServiceImplTest {
 
     @Test
     void create_userNotFound_throwsResourceNotFoundException() {
-        when(userProfileRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> service.create(99L, SportProfileModel.builder().build(), null));
@@ -129,9 +129,9 @@ class SportProfileServiceImplTest {
 
     @Test
     void create_profileAlreadyExists_throwsBusinessException() {
-        UserProfileEntity user = UserProfileEntity.builder().id(1L).build();
-        when(userProfileRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(sportProfileRepository.findByUserProfile_Id(1L))
+        UserEntity user = UserEntity.builder().id(1L).build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(sportProfileRepository.findByUser_Id(1L))
                 .thenReturn(Optional.of(SportProfileEntity.builder().id(3L).build()));
 
         assertThrows(BusinessException.class,
@@ -142,9 +142,9 @@ class SportProfileServiceImplTest {
 
     @Test
     void update_notInTeam_updatesAndLogsAndReturnsModel() {
-        UserProfileEntity user = UserProfileEntity.builder().id(1L).build();
+        UserEntity user = UserEntity.builder().id(1L).build();
         SportProfileEntity existing = SportProfileEntity.builder().id(3L)
-                .userProfile(user).photoId(null).build();
+                .user(user).photoId(null).build();
         SportProfileModel updateData = SportProfileModel.builder().build();
         SportProfileEntity updatedEntity = SportProfileEntity.builder().id(3L).build();
         SportProfileModel updatedModel = SportProfileModel.builder().id(3L).build();
@@ -163,9 +163,9 @@ class SportProfileServiceImplTest {
 
     @Test
     void update_playerInTeam_throwsBusinessException() {
-        UserProfileEntity user = UserProfileEntity.builder().id(1L).build();
+        UserEntity user = UserEntity.builder().id(1L).build();
         SportProfileEntity existing = SportProfileEntity.builder().id(3L)
-                .userProfile(user).build();
+                .user(user).build();
         when(sportProfileRepository.findById(3L)).thenReturn(Optional.of(existing));
         when(teamsServiceClient.isPlayerAssignedToTeam(1L)).thenReturn(true);
 
@@ -183,9 +183,9 @@ class SportProfileServiceImplTest {
 
     @Test
     void update_withNewPhoto_deletesOldAndUploadsNew() {
-        UserProfileEntity user = UserProfileEntity.builder().id(1L).build();
+        UserEntity user = UserEntity.builder().id(1L).build();
         SportProfileEntity existing = SportProfileEntity.builder().id(3L)
-                .userProfile(user).photoId("old123").build();
+                .user(user).photoId("old123").build();
         MockMultipartFile newPhoto = new MockMultipartFile("photo", "new.jpg",
                 "image/jpeg", new byte[]{9, 8});
         SportProfileModel updateData = SportProfileModel.builder().build();

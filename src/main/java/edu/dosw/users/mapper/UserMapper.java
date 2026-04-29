@@ -1,22 +1,22 @@
 package edu.dosw.users.mapper;
 
-import edu.dosw.users.dto.UserProfileRequest;
-import edu.dosw.users.dto.UserProfileResponse;
-import edu.dosw.users.entity.UserProfileEntity;
-import edu.dosw.users.model.UserProfileModel;
+import edu.dosw.users.dto.UserRequest;
+import edu.dosw.users.dto.UserResponse;
+import edu.dosw.users.entity.UserEntity;
+import edu.dosw.users.model.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
  * MapStruct mapper for bidirectional conversion between
- * {@link UserProfileEntity} and {@link UserProfileModel}.
+ * {@link UserEntity} and {@link UserModel}.
  *
  * <p>When converting to an entity, the {@code sportProfile} relationship is
  * ignored and must be managed independently by the service layer to avoid
  * update cycles.</p>
  */
 @Mapper(componentModel = "spring")
-public interface UserProfileMapper {
+public interface UserMapper {
 
     /**
      * Converts a user profile entity to its domain model.
@@ -24,7 +24,7 @@ public interface UserProfileMapper {
      * @param entity source entity; may be {@code null}
      * @return resulting model, or {@code null} if the entity is {@code null}
      */
-    UserProfileModel toModel(UserProfileEntity entity);
+    UserModel toModel(UserEntity entity);
 
     /**
      * Converts a user profile model to its JPA entity.
@@ -35,15 +35,15 @@ public interface UserProfileMapper {
      * @return resulting entity, or {@code null} if the model is {@code null}
      */
     @Mapping(target = "sportProfile", ignore = true)
-    UserProfileEntity toEntity(UserProfileModel model);
+    UserEntity toEntity(UserModel model);
 
-    /** Converts a {@link UserProfileRequest} to its domain model. */
+    /** Converts a {@link UserRequest} to its domain model. */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "profileCreatedAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    UserProfileModel toModel(UserProfileRequest request);
+    UserModel toModel(UserRequest request);
 
-    /** Converts a domain model to a {@link UserProfileResponse} (no password). */
-    UserProfileResponse toResponse(UserProfileModel model);
+    /** Converts a domain model to a {@link UserResponse} (no password). */
+    UserResponse toResponse(UserModel model);
 }
