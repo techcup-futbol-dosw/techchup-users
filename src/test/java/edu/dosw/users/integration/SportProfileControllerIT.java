@@ -45,6 +45,10 @@ class SportProfileControllerIT {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
+    /**
+     * Builds the {@link MockMvc} instance and clears persisted data so each
+     * integration test starts from an isolated database state.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
@@ -175,6 +179,15 @@ class SportProfileControllerIT {
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a user through the public users API and returns the generated id.
+     *
+     * @param fullName full name to store for the user
+     * @param email email address to store for the user
+     * @param identification unique identification number to store for the user
+     * @return generated user identifier extracted from the JSON response
+     * @throws Exception if the mock request or JSON parsing fails
+     */
     private long createUser(String fullName, String email, String identification) throws Exception {
         UserRequest request = UserRequest.builder()
                 .fullName(fullName).email(email)
@@ -187,6 +200,17 @@ class SportProfileControllerIT {
         return objectMapper.readTree(response).get("id").asLong();
     }
 
+    /**
+     * Creates a sport profile through the public sport profile API and returns
+     * the generated profile id.
+     *
+     * @param userId identifier of the user who owns the sport profile
+     * @param position player position to include in the multipart profile part
+     * @param dorsal jersey number to include in the multipart profile part
+     * @param available availability flag to include in the multipart profile part
+     * @return generated sport profile identifier extracted from the JSON response
+     * @throws Exception if the mock request or JSON parsing fails
+     */
     private long createSportProfile(Long userId, Position position, int dorsal, boolean available)
             throws Exception {
         MockMultipartFile profilePart = buildProfilePart(position, dorsal, available);
@@ -196,6 +220,16 @@ class SportProfileControllerIT {
         return objectMapper.readTree(response).get("id").asLong();
     }
 
+    /**
+     * Builds the JSON multipart part used by create and update sport profile
+     * requests.
+     *
+     * @param position player position to serialize
+     * @param dorsal jersey number to serialize
+     * @param available availability flag to serialize
+     * @return multipart file named {@code profile} with JSON content
+     * @throws Exception if JSON serialization fails
+     */
     private MockMultipartFile buildProfilePart(Position position, int dorsal, boolean available)
             throws Exception {
         SportProfileRequest request = SportProfileRequest.builder()

@@ -42,6 +42,10 @@ class UserControllerIT {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
+    /**
+     * Builds the {@link MockMvc} instance and clears persisted data so each
+     * integration test starts from an isolated database state.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
@@ -178,6 +182,16 @@ class UserControllerIT {
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a user through the public users API and returns the raw JSON
+     * response body for follow-up assertions or id extraction.
+     *
+     * @param fullName full name to store for the user
+     * @param email email address to store for the user
+     * @param identification unique identification number to store for the user
+     * @return JSON response returned by the create user endpoint
+     * @throws Exception if the mock request fails
+     */
     private String createUserViaApi(String fullName, String email, String identification)
             throws Exception {
         UserRequest request = UserRequest.builder()
@@ -190,6 +204,13 @@ class UserControllerIT {
                 .andReturn().getResponse().getContentAsString();
     }
 
+    /**
+     * Extracts the numeric {@code id} field from a JSON response.
+     *
+     * @param json response body containing an {@code id} field
+     * @return id value parsed as a long
+     * @throws Exception if the response body cannot be parsed as JSON
+     */
     private long extractId(String json) throws Exception {
         return objectMapper.readTree(json).get("id").asLong();
     }

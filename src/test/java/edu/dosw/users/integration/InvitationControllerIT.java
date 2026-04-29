@@ -41,6 +41,10 @@ class InvitationControllerIT {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
+    /**
+     * Builds the {@link MockMvc} instance and clears persisted data so each
+     * integration test starts from an isolated database state.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
@@ -179,6 +183,15 @@ class InvitationControllerIT {
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
+    /**
+     * Creates a user through the public users API and returns the generated id.
+     *
+     * @param fullName full name to store for the user
+     * @param email email address to store for the user
+     * @param identification unique identification number to store for the user
+     * @return generated user identifier extracted from the JSON response
+     * @throws Exception if the mock request or JSON parsing fails
+     */
     private long createUser(String fullName, String email, String identification) throws Exception {
         UserRequest request = UserRequest.builder()
                 .fullName(fullName).email(email)
@@ -191,6 +204,15 @@ class InvitationControllerIT {
         return objectMapper.readTree(response).get("id").asLong();
     }
 
+    /**
+     * Sends an invitation through the public invitations API and returns the
+     * generated invitation id.
+     *
+     * @param playerId identifier of the player receiving the invitation
+     * @param teamId identifier of the team extending the invitation
+     * @return generated invitation identifier extracted from the JSON response
+     * @throws Exception if the mock request or JSON parsing fails
+     */
     private long sendInvitation(long playerId, long teamId) throws Exception {
         String response = mockMvc.perform(
                         post("/api/invitations/player/" + playerId + "/team/" + teamId))
