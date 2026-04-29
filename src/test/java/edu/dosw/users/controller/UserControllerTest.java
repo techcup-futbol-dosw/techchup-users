@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
+import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.service.IUserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -180,5 +181,24 @@ class UserControllerTest {
 
         mockMvc.perform(patch("/api/users/99/deactivate"))
                 .andExpect(status().isNotFound());
+    }
+
+    // ── PATCH /api/users/{id}/inactivate ───────────────────────────────────
+
+    @Test
+    void inactivate_returnsNoContent() throws Exception {
+        doNothing().when(userService).inactivate(1L);
+
+        mockMvc.perform(patch("/api/users/1/inactivate"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void inactivate_conflict_returns409() throws Exception {
+        doThrow(new BusinessException("conflict"))
+                .when(userService).inactivate(1L);
+
+        mockMvc.perform(patch("/api/users/1/inactivate"))
+                .andExpect(status().isConflict());
     }
 }
