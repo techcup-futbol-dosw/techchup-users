@@ -97,6 +97,26 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * {@inheritDoc}
+     */
+    @Override
+    public UserModel updateProfile(Long userId, UserModel model) {
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        USER_NOT_FOUND_ID + userId));
+        UserEntity updated = userMapper.toEntity(model);
+        entity.setFullName(updated.getFullName());
+        entity.setIdentification(updated.getIdentification());
+        entity.setBirthDate(updated.getBirthDate());
+        entity.setGender(updated.getGender());
+        entity.setSchoolRelation(updated.getSchoolRelation());
+        entity.setAcademicProgram(updated.getAcademicProgram());
+        entity.setSemester(updated.getSemester());
+        entity.setUpdatedAt(LocalDateTime.now());
+        return userMapper.toModel(userRepository.save(entity));
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * <p>Performs a logical deactivation by changing the status instead of
      * deleting the row.</p>

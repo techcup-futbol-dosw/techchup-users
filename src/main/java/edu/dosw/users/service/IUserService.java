@@ -58,6 +58,16 @@ public interface IUserService {
     UserModel update(Long id, UserModel model);
 
     /**
+     * Updates the current user's profile without changing email or password.
+     *
+     * @param userId identifier of the current user
+     * @param model  new profile data
+     * @return the updated profile model
+     * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
+     */
+    UserModel updateProfile(Long userId, UserModel model);
+
+    /**
      * Deactivates a user profile by setting its status to {@code "INACTIVE"}.
      *
      * @param id identifier of the profile to deactivate
