@@ -4,9 +4,9 @@
 -- =============================================================
 
 -- -------------------------------------------------------------
--- TABLA: user_profiles
+-- TABLA: users
 -- -------------------------------------------------------------
-CREATE TABLE user_profiles (
+CREATE TABLE users (
     id                  BIGSERIAL       PRIMARY KEY,
     full_name           VARCHAR(150)    NOT NULL,
     email               VARCHAR(255)    NOT NULL,
@@ -21,27 +21,27 @@ CREATE TABLE user_profiles (
     profile_created_at  TIMESTAMP,
     updated_at          TIMESTAMP,
 
-    CONSTRAINT uq_user_profiles_email
+    CONSTRAINT uq_users_email
         UNIQUE (email),
 
-    CONSTRAINT uq_user_profiles_identification
+    CONSTRAINT uq_users_identification
         UNIQUE (identification),
 
-    CONSTRAINT chk_user_profiles_status
+    CONSTRAINT chk_users_status
         CHECK (status IN ('ACTIVE', 'INACTIVE')),
 
-    CONSTRAINT chk_user_profiles_gender
+    CONSTRAINT chk_users_gender
         CHECK (gender IS NULL OR gender IN ('MALE', 'FEMALE', 'OTHER')),
 
-    CONSTRAINT chk_user_profiles_school_relation
+    CONSTRAINT chk_users_school_relation
         CHECK (school_relation IS NULL OR school_relation IN (
             'STUDENT', 'PROFESSOR', 'ADMINISTRATIVE', 'GRADUATE', 'FAMILY'
         )),
 
-    CONSTRAINT chk_user_profiles_semester
+    CONSTRAINT chk_users_semester
         CHECK (semester IS NULL OR (semester >= 1 AND semester <= 10)),
 
-    CONSTRAINT chk_user_profiles_birth_date
+    CONSTRAINT chk_users_birth_date
         CHECK (birth_date IS NULL OR birth_date < CURRENT_DATE)
 );
 
@@ -61,7 +61,7 @@ CREATE TABLE sport_profiles (
 
     CONSTRAINT fk_sport_profiles_user
         FOREIGN KEY (user_id)
-        REFERENCES user_profiles (id),
+        REFERENCES users (id),
 
     CONSTRAINT uq_sport_profiles_user
         UNIQUE (user_id),
@@ -87,7 +87,7 @@ CREATE TABLE invitations (
 
     CONSTRAINT fk_invitations_player
         FOREIGN KEY (player_id)
-        REFERENCES user_profiles (id),
+        REFERENCES users (id),
 
     CONSTRAINT chk_invitations_status
         CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED')),

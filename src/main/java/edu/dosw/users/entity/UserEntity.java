@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * JPA entity representing the user profile in the relational database.
  *
- * <p>Mapped to the {@code user_profiles} table. The {@code email} and
+ * <p>Mapped to the {@code users} table. The {@code email} and
  * {@code password} fields are managed by the identity service; this entity
  * stores them as a reference copy for internal queries within the users
  * microservice.</p>
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
  * @see edu.dosw.users.mapper.UserMapper
  */
 @Entity
-@Table(name = "user_profiles")
+@Table(name = "users")
 @Getter
 @Setter
 @Builder

@@ -7,7 +7,6 @@ import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -133,9 +132,10 @@ class UserServiceImplTest {
     @Test
     void update_notFound_throwsResourceNotFoundException() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        UserModel emptyModel = UserModel.builder().build();
 
         assertThrows(ResourceNotFoundException.class,
-                () -> service.update(99L, UserModel.builder().build()));
+                () -> service.update(99L, emptyModel));
     }
 
     // ── deactivate ───────────────────────────────────────────────────────────
