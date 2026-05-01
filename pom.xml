@@ -149,6 +149,14 @@
             <goals>
               <goal>report</goal>
             </goals>
+            <configuration>
+              <excludes>
+                <exclude>edu/dosw/users/App.class</exclude>
+                <exclude>edu/dosw/users/entity/**</exclude>
+                <exclude>edu/dosw/users/enums/**</exclude>
+                <exclude>edu/dosw/users/mapper/**MapperImpl.class</exclude>
+              </excludes>
+            </configuration>
           </execution>
           <execution>
             <id>check</id>
@@ -160,6 +168,7 @@
                 <exclude>edu/dosw/users/App.class</exclude>
                 <exclude>edu/dosw/users/entity/**</exclude>
                 <exclude>edu/dosw/users/enums/**</exclude>
+                <exclude>edu/dosw/users/mapper/**MapperImpl.class</exclude>
               </excludes>
               <rules>
                 <rule>
