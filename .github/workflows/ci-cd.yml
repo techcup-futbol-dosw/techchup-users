@@ -95,7 +95,8 @@ jobs:
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.exclusions=**/App.java,**/entity/**,**/enums/**
+            -Dsonar.coverage.exclusions=**/App.java,**/entity/**,**/enums/**,**/*MapperImpl.java \
+            -Dsonar.exclusions=**/*MapperImpl.java
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -122,9 +123,12 @@ jobs:
       - name: Build and verify
         run: mvn -B -ntp clean verify
 
+      - name: Rename JAR to app.jar
+        run: mv target/DOSW-TechCup-users-1.0-SNAPSHOT.jar target/app.jar
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ vars.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: target/DOSW-TechCup-users-1.0-SNAPSHOT.jar
+          package: target/app.jar

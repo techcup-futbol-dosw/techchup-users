@@ -5,9 +5,12 @@ import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.entity.UserEntity;
+import edu.dosw.users.enums.Gender;
+import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.model.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 /**
  * MapStruct mapper for bidirectional conversion between
@@ -26,6 +29,8 @@ public interface UserMapper {
      * @param entity source entity; may be {@code null}
      * @return resulting model, or {@code null} if the entity is {@code null}
      */
+    @Mapping(target = "gender", source = "gender", qualifiedByName = "stringToGender")
+    @Mapping(target = "schoolRelation", source = "schoolRelation", qualifiedByName = "stringToSchoolRelation")
     UserModel toModel(UserEntity entity);
 
     /**
@@ -37,7 +42,29 @@ public interface UserMapper {
      * @return resulting entity, or {@code null} if the model is {@code null}
      */
     @Mapping(target = "sportProfile", ignore = true)
+    @Mapping(target = "gender", source = "gender", qualifiedByName = "genderToString")
+    @Mapping(target = "schoolRelation", source = "schoolRelation", qualifiedByName = "schoolRelationToString")
     UserEntity toEntity(UserModel model);
+
+    @Named("stringToGender")
+    default Gender stringToGender(String value) {
+        return value == null ? null : Gender.valueOf(value);
+    }
+
+    @Named("stringToSchoolRelation")
+    default SchoolRelation stringToSchoolRelation(String value) {
+        return value == null ? null : SchoolRelation.valueOf(value);
+    }
+
+    @Named("genderToString")
+    default String genderToString(Gender gender) {
+        return gender == null ? null : gender.name();
+    }
+
+    @Named("schoolRelationToString")
+    default String schoolRelationToString(SchoolRelation schoolRelation) {
+        return schoolRelation == null ? null : schoolRelation.name();
+    }
 
     /** Converts a {@link UserRequest} to its domain model. */
     @Mapping(target = "id", ignore = true)
