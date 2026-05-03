@@ -155,6 +155,7 @@
                 <exclude>edu/dosw/users/entity/**</exclude>
                 <exclude>edu/dosw/users/enums/**</exclude>
                 <exclude>edu/dosw/users/mapper/**MapperImpl.class</exclude>
+                <exclude>edu/dosw/users/config/MongoConfig.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -169,6 +170,7 @@
                 <exclude>edu/dosw/users/entity/**</exclude>
                 <exclude>edu/dosw/users/enums/**</exclude>
                 <exclude>edu/dosw/users/mapper/**MapperImpl.class</exclude>
+                <exclude>edu/dosw/users/config/MongoConfig.class</exclude>
               </excludes>
               <rules>
                 <rule>
