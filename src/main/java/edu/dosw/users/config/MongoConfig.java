@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
 /**
@@ -36,5 +37,10 @@ public class MongoConfig {
         ConnectionString cs = new ConnectionString(uri);
         String database = cs.getDatabase() != null ? cs.getDatabase() : "test";
         return new SimpleMongoClientDatabaseFactory(mongoClient, database);
+    }
+
+    @Bean
+    public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
+        return new MongoTemplate(mongoDatabaseFactory);
     }
 }
