@@ -19,6 +19,16 @@ import java.util.Collection;
 import java.util.List;
 
 @Component
+/**
+ * Filter that authenticates requests based on a Bearer JWT token.
+ *
+ * <p>Responsibilities:
+ * <ul>
+ *   <li>Extract the Bearer token from the Authorization header</li>
+ *   <li>Validate the token using {@code JwtService}</li>
+ *   <li>Extract user id, roles and permissions and populate the Spring Security context</li>
+ * </ul>
+ */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -35,34 +45,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // 1. If Authorization header is missing or not Bearer, continue filter chain
+        // If no Authorization header or not a Bearer token, skip authentication
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extract token
+        // Extract raw token (after "Bearer ")
         String token = authHeader.substring(7);
 
         try {
-            // 3. Validate token
+            // Validate token signature, expiration and token-type
             if (!jwtService.isTokenValid(token)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // 4. Avoid re-authenticating if context is already populated
+            // Only populate SecurityContext when not already authenticated
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // 5. Extract claims
+                // Read claims needed for authorization
                 String userId = jwtService.extractUserId(token);
                 List<String> roles = jwtService.extractRoles(token);
                 List<String> permissions = jwtService.extractPermissions(token);
 
-                // 6. Convert roles and permissions to authorities
+                // Map roles/permissions to GrantedAuthority and create Authentication
                 Collection<GrantedAuthority> authorities = buildAuthorities(roles, permissions);
-
-                // 7. Create Authentication and store it in the security context
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
@@ -71,9 +79,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception ex) {
+            // On any error we clear the context to ensure no invalid authentication remains
             SecurityContextHolder.clearContext();
         }
 
+        // Continue filter chain regardless of authentication outcome
         filterChain.doFilter(request, response);
     }
 

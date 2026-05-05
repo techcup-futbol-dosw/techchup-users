@@ -11,6 +11,9 @@
     <relativePath/>
   </parent>
 
+  <!-- Inherit parent POM from Spring Boot to provide sensible defaults
+       (dependency management, common properties and recommended plugins). -->
+
   <groupId>edu.dosw.users</groupId>
   <artifactId>DOSW-TechCup-users</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -25,89 +28,107 @@
     <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
   </properties>
 
+  <!-- Project properties (centralized version declarations and build settings) -->
+
   <dependencies>
-    <!-- Spring Boot -->
+    <!-- Framework dependencies -->
+    <!-- Spring Boot starters -->
+    <!-- Spring Web: REST controllers, embedded servlet container and web stack -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
+    <!-- Spring Data JPA: repository abstraction and Hibernate integration -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
+    <!-- Validation: javax/jakarta validation support (Bean Validation) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
-    <!-- Database -->
+    <!-- Data access / database drivers -->
+    <!-- PostgreSQL JDBC driver (runtime) -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <!-- H2 in-memory database for local development and tests (runtime) -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <!-- Spring Data MongoDB: optional document store for media or other data -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-mongodb</artifactId>
     </dependency>
 
-    <!-- API docs -->
+    <!-- API documentation (OpenAPI / Swagger) -->
+    <!-- OpenAPI / Swagger UI: auto-generated API documentation and interactive UI -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>${springdoc.version}</version>
     </dependency>
 
-    <!-- Utilities -->
+    <!-- Utilities and codegen tools -->
+    <!-- Lombok: reduces boilerplate (getters/setters/builders) at compile time -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
     </dependency>
+    <!-- MapStruct: annotation-based mapper generator for DTO/entity conversions -->
     <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
       <version>${mapstruct.version}</version>
     </dependency>
 
-    <!-- Tests -->
+    <!-- Testing dependencies -->
+    <!-- Spring Boot Test: testing utilities (JUnit, AssertJ, MockMvc, etc.) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- Security -->
+    <!-- Spring Security: authentication and authorization support -->
+    <!-- Spring Security: authentication and authorization support -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
-      <!-- JWT API -->
-      <dependency>
-          <groupId>io.jsonwebtoken</groupId>
-          <artifactId>jjwt-api</artifactId>
-          <version>0.12.5</version>
-      </dependency>
+    <!-- JSON Web Token (JJWT): API + implementation and Jackson support.
+         Implementation and Jackson modules are declared with runtime scope as recommended. -->
+    <!-- JJWT API: JSON Web Token library API -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.12.5</version>
+    </dependency>
 
-      <!-- JWT Implementation -->
-      <dependency>
-          <groupId>io.jsonwebtoken</groupId>
-          <artifactId>jjwt-impl</artifactId>
-          <version>0.12.5</version>
-          <scope>runtime</scope>
-      </dependency>
+    <!-- JJWT implementation (runtime) -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>0.12.5</version>
+        <scope>runtime</scope>
+    </dependency>
 
-      <!-- JWT Jackson (para parseo JSON) -->
-      <dependency>
-          <groupId>io.jsonwebtoken</groupId>
-          <artifactId>jjwt-jackson</artifactId>
-          <version>0.12.5</version>
-          <scope>runtime</scope>
-      </dependency>
+    <!-- JJWT Jackson module for JSON parsing/serialization (runtime) -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>0.12.5</version>
+        <scope>runtime</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -124,6 +145,12 @@
           </excludes>
         </configuration>
       </plugin>
+
+      <!-- Build plugins:
+           - maven-compiler-plugin: Java release and annotation processors (MapStruct, Lombok)
+           - maven-surefire-plugin: unit test execution
+           - jacoco-maven-plugin: coverage reporting
+           Keeping plugin config here ensures consistent CI behavior. -->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

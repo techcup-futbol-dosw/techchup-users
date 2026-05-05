@@ -13,6 +13,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /**
+     * Central security configuration for the service.
+     *
+     * <p>Configures stateless JWT-based authentication by registering the
+     * {@link JwtAuthenticationFilter} before Spring Security's
+     * {@link UsernamePasswordAuthenticationFilter}.
+     * It also defines exception handling and which endpoints are public.</p>
+     */
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
     private final AccessDeniedHandlerImpl accessDeniedHandler;
@@ -26,17 +35,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
+    public SecurityFilterChain filterChain(HttpSecurity http) {
+        // Disable CSRF for stateless APIs, enable CORS defaults
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})
+
+                // Use stateless session management: every request must carry auth info
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
+                // Configure handlers for auth failures and access denied
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
+
+                // Public endpoints (API docs) and require authentication for the rest
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui.html",
@@ -46,9 +61,15 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+
+                // Register JWT filter before the standard username/password filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+        try {
+            return http.build();
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to build the security filter chain", ex);
+        }
     }
 }
 
