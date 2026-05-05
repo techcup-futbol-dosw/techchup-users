@@ -14,6 +14,3 @@ spring.jpa.show-sql=true
 # Consola H2 (http://localhost:8080/h2-console)
 spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
-
-# JWT Configuration (Development Local)
-security.jwt.secret=bWktY2xhdmUtc3VwZXItc2VjcmV0YS1wYXJhLWp3dC0xMjM0NTY3ODkwMTIzNDU2
