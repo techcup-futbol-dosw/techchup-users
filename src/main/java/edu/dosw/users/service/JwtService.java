@@ -1,4 +1,4 @@
-package edu.dosw.users.security;
+package edu.dosw.users.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
