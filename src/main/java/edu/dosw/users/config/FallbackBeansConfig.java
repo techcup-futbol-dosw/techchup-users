@@ -5,7 +5,7 @@ import edu.dosw.users.service.ImageService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -13,9 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
  * local and test environments.
  *
  * <ul>
- *   <li>{@link ImageService} stub — active when {@code MongoTemplate} is not
- *       in the context (MongoDB excluded in tests). Mirrors the same condition
- *       used by {@code ImageServiceImpl} so the two never conflict.</li>
+ *   <li>{@link ImageService} stub — active in all profiles except {@code prod}
+ *       (local and test environments where MongoDB is not configured).</li>
  *   <li>{@link TeamsServiceClient} stub — active until a real HTTP client
  *       implementation is registered.</li>
  * </ul>
@@ -25,10 +24,10 @@ public class FallbackBeansConfig {
 
     /**
      * No-op {@link ImageService}: upload returns {@code null}, delete is a
-     * no-op. Active only when {@code MongoTemplate} is not present.
+     * no-op. Active in all profiles except {@code prod}.
      */
     @Bean
-    @ConditionalOnMissingBean(MongoTemplate.class)
+    @Profile("!prod")
     public ImageService imageServiceStub() {
         return new ImageService() {
             @Override
