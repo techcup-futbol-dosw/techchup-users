@@ -53,6 +53,14 @@ public class ImageServiceImpl implements ImageService {
      * {@inheritDoc}
      */
     @Override
+    public PlayerPhoto getPhoto(String photoId) {
+        return playerPhotoRepository.findById(photoId).orElse(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void delete(String photoId) {
         playerPhotoRepository.deleteById(photoId);
     }

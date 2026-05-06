@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -60,6 +62,28 @@ class ImageServiceImplTest {
                 () -> imageService.upload(file, 1L));
 
         assertTrue(ex.getMessage().contains("Error al leer el archivo de imagen"));
+    }
+
+    @Test
+    void getPhoto_found_returnsPhoto() {
+        PlayerPhoto photo = new PlayerPhoto();
+        photo.setId("abc123def456abc123def456");
+        when(playerPhotoRepository.findById("abc123def456abc123def456"))
+                .thenReturn(Optional.of(photo));
+
+        PlayerPhoto result = imageService.getPhoto("abc123def456abc123def456");
+
+        assertNotNull(result);
+        assertEquals("abc123def456abc123def456", result.getId());
+    }
+
+    @Test
+    void getPhoto_notFound_returnsNull() {
+        when(playerPhotoRepository.findById("nonexistent")).thenReturn(Optional.empty());
+
+        PlayerPhoto result = imageService.getPhoto("nonexistent");
+
+        assertNull(result);
     }
 
     @Test
