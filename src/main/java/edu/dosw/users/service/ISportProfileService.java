@@ -55,6 +55,20 @@ public interface ISportProfileService {
     SportProfileModel update(Long id, SportProfileModel model, MultipartFile photo);
 
     /**
+     * Updates the sport profile owned by the given user in a single repository
+     * lookup, avoiding the extra read required when the caller only knows the
+     * user identifier.
+     *
+     * @param userId identifier of the user who owns the sport profile
+     * @param model  new profile data
+     * @param photo  optional new player photo; {@code null} keeps the existing photo
+     * @return the updated model
+     * @throws edu.dosw.users.exception.ResourceNotFoundException if no sport profile exists for the user
+     * @throws edu.dosw.users.exception.BusinessException         if the player is currently assigned to a team
+     */
+    SportProfileModel updateByUserId(Long userId, SportProfileModel model, MultipartFile photo);
+
+    /**
      * Toggles the availability flag of the specified sport profile.
      *
      * @param id        identifier of the sport profile

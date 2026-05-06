@@ -45,10 +45,8 @@ class PlayerProfileControllerTest {
 
     @Test
     void updateMyProfile_returnsOk() throws Exception {
-        SportProfileModel existing = SportProfileModel.builder().id(10L).userId(7L).build();
         SportProfileModel updated = SportProfileModel.builder().id(10L).userId(7L).build();
-        when(sportProfileService.getByUserId(7L)).thenReturn(existing);
-        when(sportProfileService.update(eq(10L), any(), any())).thenReturn(updated);
+        when(sportProfileService.updateByUserId(eq(7L), any(), any())).thenReturn(updated);
 
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile", "", MediaType.APPLICATION_JSON_VALUE,
@@ -65,9 +63,7 @@ class PlayerProfileControllerTest {
 
     @Test
     void updateMyProfile_playerInTeam_returns409() throws Exception {
-        when(sportProfileService.getByUserId(7L))
-                .thenReturn(SportProfileModel.builder().id(10L).userId(7L).build());
-        when(sportProfileService.update(eq(10L), any(), any()))
+        when(sportProfileService.updateByUserId(eq(7L), any(), any()))
                 .thenThrow(new BusinessException("player in team"));
 
         MockMultipartFile profilePart = new MockMultipartFile(
@@ -83,7 +79,7 @@ class PlayerProfileControllerTest {
 
     @Test
     void updateMyProfile_noProfile_returns404() throws Exception {
-        when(sportProfileService.getByUserId(7L))
+        when(sportProfileService.updateByUserId(eq(7L), any(), any()))
                 .thenThrow(new ResourceNotFoundException("not found"));
 
         MockMultipartFile profilePart = new MockMultipartFile(

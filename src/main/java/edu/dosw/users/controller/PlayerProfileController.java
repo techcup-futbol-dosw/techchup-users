@@ -33,10 +33,9 @@ public class PlayerProfileController {
             @RequestHeader("X-User-Id") Long userId,
             @RequestPart("profile") SportProfileRequest request,
             @RequestPart(value = "photo", required = false) MultipartFile photo) {
-        Long profileId = sportProfileService.getByUserId(userId).getId();
         return ResponseEntity.ok(
                 sportProfileMapper.toResponse(
-                        sportProfileService.update(
-                                profileId, sportProfileMapper.toModel(request), photo)));
+                        sportProfileService.updateByUserId(
+                                userId, sportProfileMapper.toModel(request), photo)));
     }
 }

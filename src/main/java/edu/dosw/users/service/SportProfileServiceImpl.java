@@ -143,6 +143,39 @@ public class SportProfileServiceImpl implements ISportProfileService {
         sportProfileRepository.save(entity);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Loads the entity via {@code findByUser_Id}, eliminating the extra
+     * round-trip that would result from calling {@link #getByUserId} followed
+     * by {@link #update}.</p>
+     */
+    @Override
+    public SportProfileModel updateByUserId(Long userId, SportProfileModel model, MultipartFile photo) {
+        SportProfileEntity existing = sportProfileRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Sport profile not found for user id: " + userId));
+
+        if (teamsServiceClient.isPlayerAssignedToTeam(userId)) {
+            throw new BusinessException(
+                    "Cannot update sport profile while player is assigned to a team");
+        }
+
+        String photoId = uploadIfPresent(photo, existing.getPhotoId());
+
+        SportProfileEntity updated = sportProfileMapper.toEntity(model);
+        updated.setId(existing.getId());
+        updated.setUser(existing.getUser());
+        updated.setPhotoId(photoId);
+        updated.setCreatedAt(existing.getCreatedAt());
+        updated.setUpdatedAt(LocalDateTime.now());
+
+        SportProfileModel saved = sportProfileMapper.toModel(sportProfileRepository.save(updated));
+        auditService.logSportProfile(existing.getId(), AuditAction.UPDATE,
+                "Sport profile updated for user " + userId);
+        return saved;
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     /**
