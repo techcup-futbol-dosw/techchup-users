@@ -30,6 +30,15 @@ public interface IInvitationService {
     List<InvitationModel> getByPlayerId(Long playerId);
 
     /**
+     * Returns invitations received by the given player, optionally filtered by status.
+     *
+     * @param playerId identifier of the player
+     * @param status   optional status filter (e.g. {@code "PENDING"}); {@code null} returns all
+     * @return list of matching invitation models, may be empty
+     */
+    List<InvitationModel> getByPlayerIdFiltered(Long playerId, String status);
+
+    /**
      * Sends a new invitation to a player from the specified team.
      *
      * @param playerId identifier of the player receiving the invitation

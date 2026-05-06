@@ -77,6 +77,36 @@ class InvitationServiceImplTest {
         assertEquals(2, result.size());
     }
 
+    // ── getByPlayerIdFiltered ─────────────────────────────────────────────────
+
+    @Test
+    void getByPlayerIdFiltered_nullStatus_delegatesToGetByPlayerId() {
+        InvitationEntity e1 = InvitationEntity.builder().id(1L).build();
+        InvitationModel m1 = InvitationModel.builder().id(1L).build();
+        when(invitationRepository.findByPlayer_Id(10L)).thenReturn(List.of(e1));
+        when(invitationMapper.toModel(e1)).thenReturn(m1);
+
+        List<InvitationModel> result = service.getByPlayerIdFiltered(10L, null);
+
+        assertEquals(1, result.size());
+        verify(invitationRepository).findByPlayer_Id(10L);
+        verify(invitationRepository, never()).findByPlayer_IdAndStatus(any(), any());
+    }
+
+    @Test
+    void getByPlayerIdFiltered_withStatus_filtersAndUppercases() {
+        InvitationEntity e1 = InvitationEntity.builder().id(1L).build();
+        InvitationModel m1 = InvitationModel.builder().id(1L).status(InvitationStatus.PENDING).build();
+        when(invitationRepository.findByPlayer_IdAndStatus(10L, "PENDING")).thenReturn(List.of(e1));
+        when(invitationMapper.toModel(e1)).thenReturn(m1);
+
+        List<InvitationModel> result = service.getByPlayerIdFiltered(10L, "pending");
+
+        assertEquals(1, result.size());
+        assertEquals(InvitationStatus.PENDING, result.get(0).getStatus());
+        verify(invitationRepository).findByPlayer_IdAndStatus(10L, "PENDING");
+    }
+
     // ── send ─────────────────────────────────────────────────────────────────
 
     @Test

@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -40,6 +42,17 @@ public class InvitationController {
     public ResponseEntity<List<InvitationResponse>> getByPlayerId(@PathVariable Long playerId) {
         return ResponseEntity.ok(
                 invitationService.getByPlayerId(playerId).stream()
+                        .map(invitationMapper::toResponse)
+                        .toList());
+    }
+
+    /** Returns invitations of the authenticated player, optionally filtered by status. */
+    @GetMapping("/me")
+    public ResponseEntity<List<InvitationResponse>> getMyInvitations(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) String status) {
+        return ResponseEntity.ok(
+                invitationService.getByPlayerIdFiltered(userId, status).stream()
                         .map(invitationMapper::toResponse)
                         .toList());
     }

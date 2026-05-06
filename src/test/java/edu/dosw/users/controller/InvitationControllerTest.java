@@ -83,6 +83,33 @@ class InvitationControllerTest {
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
+    // ── GET /api/invitations/me ───────────────────────────────────────────────
+
+    @Test
+    void getMyInvitations_noStatus_returnsFullList() throws Exception {
+        when(invitationService.getByPlayerIdFiltered(10L, null)).thenReturn(List.of(
+                InvitationModel.builder().id(1L).playerId(10L).status(InvitationStatus.PENDING).build(),
+                InvitationModel.builder().id(2L).playerId(10L).status(InvitationStatus.ACCEPTED).build()));
+
+        mockMvc.perform(get("/api/invitations/me")
+                        .header("X-User-Id", 10L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void getMyInvitations_withStatusFilter_returnsFilteredList() throws Exception {
+        when(invitationService.getByPlayerIdFiltered(10L, "PENDING")).thenReturn(List.of(
+                InvitationModel.builder().id(1L).playerId(10L).status(InvitationStatus.PENDING).build()));
+
+        mockMvc.perform(get("/api/invitations/me")
+                        .header("X-User-Id", 10L)
+                        .param("status", "PENDING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].status").value("PENDING"));
+    }
+
     // ── POST /api/invitations/player/{playerId}/team/{teamId} ─────────────────
 
     @Test

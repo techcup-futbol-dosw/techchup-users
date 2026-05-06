@@ -57,6 +57,20 @@ public class InvitationServiceImpl implements IInvitationService {
 
     /**
      * {@inheritDoc}
+     */
+    @Override
+    public List<InvitationModel> getByPlayerIdFiltered(Long playerId, String status) {
+        if (status == null || status.isBlank()) {
+            return getByPlayerId(playerId);
+        }
+        return invitationRepository.findByPlayer_IdAndStatus(playerId, status.toUpperCase())
+                .stream()
+                .map(invitationMapper::toModel)
+                .toList();
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * <p>Validates that the player exists and that there is no pending
      * invitation from the same team before creating the new invitation.</p>
