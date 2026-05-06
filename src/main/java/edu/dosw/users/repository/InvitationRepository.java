@@ -1,9 +1,10 @@
 package edu.dosw.users.repository;
 
-import edu.dosw.users.entity.InvitationEntity;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import edu.dosw.users.entity.InvitationEntity;
 
 /**
  * Spring Data JPA repository for {@link InvitationEntity} persistence operations.
@@ -22,6 +23,15 @@ public interface InvitationRepository extends JpaRepository<InvitationEntity, Lo
      * @return list of invitations associated with the player
      */
     List<InvitationEntity> findByPlayer_Id(Long playerId);
+
+    /**
+     * Checks whether an invitation already exists for the given player and team.
+     *
+     * @param playerId identifier of the invited player
+     * @param teamId identifier of the inviting team
+     * @return {@code true} if a matching invitation exists
+     */
+    boolean existsByPlayer_IdAndTeamId(Long playerId, Long teamId);
 
     /**
      * Finds all invitations received by the given player with the requested status.

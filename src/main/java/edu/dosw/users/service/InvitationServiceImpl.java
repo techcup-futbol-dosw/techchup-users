@@ -1,5 +1,10 @@
 package edu.dosw.users.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
@@ -11,10 +16,6 @@ import edu.dosw.users.model.InvitationModel;
 import edu.dosw.users.repository.InvitationRepository;
 import edu.dosw.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * Default implementation of {@link IInvitationService}.
@@ -55,6 +56,20 @@ public class InvitationServiceImpl implements IInvitationService {
                 .toList();
     }
 
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public List<InvitationModel> getByPlayerId(Long playerId, InvitationStatus status) {
+                if (status == null) {
+                        return getByPlayerId(playerId);
+                }
+                return invitationRepository.findByPlayer_IdAndStatus(playerId, status.name())
+                                .stream()
+                                .map(invitationMapper::toModel)
+                                .toList();
+        }
+
     /**
      * {@inheritDoc}
      *
@@ -67,13 +82,9 @@ public class InvitationServiceImpl implements IInvitationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Player not found with id: " + playerId));
 
-        boolean hasPending = invitationRepository
-                .findByPlayer_IdAndStatus(playerId, InvitationStatus.PENDING.name())
-                .stream()
-                .anyMatch(inv -> teamId.equals(inv.getTeamId()));
-        if (hasPending) {
+        if (invitationRepository.existsByPlayer_IdAndTeamId(playerId, teamId)) {
             throw new BusinessException(
-                    "Player " + playerId + " already has a pending invitation from team " + teamId);
+                    "Player " + playerId + " already has an invitation from team " + teamId);
         }
 
         InvitationEntity entity = InvitationEntity.builder()

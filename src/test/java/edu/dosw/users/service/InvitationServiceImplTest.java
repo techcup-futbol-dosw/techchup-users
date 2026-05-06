@@ -1,5 +1,22 @@
 package edu.dosw.users.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
@@ -10,19 +27,6 @@ import edu.dosw.users.mapper.InvitationMapper;
 import edu.dosw.users.model.InvitationModel;
 import edu.dosw.users.repository.InvitationRepository;
 import edu.dosw.users.repository.UserRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link InvitationServiceImpl}.
@@ -87,8 +91,7 @@ class InvitationServiceImplTest {
                 .playerId(10L).teamId(5L).status(InvitationStatus.PENDING).build();
 
         when(userRepository.findById(10L)).thenReturn(Optional.of(player));
-        when(invitationRepository.findByPlayer_IdAndStatus(10L, "PENDING"))
-                .thenReturn(List.of());
+        when(invitationRepository.existsByPlayer_IdAndTeamId(10L, 5L)).thenReturn(false);
         when(invitationRepository.save(any())).thenReturn(savedEntity);
         when(invitationMapper.toModel(savedEntity)).thenReturn(savedModel);
 
@@ -108,12 +111,8 @@ class InvitationServiceImplTest {
     @Test
     void send_alreadyHasPendingFromSameTeam_throwsBusinessException() {
         UserEntity player = UserEntity.builder().id(10L).build();
-        InvitationEntity existing = InvitationEntity.builder()
-                .id(3L).teamId(5L).status("PENDING").build();
-
         when(userRepository.findById(10L)).thenReturn(Optional.of(player));
-        when(invitationRepository.findByPlayer_IdAndStatus(10L, "PENDING"))
-                .thenReturn(List.of(existing));
+        when(invitationRepository.existsByPlayer_IdAndTeamId(10L, 5L)).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> service.send(10L, 5L));
     }
@@ -189,5 +188,20 @@ class InvitationServiceImplTest {
         service.cancel(3L);
 
         assertEquals(InvitationStatus.CANCELLED, pendingModel.getStatus());
+    }
+
+    // ── getByPlayerId with status ─────────────────────────────────────────-
+
+    @Test
+    void getByPlayerId_withStatus_returnsMappedList() {
+        InvitationEntity entity = InvitationEntity.builder().id(1L).build();
+        InvitationModel model = InvitationModel.builder().id(1L).build();
+        when(invitationRepository.findByPlayer_IdAndStatus(10L, "PENDING"))
+                .thenReturn(List.of(entity));
+        when(invitationMapper.toModel(entity)).thenReturn(model);
+
+        List<InvitationModel> result = service.getByPlayerId(10L, InvitationStatus.PENDING);
+
+        assertEquals(1, result.size());
     }
 }

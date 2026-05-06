@@ -1,8 +1,9 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.model.InvitationModel;
-
 import java.util.List;
+
+import edu.dosw.users.enums.InvitationStatus;
+import edu.dosw.users.model.InvitationModel;
 
 /**
  * Service for managing team invitations sent to players.
@@ -28,6 +29,15 @@ public interface IInvitationService {
      * @return list of matching invitation models, may be empty
      */
     List<InvitationModel> getByPlayerId(Long playerId);
+
+    /**
+     * Returns invitations received by the given player filtered by status.
+     *
+     * @param playerId identifier of the player
+     * @param status invitation status to filter by (optional)
+     * @return list of matching invitation models
+     */
+    List<InvitationModel> getByPlayerId(Long playerId, InvitationStatus status);
 
     /**
      * Sends a new invitation to a player from the specified team.
