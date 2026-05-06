@@ -3,8 +3,7 @@ package edu.dosw.users.service;
 import edu.dosw.users.model.PlayerPhoto;
 import edu.dosw.users.repository.PlayerPhotoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,16 +14,16 @@ import java.time.LocalDateTime;
 /**
  * MongoDB-backed implementation of {@link ImageService}.
  *
- * <p>The service is only registered when a {@link MongoTemplate} bean is
- * available, allowing the application to start with an alternative fallback
- * when MongoDB is not configured.</p>
+ * <p>Active only in the {@code prod} profile, where MongoDB Atlas is
+ * configured. In other profiles the stub from {@code FallbackBeansConfig}
+ * is used instead.</p>
  *
  * @see PlayerPhotoRepository
  * @see PlayerPhoto
  */
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(MongoTemplate.class)
+@Profile("prod")
 public class ImageServiceImpl implements ImageService {
 
     private final PlayerPhotoRepository playerPhotoRepository;
