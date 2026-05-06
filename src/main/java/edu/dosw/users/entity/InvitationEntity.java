@@ -20,7 +20,13 @@ import java.time.LocalDateTime;
  * @see edu.dosw.users.mapper.InvitationMapper
  */
 @Entity
-@Table(name = "invitations")
+@Table(
+        name = "invitations",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_invitation_team_player_status",
+                columnNames = {"team_id", "player_id", "status"}
+        )
+)
 @Getter
 @Setter
 @Builder
