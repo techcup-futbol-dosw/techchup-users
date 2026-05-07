@@ -70,20 +70,20 @@ class InvitationControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ── GET /api/invitations/player/{playerId} ────────────────────────────────
+    // ── GET /api/invitations/user/{userId} ───────────────────────────────────
 
     @Test
-    void getByPlayerId_returnsOkWithList() throws Exception {
+    void getByUserId_returnsOkWithList() throws Exception {
         when(invitationService.getByPlayerId(10L)).thenReturn(List.of(
                 InvitationModel.builder().id(1L).playerId(10L).build(),
                 InvitationModel.builder().id(2L).playerId(10L).build()));
 
-        mockMvc.perform(get("/api/invitations/player/10"))
+        mockMvc.perform(get("/api/invitations/user/10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
-    // ── POST /api/invitations/player/{playerId}/team/{teamId} ─────────────────
+    // ── POST /api/invitations/user/{userId}/team/{teamId} ────────────────────
 
     @Test
     void send_returnsCreated() throws Exception {
@@ -91,18 +91,18 @@ class InvitationControllerTest {
                 .thenReturn(InvitationModel.builder().id(3L).playerId(10L).teamId(5L)
                         .status(InvitationStatus.PENDING).build());
 
-        mockMvc.perform(post("/api/invitations/player/10/team/5"))
+        mockMvc.perform(post("/api/invitations/user/10/team/5"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.status").value("PENDING"));
     }
 
     @Test
-    void send_playerNotFound_returns404() throws Exception {
+    void send_userNotFound_returns404() throws Exception {
         when(invitationService.send(99L, 5L))
-                .thenThrow(new ResourceNotFoundException("player not found"));
+                .thenThrow(new ResourceNotFoundException("user not found"));
 
-        mockMvc.perform(post("/api/invitations/player/99/team/5"))
+        mockMvc.perform(post("/api/invitations/user/99/team/5"))
                 .andExpect(status().isNotFound());
     }
 
@@ -111,7 +111,7 @@ class InvitationControllerTest {
         when(invitationService.send(10L, 5L))
                 .thenThrow(new BusinessException("already pending"));
 
-        mockMvc.perform(post("/api/invitations/player/10/team/5"))
+        mockMvc.perform(post("/api/invitations/user/10/team/5"))
                 .andExpect(status().isConflict());
     }
 
