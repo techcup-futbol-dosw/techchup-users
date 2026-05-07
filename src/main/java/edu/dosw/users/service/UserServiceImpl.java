@@ -8,7 +8,6 @@ import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.UserRepository;
-import edu.dosw.users.service.IAuditService;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
 import lombok.RequiredArgsConstructor;
