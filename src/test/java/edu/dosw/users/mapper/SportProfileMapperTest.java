@@ -3,7 +3,6 @@ package edu.dosw.users.mapper;
 import edu.dosw.users.dto.SportProfileRequest;
 import edu.dosw.users.dto.SportProfileResponse;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.Position;
 import edu.dosw.users.model.SportProfileModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,33 +16,25 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for {@link SportProfileMapper}.
  *
  * <p>Verifies bidirectional conversion between {@link SportProfileEntity}
- * and {@link SportProfileModel}, including the mapping of the user identifier
- * nested in {@code UserEntity} and the handling of null values.</p>
+ * and {@link SportProfileModel}, including the mapping of the {@code userId}
+ * field and the handling of null values.</p>
  */
 class SportProfileMapperTest {
 
     private SportProfileMapper mapper;
 
-    /**
-     * Initialises the MapStruct-generated implementation before each test.
-     */
     @BeforeEach
     void setUp() {
         mapper = new SportProfileMapperImpl();
     }
 
-    
+    // ── toModel ──────────────────────────────────────────────────────────────
 
-    /**
-     * Verifies that {@code toModel} correctly maps all entity fields to the
-     * model, including extraction of {@code userProfile.id} into {@code userId}.
-     */
     @Test
-    void toModel_mapsUserProfileIdToUserId() {
-        UserEntity user = UserEntity.builder().id(42L).build();
+    void toModel_mapsAllFields_includingUserId() {
         SportProfileEntity entity = SportProfileEntity.builder()
                 .id(1L)
-                .user(user)
+                .userId(42L)
                 .position("GOALKEEPER")
                 .dorsalNumber(1)
                 .photoId("abc123def456abc123def456")
@@ -63,15 +54,11 @@ class SportProfileMapperTest {
         assertTrue(model.isAvailable());
     }
 
-    /**
-     * Verifies that when {@code userProfile} is {@code null}, the {@code userId}
-     * field of the resulting model is also {@code null}.
-     */
     @Test
-    void toModel_nullUserProfile_userIdIsNull() {
+    void toModel_nullUserId_userIdIsNull() {
         SportProfileEntity entity = SportProfileEntity.builder()
                 .id(1L)
-                .user(null)
+                .userId(null)
                 .position("DEFENDER")
                 .available(false)
                 .build();
@@ -82,23 +69,15 @@ class SportProfileMapperTest {
         assertEquals(Position.DEFENDER, model.getPosition());
     }
 
-    /**
-     * Verifies that {@code toModel} returns {@code null} when given a
-     * {@code null} entity.
-     */
     @Test
     void toModel_nullEntity_returnsNull() {
         assertNull(mapper.toModel((SportProfileEntity) null));
     }
 
+    // ── toEntity ─────────────────────────────────────────────────────────────
 
-    /**
-     * Verifies that {@code toEntity} correctly maps all model fields to the
-     * entity and that {@code userProfile} is left as {@code null} (field
-     * ignored by the mapper).
-     */
     @Test
-    void toEntity_mapsFields_andIgnoresUserProfile() {
+    void toEntity_mapsAllFields() {
         SportProfileModel model = SportProfileModel.builder()
                 .id(1L)
                 .userId(42L)
@@ -114,16 +93,12 @@ class SportProfileMapperTest {
 
         assertNotNull(entity);
         assertEquals(1L, entity.getId());
+        assertEquals(42L, entity.getUserId());
         assertEquals("FORWARD", entity.getPosition());
         assertEquals(9, entity.getDorsalNumber());
         assertTrue(entity.isAvailable());
-        assertNull(entity.getUser());
     }
 
-    /**
-     * Verifies that {@code toEntity} returns {@code null} when given a
-     * {@code null} model.
-     */
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));
