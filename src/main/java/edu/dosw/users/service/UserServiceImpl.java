@@ -166,8 +166,8 @@ public class UserServiceImpl implements IUserService {
     @Override
     public List<UserModel> search(String name, String position, String status) {
         String nameParam = (name == null || name.isBlank()) ? null : name.trim();
-        String statusParam = (status == null || status.isBlank()) ? null : status.toUpperCase();
-        String positionParam = (position == null || position.isBlank()) ? null : position.toUpperCase();
+        String statusParam = (status == null || status.isBlank()) ? null : status.trim().toUpperCase();
+        String positionParam = (position == null || position.isBlank()) ? null : position.trim().toUpperCase();
         return userRepository.searchPlayers(nameParam, statusParam, positionParam)
                 .stream()
                 .map(userMapper::toModel)
