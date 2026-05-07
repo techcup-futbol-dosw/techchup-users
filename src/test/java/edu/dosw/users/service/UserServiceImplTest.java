@@ -265,6 +265,44 @@ class UserServiceImplTest {
             () -> service.updateProfile(55L, UserModel.builder().build()));
         }
 
+    // ── search ───────────────────────────────────────────────────────────────
+
+    @Test
+    void search_withAllParams_normalizesAndCallsRepository() {
+        UserEntity e1 = UserEntity.builder().id(1L).build();
+        UserModel m1 = UserModel.builder().id(1L).build();
+        when(userRepository.searchPlayers("juan", "ACTIVE", "FORWARD")).thenReturn(List.of(e1));
+        when(userMapper.toModel(e1)).thenReturn(m1);
+
+        List<UserModel> result = service.search(" juan ", "forward", "active");
+
+        assertEquals(1, result.size());
+        verify(userRepository).searchPlayers("juan", "ACTIVE", "FORWARD");
+    }
+
+    @Test
+    void search_withWhitespaceInStatusAndPosition_trimsAndUppercasesBeforeRepositoryCall() {
+        UserEntity e1 = UserEntity.builder().id(1L).build();
+        UserModel m1 = UserModel.builder().id(1L).build();
+        when(userRepository.searchPlayers("juan", "ACTIVE", "FORWARD")).thenReturn(List.of(e1));
+        when(userMapper.toModel(e1)).thenReturn(m1);
+
+        List<UserModel> result = service.search(" juan ", " forward ", " active ");
+
+        assertEquals(1, result.size());
+        verify(userRepository).searchPlayers("juan", "ACTIVE", "FORWARD");
+    }
+
+    @Test
+    void search_withNullParams_passesNullsToRepository() {
+        when(userRepository.searchPlayers(null, null, null)).thenReturn(List.of());
+
+        List<UserModel> result = service.search(null, null, null);
+
+        assertTrue(result.isEmpty());
+        verify(userRepository).searchPlayers(null, null, null);
+    }
+
     // ── deactivate ───────────────────────────────────────────────────────────
 
     @Test

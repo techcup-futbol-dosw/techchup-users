@@ -63,6 +63,43 @@ class UserControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
+    // ── GET /api/users/search ─────────────────────────────────────────────────
+
+    @Test
+    void search_noParams_returnsOkWithList() throws Exception {
+        when(userService.search(null, null, null)).thenReturn(List.of(
+                UserModel.builder().id(1L).fullName("Carlos").build(),
+                UserModel.builder().id(2L).fullName("Ana").build()));
+
+        mockMvc.perform(get("/api/users/search"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void search_withNameAndPosition_returnsFilteredList() throws Exception {
+        when(userService.search("carlos", "FORWARD", null)).thenReturn(List.of(
+                UserModel.builder().id(1L).fullName("Carlos").build()));
+
+        mockMvc.perform(get("/api/users/search")
+                        .param("name", "carlos")
+                        .param("position", "FORWARD"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].fullName").value("Carlos"));
+    }
+
+    @Test
+    void search_withStatus_returnsFilteredList() throws Exception {
+        when(userService.search(null, null, "ACTIVE")).thenReturn(List.of(
+                UserModel.builder().id(3L).fullName("Luis").build()));
+
+        mockMvc.perform(get("/api/users/search")
+                        .param("status", "ACTIVE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
     // ── GET /api/users ────────────────────────────────────────────────────────
 
     @Test
