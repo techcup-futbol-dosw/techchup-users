@@ -5,7 +5,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.dosw.users.dto.SportProfileRequest;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
+import edu.dosw.users.model.PlayerPhoto;
 import edu.dosw.users.model.SportProfileModel;
+import edu.dosw.users.service.ImageService;
 import edu.dosw.users.service.ISportProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,6 +44,7 @@ class SportProfileControllerTest {
 
     @Autowired private WebApplicationContext context;
     @MockitoBean private ISportProfileService sportProfileService;
+    @MockitoBean private ImageService imageService;
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -194,6 +198,31 @@ class SportProfileControllerTest {
 
         mockMvc.perform(patch("/api/sport-profiles/99/availability")
                         .param("available", "false"))
+                .andExpect(status().isNotFound());
+    }
+
+    // ── GET /api/sport-profiles/photos/{photoId} ─────────────────────────────
+
+    @Test
+    void getPhoto_found_returnsBinaryWithContentType() throws Exception {
+        PlayerPhoto photo = new PlayerPhoto();
+        photo.setId("abc123");
+        photo.setContentType("image/png");
+        photo.setData(new byte[]{1, 2, 3});
+
+        when(imageService.getPhoto("abc123")).thenReturn(photo);
+
+        mockMvc.perform(get("/api/sport-profiles/photos/abc123"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/png"))
+                .andExpect(content().bytes(new byte[]{1, 2, 3}));
+    }
+
+    @Test
+    void getPhoto_notFound_returns404() throws Exception {
+        when(imageService.getPhoto("nonexistent")).thenReturn(null);
+
+        mockMvc.perform(get("/api/sport-profiles/photos/nonexistent"))
                 .andExpect(status().isNotFound());
     }
 }

@@ -35,22 +35,22 @@ public class InvitationController {
                 invitationMapper.toResponse(invitationService.getById(id)));
     }
 
-    /** Returns all invitations received by the given player. */
-    @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<InvitationResponse>> getByPlayerId(@PathVariable Long playerId) {
+    /** Returns all invitations received by the given user. */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<InvitationResponse>> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(
-                invitationService.getByPlayerId(playerId).stream()
+                invitationService.getByPlayerId(userId).stream()
                         .map(invitationMapper::toResponse)
                         .toList());
     }
 
     /** Sends a new invitation. Returns 201 Created. */
-    @PostMapping("/player/{playerId}/team/{teamId}")
+    @PostMapping("/user/{userId}/team/{teamId}")
     public ResponseEntity<InvitationResponse> send(
-            @PathVariable Long playerId,
+            @PathVariable Long userId,
             @PathVariable Long teamId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(invitationMapper.toResponse(invitationService.send(playerId, teamId)));
+                .body(invitationMapper.toResponse(invitationService.send(userId, teamId)));
     }
 
     /** Accepts a pending invitation. */
