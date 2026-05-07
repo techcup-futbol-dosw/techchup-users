@@ -202,7 +202,9 @@ class AuthenticationEntryPointImplTest {
         }
 
         @Override
-        public void setWriteListener(jakarta.servlet.WriteListener listener) {}
+        public void setWriteListener(jakarta.servlet.WriteListener listener) {
+            // Mock implementation: no-op for testing purposes
+        }
 
         @Override
         public void write(int b) {

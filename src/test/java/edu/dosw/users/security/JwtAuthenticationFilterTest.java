@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
@@ -120,41 +122,18 @@ class JwtAuthenticationFilterTest {
     }
 
     /**
-     * Validates that missing Authorization header is handled gracefully.
+     * Validates that invalid or missing Authorization headers are handled gracefully.
      * 
-     * <p><b>Scenario</b>: Request does not contain an Authorization header.
+     * <p><b>Scenario</b>: Request contains invalid authorization header (null, non-Bearer, or invalid token).
      * 
      * <p><b>Expected Result</b>: Filter continues without authentication, no SecurityContext entry.
      */
-    @Test
-    @DisplayName("Missing Authorization header skips authentication")
-    void testDoFilterInternal_NoAuthorizationHeader() throws Exception {
-        // Arrange: No Authorization header
-        when(request.getHeader("Authorization")).thenReturn(null);
-
-        // Act: Execute filter
-        filter.doFilterInternal(request, response, filterChain);
-
-        // Assert: No authentication in context
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assertNull(auth, "No authentication should be set");
-        
-        // Verify filter chain continues
-        verify(filterChain).doFilter(request, response);
-    }
-
-    /**
-     * Validates that non-Bearer Authorization headers are skipped.
-     * 
-     * <p><b>Scenario</b>: Authorization header does not start with "Bearer ".
-     * 
-     * <p><b>Expected Result</b>: Filter continues without authentication.
-     */
-    @Test
-    @DisplayName("Non-Bearer Authorization header skips authentication")
-    void testDoFilterInternal_NonBearerAuthorizationHeader() throws Exception {
-        // Arrange: Basic authentication instead of Bearer
-        when(request.getHeader("Authorization")).thenReturn("Basic dXNlcjpwYXNz");
+    @ParameterizedTest(name = "Authorization header: {0}")
+    @ValueSource(strings = {"", "Basic dXNlcjpwYXNz", "Bearer invalid.token.here"})
+    @DisplayName("Invalid or missing Authorization headers skip authentication")
+    void testDoFilterInternal_InvalidAuthorizationHeaders(String authHeader) throws Exception {
+        // Arrange: Set the authorization header
+        when(request.getHeader("Authorization")).thenReturn(authHeader.isEmpty() ? null : authHeader);
 
         // Act: Execute filter
         filter.doFilterInternal(request, response, filterChain);
@@ -169,29 +148,6 @@ class JwtAuthenticationFilterTest {
 
     // ========== Token Validation Tests ==========
 
-    /**
-     * Validates that invalid tokens do not populate SecurityContext.
-     * 
-     * <p><b>Scenario</b>: Authorization header contains an invalid token.
-     * 
-     * <p><b>Expected Result</b>: Token validation fails, no authentication is set.
-     */
-    @Test
-    @DisplayName("Invalid token does not populate SecurityContext")
-    void testDoFilterInternal_InvalidToken() throws Exception {
-        // Arrange: Invalid token
-        when(request.getHeader("Authorization")).thenReturn("Bearer invalid.token.here");
-
-        // Act: Execute filter
-        filter.doFilterInternal(request, response, filterChain);
-
-        // Assert: No authentication in context
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assertNull(auth, "No authentication should be set for invalid token");
-        
-        // Verify filter chain continues
-        verify(filterChain).doFilter(request, response);
-    }
 
     /**
      * Validates that expired tokens do not populate SecurityContext.
