@@ -23,8 +23,17 @@ public class ResourceAccessPolicy {
             return false;
         }
 
-        Long currentAccountId = Long.valueOf(authentication.getPrincipal().toString());
-        return requestedAccountId.equals(currentAccountId);
+        Object principal = authentication.getPrincipal();
+        if (principal == null) {
+            return false;
+        }
+
+        try {
+            Long currentAccountId = Long.valueOf(principal.toString());
+            return requestedAccountId.equals(currentAccountId);
+        } catch (NumberFormatException ex) {
+            return false;
+        }
     }
 }
 
