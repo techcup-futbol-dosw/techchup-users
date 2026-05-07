@@ -82,6 +82,21 @@ class SecurityConfigTest {
          verify(downstreamChain, never()).doFilter(any(), any());
      }
 
+      @Test
+      @DisplayName("Unsafe requests without a CSRF token are rejected even with a valid JWT")
+      void unsafeRequestWithoutCsrfTokenIsRejected() throws ServletException, IOException {
+          MockHttpServletRequest request = buildRequest("POST");
+          request.addHeader("Authorization", "Bearer " + createAccessToken("123"));
+
+          MockHttpServletResponse response = new MockHttpServletResponse();
+          FilterChain downstreamChain = mock(FilterChain.class);
+
+          filterChainProxy.doFilter(request, response, downstreamChain);
+
+          assertEquals(403, response.getStatus());
+          verify(downstreamChain, never()).doFilter(any(), any());
+      }
+
      @Test
      @DisplayName("Valid Bearer tokens are allowed through the security filter chain")
      void validBearerTokenIsAllowedThroughSecurityFilterChain() throws ServletException, IOException {
@@ -97,8 +112,12 @@ class SecurityConfigTest {
          verify(downstreamChain).doFilter(any(), any());
      }
 
-     private static MockHttpServletRequest buildRequest() {
-         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/security-config-test");
+      private static MockHttpServletRequest buildRequest() {
+          return buildRequest("GET");
+      }
+
+      private static MockHttpServletRequest buildRequest(String method) {
+          MockHttpServletRequest request = new MockHttpServletRequest(method, "/api/security-config-test");
          request.setServletPath("/api/security-config-test");
          request.setRequestURI("/api/security-config-test");
          return request;

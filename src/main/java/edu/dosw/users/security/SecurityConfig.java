@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -36,9 +35,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
-        // Disable CSRF for stateless APIs, enable CORS defaults
-        http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> {})
+        // Keep Spring Security's default CSRF protection enabled for unsafe HTTP methods.
+        http.cors(cors -> {})
 
                 // Use stateless session management: every request must carry auth info
                 .sessionManagement(session ->
