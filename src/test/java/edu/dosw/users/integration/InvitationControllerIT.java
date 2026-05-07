@@ -54,13 +54,13 @@ class InvitationControllerIT {
         userRepository.deleteAll();
     }
 
-    // ── POST /api/invitations/player/{playerId}/team/{teamId} ─────────────────
+    // ── POST /api/invitations/user/{playerId}/team/{teamId} ─────────────────
 
     @Test
     void sendInvitation_persistsAndReturnsPending() throws Exception {
         long playerId = createUser("Jugador A", "ja@eci.edu.co", "20001001");
 
-        mockMvc.perform(post("/api/invitations/player/" + playerId + "/team/100"))
+        mockMvc.perform(post("/api/invitations/user/" + playerId + "/team/100"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.playerId").value(playerId))
@@ -70,7 +70,7 @@ class InvitationControllerIT {
 
     @Test
     void sendInvitation_playerNotFound_returns404() throws Exception {
-        mockMvc.perform(post("/api/invitations/player/9999/team/100"))
+        mockMvc.perform(post("/api/invitations/user/9999/team/100"))
                 .andExpect(status().isNotFound());
     }
 
@@ -78,9 +78,9 @@ class InvitationControllerIT {
     void sendDuplicateInvitation_returns409() throws Exception {
         long playerId = createUser("Jugador B", "jb@eci.edu.co", "20002002");
 
-        mockMvc.perform(post("/api/invitations/player/" + playerId + "/team/200"));
+        mockMvc.perform(post("/api/invitations/user/" + playerId + "/team/200"));
 
-        mockMvc.perform(post("/api/invitations/player/" + playerId + "/team/200"))
+        mockMvc.perform(post("/api/invitations/user/" + playerId + "/team/200"))
                 .andExpect(status().isConflict());
     }
 
@@ -103,7 +103,7 @@ class InvitationControllerIT {
                 .andExpect(status().isNotFound());
     }
 
-    // ── GET /api/invitations/player/{playerId} ────────────────────────────────
+    // ── GET /api/invitations/user/{playerId} ────────────────────────────────
 
     @Test
     void getByPlayerId_returnsInvitationList() throws Exception {
@@ -111,7 +111,7 @@ class InvitationControllerIT {
         sendInvitation(playerId, 401L);
         sendInvitation(playerId, 402L);
 
-        mockMvc.perform(get("/api/invitations/player/" + playerId))
+        mockMvc.perform(get("/api/invitations/user/" + playerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
@@ -215,7 +215,7 @@ class InvitationControllerIT {
      */
     private long sendInvitation(long playerId, long teamId) throws Exception {
         String response = mockMvc.perform(
-                        post("/api/invitations/player/" + playerId + "/team/" + teamId))
+                        post("/api/invitations/user/" + playerId + "/team/" + teamId))
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asLong();
     }

@@ -1,6 +1,7 @@
 package edu.dosw.users.config;
 
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.model.PlayerPhoto;
 import edu.dosw.users.service.ImageService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class FallbackBeansConfig {
 
     /**
-     * No-op {@link ImageService}: upload returns {@code null}, delete is a
-     * no-op. Active in all profiles except {@code prod}.
+     * No-op {@link ImageService}: upload returns {@code null}, getPhoto returns
+     * {@code null}, delete is a no-op. Active in all profiles except {@code prod}.
      */
     @Bean
     @Profile("!prod")
@@ -32,6 +33,11 @@ public class FallbackBeansConfig {
         return new ImageService() {
             @Override
             public String upload(MultipartFile file, Long sportProfileId) {
+                return null;
+            }
+
+            @Override
+            public PlayerPhoto getPhoto(String photoId) {
                 return null;
             }
 

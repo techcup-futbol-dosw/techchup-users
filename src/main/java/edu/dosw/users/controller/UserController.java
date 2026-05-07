@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,6 +35,18 @@ public class UserController {
 
     private final IUserService userService;
     private final UserMapper userMapper;
+
+    /** Returns players matching the given filters (all parameters optional). */
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponse>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String position,
+            @RequestParam(required = false) String status) {
+        return ResponseEntity.ok(
+                userService.search(name, position, status).stream()
+                        .map(userMapper::toResponse)
+                        .toList());
+    }
 
     /** Returns all user profiles. */
     @GetMapping

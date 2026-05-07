@@ -8,7 +8,6 @@ import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.UserRepository;
-import edu.dosw.users.service.IAuditService;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
 import lombok.RequiredArgsConstructor;
@@ -163,6 +162,17 @@ public class UserServiceImpl implements IUserService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public List<UserModel> search(String name, String position, String status) {
+        String nameParam = (name == null || name.isBlank()) ? null : name.trim();
+        String statusParam = (status == null || status.isBlank()) ? null : status.trim().toUpperCase();
+        String positionParam = (position == null || position.isBlank()) ? null : position.trim().toUpperCase();
+        return userRepository.searchPlayers(nameParam, statusParam, positionParam)
+                .stream()
+                .map(userMapper::toModel)
+                .toList();
+    }
+
     @Override
     public void inactivate(Long id) {
         var entity = userRepository.findById(id)
