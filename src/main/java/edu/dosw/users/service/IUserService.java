@@ -83,4 +83,14 @@ public interface IUserService {
      * @throws edu.dosw.users.exception.BusinessException when business rules fail
      */
     void inactivate(Long id);
+
+    /**
+     * Searches for players (users with a sport profile) matching the given filters.
+     *
+     * @param name     optional partial name filter (case-insensitive)
+     * @param position optional position filter (e.g. {@code "FORWARD"}); {@code null} returns all positions
+     * @param status   optional status filter (e.g. {@code "ACTIVE"}); {@code null} returns all statuses
+     * @return list of matching user models, may be empty
+     */
+    List<UserModel> search(String name, String position, String status);
 }
