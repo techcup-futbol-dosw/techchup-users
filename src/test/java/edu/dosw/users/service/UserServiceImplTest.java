@@ -281,6 +281,19 @@ class UserServiceImplTest {
     }
 
     @Test
+    void search_withWhitespaceInStatusAndPosition_trimsAndUppercasesBeforeRepositoryCall() {
+        UserEntity e1 = UserEntity.builder().id(1L).build();
+        UserModel m1 = UserModel.builder().id(1L).build();
+        when(userRepository.searchPlayers("juan", "ACTIVE", "FORWARD")).thenReturn(List.of(e1));
+        when(userMapper.toModel(e1)).thenReturn(m1);
+
+        List<UserModel> result = service.search(" juan ", " forward ", " active ");
+
+        assertEquals(1, result.size());
+        verify(userRepository).searchPlayers("juan", "ACTIVE", "FORWARD");
+    }
+
+    @Test
     void search_withNullParams_passesNullsToRepository() {
         when(userRepository.searchPlayers(null, null, null)).thenReturn(List.of());
 
