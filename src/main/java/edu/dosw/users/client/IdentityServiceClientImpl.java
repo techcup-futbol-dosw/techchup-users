@@ -1,6 +1,7 @@
 package edu.dosw.users.client;
 
 import edu.dosw.users.model.UserModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,6 +30,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     private final String identityServiceUrl;
     private final RestTemplate restTemplate;
 
+    @Autowired
     public IdentityServiceClientImpl(
             @Value("${identity.service.url}") String identityServiceUrl) {
         this(identityServiceUrl, new RestTemplate());
