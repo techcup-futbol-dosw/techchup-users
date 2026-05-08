@@ -232,6 +232,14 @@ class UserServiceImplTest {
     }
 
     @Test
+    void inactivate_notFound_throwsResourceNotFoundException() {
+        when(identityServiceClient.getUserById(99L)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.inactivate(99L));
+        verify(identityServiceClient, never()).inactivateUser(any());
+    }
+
+    @Test
     void inactivate_alreadyInactive_throwsBusinessException() {
         UserModel existing = UserModel.builder().id(3L).status("INACTIVE").build();
         when(identityServiceClient.getUserById(3L)).thenReturn(existing);
