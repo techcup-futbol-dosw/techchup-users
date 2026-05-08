@@ -13,6 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -30,8 +31,13 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
 
     public IdentityServiceClientImpl(
             @Value("${identity.service.url}") String identityServiceUrl) {
+        this(identityServiceUrl, new RestTemplate());
+    }
+
+    /** Package-private constructor used in unit tests to inject a mock RestTemplate. */
+    IdentityServiceClientImpl(String identityServiceUrl, RestTemplate restTemplate) {
         this.identityServiceUrl = identityServiceUrl;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -40,8 +46,6 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
             restTemplate.getForEntity(identityServiceUrl + "/api/users/" + id, Void.class);
             return true;
         } catch (HttpClientErrorException.NotFound e) {
-            return false;
-        } catch (Exception e) {
             return false;
         }
     }
@@ -57,10 +61,12 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
 
     @Override
     public UserModel getUserByIdentification(String identification) {
+        URI uri = UriComponentsBuilder
+                .fromUriString(identityServiceUrl + "/api/users/identification/{id}")
+                .buildAndExpand(identification)
+                .toUri();
         try {
-            return restTemplate.getForObject(
-                    identityServiceUrl + "/api/users/identification/" + identification,
-                    UserModel.class);
+            return restTemplate.getForObject(uri, UserModel.class);
         } catch (HttpClientErrorException.NotFound e) {
             return null;
         }
