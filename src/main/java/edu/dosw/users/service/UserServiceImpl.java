@@ -1,26 +1,29 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.exception.BusinessException;
+import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
-import edu.dosw.users.entity.UserEntity;
-import edu.dosw.users.exception.BusinessException;
-import edu.dosw.users.exception.ResourceNotFoundException;
-import edu.dosw.users.mapper.UserMapper;
-import edu.dosw.users.model.UserModel;
-import edu.dosw.users.repository.UserRepository;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
+import edu.dosw.users.exception.BusinessException;
+import edu.dosw.users.exception.ResourceNotFoundException;
+import edu.dosw.users.model.SportProfileModel;
+import edu.dosw.users.model.UserModel;
+import edu.dosw.users.repository.SportProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Default implementation of {@link IUserService}.
+ * Implementation of {@link IUserService} that delegates all user-data
+ * operations to the identity microservice via {@link IdentityServiceClient}.
  *
- * <p>Coordinates user profile persistence through {@link UserRepository} and
- * maps between persistence entities and domain models through {@link UserMapper}.</p>
+ * <p>Business rules that belong to this service (team participation checks,
+ * sport-profile audit logging, position-based search filtering) are applied
+ * locally before or after the identity-service call.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -28,20 +31,21 @@ public class UserServiceImpl implements IUserService {
 
     private static final String USER_NOT_FOUND_ID = "User not found with id: ";
 
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-        private final IAuditService auditService;
-        private final TeamsServiceClient teamsServiceClient;
+    private final IdentityServiceClient identityServiceClient;
+    private final TeamsServiceClient teamsServiceClient;
+    private final SportProfileRepository sportProfileRepository;
+    private final IAuditService auditService;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public UserModel getById(Long id) {
-        return userRepository.findById(id)
-                .map(userMapper::toModel)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND_ID + id));
+        UserModel user = identityServiceClient.getUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+        }
+        return user;
     }
 
     /**
@@ -49,10 +53,12 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public UserModel getByIdentification(String identification) {
-        return userRepository.findByIdentification(identification)
-                .map(userMapper::toModel)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User profile not found with identification: " + identification));
+        UserModel user = identityServiceClient.getUserByIdentification(identification);
+        if (user == null) {
+            throw new ResourceNotFoundException(
+                    "User profile not found with identification: " + identification);
+        }
+        return user;
     }
 
     /**
@@ -60,17 +66,14 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public List<UserModel> getAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toModel)
-                .toList();
+        return identityServiceClient.getAllUsers();
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Initializes the profile status and timestamps before persisting the
-     * new user.</p>
+     * <p>Pre-populates {@code status}, {@code profileCreatedAt} and
+     * {@code updatedAt} before delegating to the identity service.</p>
      */
     @Override
     public UserModel create(UserModel model) {
@@ -78,49 +81,40 @@ public class UserServiceImpl implements IUserService {
         model.setStatus("ACTIVE");
         model.setProfileCreatedAt(now);
         model.setUpdatedAt(now);
-        return userMapper.toModel(
-                userRepository.save(userMapper.toEntity(model)));
+        return identityServiceClient.createUser(model);
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Verifies that the user exists, preserves the requested identifier,
-     * and refreshes the update timestamp before saving.</p>
+     * <p>Enforces that the user is active and applies the semester/school-relation
+     * constraint before delegating the update to the identity service. If the
+     * user has a sport profile, an audit entry is recorded.</p>
      */
     @Override
     public UserModel update(Long id, UserModel model) {
-        var entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND_ID + id));
+        UserModel existing = identityServiceClient.getUserById(id);
+        if (existing == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+        }
 
-        if (!"ACTIVE".equalsIgnoreCase(entity.getStatus())) {
+        if (!"ACTIVE".equalsIgnoreCase(existing.getStatus())) {
             throw new BusinessException("Cannot update an inactive user.");
         }
 
-        // Business rule: semester only allowed for STUDENT
         if (model.getSchoolRelation() != null
                 && model.getSchoolRelation() != SchoolRelation.STUDENT
                 && model.getSemester() != null) {
             throw new BusinessException("Semester can only be set for students.");
         }
 
-        // Apply only the allowed fields to avoid overwriting protected values
-        entity.setFullName(model.getFullName());
-        entity.setSchoolRelation(model.getSchoolRelation() != null
-                ? model.getSchoolRelation().name() : null);
-        entity.setAcademicProgram(model.getAcademicProgram());
-        entity.setSemester(model.getSemester());
-        entity.setUpdatedAt(LocalDateTime.now());
+        UserModel updated = identityServiceClient.updateUser(id, model);
 
-        var saved = userRepository.save(entity);
+        sportProfileRepository.findByUserId(id).ifPresent(sp ->
+                auditService.logSportProfile(sp.getId(), AuditAction.UPDATE,
+                        "Admin updated user with id: " + id));
 
-        if (saved.getSportProfile() != null && saved.getSportProfile().getId() != null) {
-            auditService.logSportProfile(saved.getSportProfile().getId(), AuditAction.UPDATE,
-                    "Admin updated user with id: " + id);
-        }
-
-        return userMapper.toModel(saved);
+        return updated;
     }
 
     /**
@@ -128,65 +122,73 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public UserModel updateProfile(Long userId, UserModel model) {
-        UserEntity entity = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND_ID + userId));
-        UserEntity updated = userMapper.toEntity(model);
-        entity.setFullName(updated.getFullName());
-        entity.setIdentification(updated.getIdentification());
-        entity.setBirthDate(updated.getBirthDate());
-        entity.setGender(updated.getGender());
-        entity.setSchoolRelation(updated.getSchoolRelation());
-        entity.setAcademicProgram(updated.getAcademicProgram());
-        entity.setSemester(updated.getSemester());
-        entity.setUpdatedAt(LocalDateTime.now());
-        return userMapper.toModel(userRepository.save(entity));
+        UserModel existing = identityServiceClient.getUserById(userId);
+        if (existing == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + userId);
+        }
+        return identityServiceClient.updateUserProfile(userId, model);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deactivate(Long id) {
+        UserModel user = identityServiceClient.getUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+        }
+        identityServiceClient.deactivateUser(id);
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Performs a logical deactivation by changing the status instead of
-     * deleting the row.</p>
+     * <p>Validates the user's current status and team participation before
+     * delegating the inactivation to the identity service.</p>
      */
-    @Override
-    public void deactivate(Long id) {
-        var entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND_ID + id));
-        entity.setStatus("INACTIVE");
-        entity.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(entity);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<UserModel> search(String name, String position, String status) {
-        String nameParam = (name == null || name.isBlank()) ? null : name.trim();
-        String statusParam = (status == null || status.isBlank()) ? null : status.trim().toUpperCase();
-        String positionParam = (position == null || position.isBlank()) ? null : position.trim().toUpperCase();
-        return userRepository.searchPlayers(nameParam, statusParam, positionParam)
-                .stream()
-                .map(userMapper::toModel)
-                .toList();
-    }
-
     @Override
     public void inactivate(Long id) {
-        var entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND_ID + id));
-        if (!"ACTIVE".equalsIgnoreCase(entity.getStatus())) {
+        UserModel user = identityServiceClient.getUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+        }
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
             throw new BusinessException("La cuenta ya se encuentra inactiva");
         }
         if (teamsServiceClient.isPlayerAssignedToTeam(id)) {
             throw new BusinessException(
                     "No es posible inactivar la cuenta mientras el usuario participa en un torneo activo");
         }
-        entity.setStatus("INACTIVE");
-        entity.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(entity);
+        identityServiceClient.inactivateUser(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Fetches users from the identity service filtered by name and status,
+     * then applies a local position filter using sport-profile data when
+     * {@code position} is provided.</p>
+     */
+    @Override
+    public List<UserModel> search(String name, String position, String status) {
+        String nameParam = (name == null || name.isBlank()) ? null : name.trim();
+        String statusParam = (status == null || status.isBlank()) ? null : status.trim().toUpperCase();
+        String positionParam = (position == null || position.isBlank()) ? null : position.trim().toUpperCase();
+
+        List<UserModel> users = identityServiceClient.searchUsers(nameParam, statusParam);
+
+        if (positionParam != null) {
+            String pos = positionParam;
+            Set<Long> userIdsWithPosition = sportProfileRepository.findByPosition(pos)
+                    .stream()
+                    .map(sp -> sp.getUserId())
+                    .collect(Collectors.toSet());
+            users = users.stream()
+                    .filter(u -> userIdsWithPosition.contains(u.getId()))
+                    .toList();
+        }
+
+        return users;
     }
 }

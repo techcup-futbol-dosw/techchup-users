@@ -1,70 +1,22 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.dto.UserRequest;
-import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserResponse;
-import edu.dosw.users.entity.UserEntity;
-import edu.dosw.users.enums.Gender;
-import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.model.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 /**
- * MapStruct mapper for bidirectional conversion between
- * {@link UserEntity} and {@link UserModel}.
+ * MapStruct mapper for converting between user-facing DTOs and the
+ * {@link UserModel} domain model.
  *
- * <p>When converting to an entity, the {@code sportProfile} relationship is
- * ignored and must be managed independently by the service layer to avoid
- * update cycles.</p>
+ * <p>User data is owned by the identity service; this mapper only handles
+ * DTO ↔ model conversions needed by the controller layer.</p>
  */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
-    /**
-     * Converts a user profile entity to its domain model.
-     *
-     * @param entity source entity; may be {@code null}
-     * @return resulting model, or {@code null} if the entity is {@code null}
-     */
-    @Mapping(target = "gender", source = "gender", qualifiedByName = "stringToGender")
-    @Mapping(target = "schoolRelation", source = "schoolRelation", qualifiedByName = "stringToSchoolRelation")
-    UserModel toModel(UserEntity entity);
-
-    /**
-     * Converts a user profile model to its JPA entity.
-     * The {@code sportProfile} relationship is left as {@code null} and must
-     * be assigned by the service layer.
-     *
-     * @param model source model; may be {@code null}
-     * @return resulting entity, or {@code null} if the model is {@code null}
-     */
-    @Mapping(target = "sportProfile", ignore = true)
-    @Mapping(target = "gender", source = "gender", qualifiedByName = "genderToString")
-    @Mapping(target = "schoolRelation", source = "schoolRelation", qualifiedByName = "schoolRelationToString")
-    UserEntity toEntity(UserModel model);
-
-    @Named("stringToGender")
-    default Gender stringToGender(String value) {
-        return value == null ? null : Gender.valueOf(value);
-    }
-
-    @Named("stringToSchoolRelation")
-    default SchoolRelation stringToSchoolRelation(String value) {
-        return value == null ? null : SchoolRelation.valueOf(value);
-    }
-
-    @Named("genderToString")
-    default String genderToString(Gender gender) {
-        return gender == null ? null : gender.name();
-    }
-
-    @Named("schoolRelationToString")
-    default String schoolRelationToString(SchoolRelation schoolRelation) {
-        return schoolRelation == null ? null : schoolRelation.name();
-    }
 
     /** Converts a {@link UserRequest} to its domain model. */
     @Mapping(target = "id", ignore = true)
@@ -76,17 +28,18 @@ public interface UserMapper {
     /**
      * Converts an administrator update request to a domain model containing
      * only the fields that are permitted to be changed by an administrator.
-     * The mapper ignores all protected fields so the service can apply the
-     * changes onto the existing entity without overwriting immutable values.
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "identification", ignore = true)
+    @Mapping(target = "birthDate", ignore = true)
+    @Mapping(target = "gender", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "profileCreatedAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     UserModel toModel(AdminUserUpdateRequest request);
+
     /** Converts a {@link UserProfileUpdateRequest} to its domain model. */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)

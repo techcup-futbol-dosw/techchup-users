@@ -1,7 +1,7 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.entity.InvitationEntity;
-import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.InvitationStatus;
 import edu.dosw.users.exception.BusinessException;
@@ -9,7 +9,6 @@ import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.InvitationMapper;
 import edu.dosw.users.model.InvitationModel;
 import edu.dosw.users.repository.InvitationRepository;
-import edu.dosw.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +18,16 @@ import java.util.List;
 /**
  * Default implementation of {@link IInvitationService}.
  *
- * <p>Manages the full lifecycle of a team invitation. Because
- * {@link InvitationMapper} ignores the {@code player} relationship,
- * this class sets it manually using a partial entity reference (id only)
- * after mapping.</p>
+ * <p>Manages the full lifecycle of a team invitation. User existence is
+ * validated via {@link IdentityServiceClient} before creating an invitation.
+ * {@link InvitationMapper} handles conversion between entity and model.</p>
  */
 @Service
 @RequiredArgsConstructor
 public class InvitationServiceImpl implements IInvitationService {
 
     private final InvitationRepository invitationRepository;
-    private final UserRepository userRepository;
+    private final IdentityServiceClient identityServiceClient;
     private final InvitationMapper invitationMapper;
     private final IAuditService auditService;
 
@@ -49,7 +47,7 @@ public class InvitationServiceImpl implements IInvitationService {
      */
     @Override
     public List<InvitationModel> getByPlayerId(Long playerId) {
-        return invitationRepository.findByPlayer_Id(playerId)
+        return invitationRepository.findByUserId(playerId)
                 .stream()
                 .map(invitationMapper::toModel)
                 .toList();
@@ -58,17 +56,19 @@ public class InvitationServiceImpl implements IInvitationService {
     /**
      * {@inheritDoc}
      *
-     * <p>Validates that the player exists and that there is no pending
-     * invitation from the same team before creating the new invitation.</p>
+     * <p>Validates that the player exists in the identity service and that there
+     * is no pending invitation from the same team before creating the new
+     * invitation.</p>
      */
     @Override
     public InvitationModel send(Long playerId, Long teamId) {
-        userRepository.findById(playerId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Player not found with id: " + playerId));
+        if (!identityServiceClient.userExists(playerId)) {
+            throw new ResourceNotFoundException(
+                    "Player not found with id: " + playerId);
+        }
 
         boolean hasPending = invitationRepository
-                .findByPlayer_IdAndStatus(playerId, InvitationStatus.PENDING.name())
+                .findByUserIdAndStatus(playerId, InvitationStatus.PENDING.name())
                 .stream()
                 .anyMatch(inv -> teamId.equals(inv.getTeamId()));
         if (hasPending) {
@@ -77,7 +77,7 @@ public class InvitationServiceImpl implements IInvitationService {
         }
 
         InvitationEntity entity = InvitationEntity.builder()
-                .player(UserEntity.builder().id(playerId).build())
+                .userId(playerId)
                 .teamId(teamId)
                 .status(InvitationStatus.PENDING.name())
                 .sentAt(LocalDateTime.now())
@@ -148,7 +148,6 @@ public class InvitationServiceImpl implements IInvitationService {
         action.apply(model);
 
         InvitationEntity updated = invitationMapper.toEntity(model);
-        updated.setPlayer(existing.getPlayer());
 
         InvitationModel saved = invitationMapper.toModel(invitationRepository.save(updated));
         auditService.logInvitation(id, auditAction, details + " (invitation id: " + id + ")");
