@@ -49,8 +49,10 @@ public class InvitationEntity {
     @Column(name = "responded_at")
     private LocalDateTime respondedAt;
 
-    /** Player who receives the invitation. */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id", nullable = false)
-    private UserEntity player;
+    /**
+     * Identifier of the player who receives the invitation.
+     * Managed by the identity service; stored as a plain column without a JPA relationship.
+     */
+    @Column(name = "player_id", nullable = false)
+    private Long userId;
 }

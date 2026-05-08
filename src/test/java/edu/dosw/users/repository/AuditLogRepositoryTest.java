@@ -3,7 +3,6 @@ package edu.dosw.users.repository;
 import edu.dosw.users.entity.AuditLogEntity;
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +26,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class AuditLogRepositoryTest {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private SportProfileRepository sportProfileRepository;
 
     @Autowired
@@ -41,43 +37,22 @@ class AuditLogRepositoryTest {
     private SportProfileEntity sportProfile;
     private InvitationEntity invitation;
 
-    /**
-     * Creates the user, sport profile, and invitation records required by the
-     * repository query tests.
-     */
     @BeforeEach
     void setUp() {
-        UserEntity user = userRepository.save(UserEntity.builder()
-                .fullName("Test User")
-                .email("user@test.com")
-                .password("hashed")
-                .identification("12345678")
-                .status("ACTIVE")
-                .build());
-
         sportProfile = sportProfileRepository.save(SportProfileEntity.builder()
-                .user(user)
+                .userId(1L)
                 .position("FORWARD")
                 .available(true)
                 .build());
 
         invitation = invitationRepository.save(InvitationEntity.builder()
-                .player(user)
+                .userId(1L)
                 .teamId(1L)
                 .status("PENDING")
                 .sentAt(LocalDateTime.now())
                 .build());
     }
 
-    /**
-     * Persists an audit log entry linked to either a sport profile or an
-     * invitation.
-     *
-     * @param sp sport profile reference to associate, or {@code null}
-     * @param inv invitation reference to associate, or {@code null}
-     * @param action action value to store in the audit entry
-     * @return saved audit log entity
-     */
     private AuditLogEntity savedLog(SportProfileEntity sp, InvitationEntity inv, String action) {
         return repository.save(AuditLogEntity.builder()
                 .sportProfile(sp)

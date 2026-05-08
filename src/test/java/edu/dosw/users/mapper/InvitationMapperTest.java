@@ -2,7 +2,6 @@ package edu.dosw.users.mapper;
 
 import edu.dosw.users.dto.InvitationResponse;
 import edu.dosw.users.entity.InvitationEntity;
-import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.InvitationStatus;
 import edu.dosw.users.model.InvitationModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,17 +15,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for {@link InvitationMapper}.
  *
  * <p>Verifies bidirectional conversion between {@link InvitationEntity} and
- * {@link InvitationModel}, including extraction of {@code player.id} into
- * {@code playerId}, handling of a null player, and the fact that the
- * {@code player} relationship is ignored in {@code toEntity}.</p>
+ * {@link InvitationModel}, including the mapping of the entity's {@code userId}
+ * field to the model's {@code playerId}, and handling of null values.</p>
  */
 class InvitationMapperTest {
 
     private InvitationMapper mapper;
 
-    /**
-     * Initialises the MapStruct-generated implementation before each test.
-     */
     @BeforeEach
     void setUp() {
         mapper = new InvitationMapperImpl();
@@ -34,16 +29,11 @@ class InvitationMapperTest {
 
     // ── toModel ──────────────────────────────────────────────────────────────
 
-    /**
-     * Verifies that {@code toModel} correctly maps all entity fields to the
-     * model, extracting {@code player.id} into {@code playerId}.
-     */
     @Test
-    void toModel_mapsPlayerIdAndAllFields() {
-        UserEntity player = UserEntity.builder().id(10L).build();
+    void toModel_mapsUserIdToPlayerIdAndAllFields() {
         InvitationEntity entity = InvitationEntity.builder()
                 .id(1L)
-                .player(player)
+                .userId(10L)
                 .teamId(5L)
                 .status("PENDING")
                 .sentAt(LocalDateTime.of(2024, 4, 1, 12, 0))
@@ -61,15 +51,11 @@ class InvitationMapperTest {
         assertNull(model.getRespondedAt());
     }
 
-    /**
-     * Verifies that when {@code player} is {@code null}, the {@code playerId}
-     * field of the resulting model is also {@code null}.
-     */
     @Test
-    void toModel_nullPlayer_playerIdIsNull() {
+    void toModel_nullUserId_playerIdIsNull() {
         InvitationEntity entity = InvitationEntity.builder()
                 .id(1L)
-                .player(null)
+                .userId(null)
                 .teamId(5L)
                 .status("ACCEPTED")
                 .build();
@@ -80,10 +66,6 @@ class InvitationMapperTest {
         assertEquals(InvitationStatus.ACCEPTED, model.getStatus());
     }
 
-    /**
-     * Verifies that {@code toModel} returns {@code null} when given a
-     * {@code null} entity.
-     */
     @Test
     void toModel_nullEntity_returnsNull() {
         assertNull(mapper.toModel(null));
@@ -91,12 +73,8 @@ class InvitationMapperTest {
 
     // ── toEntity ─────────────────────────────────────────────────────────────
 
-    /**
-     * Verifies that {@code toEntity} correctly maps all model fields to the
-     * entity and that the {@code player} relationship is left as {@code null}.
-     */
     @Test
-    void toEntity_mapsFields_andIgnoresPlayer() {
+    void toEntity_mapsPlayerIdToUserId() {
         InvitationModel model = InvitationModel.builder()
                 .id(1L)
                 .playerId(10L)
@@ -110,15 +88,11 @@ class InvitationMapperTest {
 
         assertNotNull(entity);
         assertEquals(1L, entity.getId());
+        assertEquals(10L, entity.getUserId());
         assertEquals(5L, entity.getTeamId());
         assertEquals("REJECTED", entity.getStatus());
-        assertNull(entity.getPlayer());
     }
 
-    /**
-     * Verifies that {@code toEntity} returns {@code null} when given a
-     * {@code null} model.
-     */
     @Test
     void toEntity_nullModel_returnsNull() {
         assertNull(mapper.toEntity(null));

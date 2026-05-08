@@ -1,17 +1,16 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.client.IdentityServiceClient;
+import edu.dosw.users.client.TeamsServiceClient;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserEntity;
+import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
-import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.model.UserModel;
-import edu.dosw.users.repository.UserRepository;
-import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.repository.SportProfileRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,161 +22,79 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * Consolidated unit tests for {@link UserServiceImpl} covering update
- * behaviour, validation rules and interactions with the audit service.
+ * Unit tests for {@link UserServiceImpl}.
+ *
+ * <p>Verifies delegation to {@link IdentityServiceClient}, business-rule
+ * enforcement (active check, semester constraint, team assignment) and
+ * audit logging on update.</p>
  */
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private UserMapper userMapper;
-    @Mock private IAuditService auditService;
+    @Mock private IdentityServiceClient identityServiceClient;
     @Mock private TeamsServiceClient teamsServiceClient;
+    @Mock private SportProfileRepository sportProfileRepository;
+    @Mock private IAuditService auditService;
 
     @InjectMocks private UserServiceImpl service;
 
-    @Test
-    void update_success_logsAuditWhenSportProfileExists() {
-        Long id = 1L;
-        UserEntity existing = UserEntity.builder()
-                .id(id)
-                .status("ACTIVE")
-                .fullName("Old Name")
-                .sportProfile(SportProfileEntity.builder().id(10L).build())
-                .build();
-
-        UserModel incoming = UserModel.builder()
-                .fullName("New Name")
-                .schoolRelation(SchoolRelation.STUDENT)
-                .academicProgram("Engineering")
-                .semester(3)
-                .build();
-
-        when(userRepository.findById(id)).thenReturn(Optional.of(existing));
-        when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(userMapper.toModel(any(UserEntity.class))).thenReturn(incoming);
-
-        var result = service.update(id, incoming);
-
-        assertThat(result).isNotNull();
-        verify(userRepository).save(any(UserEntity.class));
-        verify(auditService).logSportProfile(10L, edu.dosw.users.enums.AuditAction.UPDATE,
-                "Admin updated user with id: " + id);
-    }
-
-    @Test
-    void update_throwsNotFoundWhenMissing() {
-        Long id = 99L;
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.update(id, new UserModel()))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("User not found with id: " + id);
-    }
-
-    @Test
-    void update_throwsWhenUserInactive() {
-        Long id = 2L;
-        UserEntity existing = UserEntity.builder()
-                .id(id)
-                .status("INACTIVE")
-                .build();
-        when(userRepository.findById(id)).thenReturn(Optional.of(existing));
-
-        assertThatThrownBy(() -> service.update(id, new UserModel()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage("Cannot update an inactive user.");
-    }
-
-    @Test
-    void update_throwsWhenSemesterSetForNonStudent() {
-        Long id = 3L;
-        UserEntity existing = UserEntity.builder()
-                .id(id)
-                .status("ACTIVE")
-                .build();
-        UserModel incoming = UserModel.builder()
-                .schoolRelation(SchoolRelation.ADMINISTRATIVE)
-                .semester(2)
-                .build();
-
-        when(userRepository.findById(id)).thenReturn(Optional.of(existing));
-
-        assertThatThrownBy(() -> service.update(id, incoming))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage("Semester can only be set for students.");
-    }
-
-    // ---- existing service tests (compatibility) ----
+    // ── getById ──────────────────────────────────────────────────────────────
 
     @Test
     void getById_found_returnsModel() {
-        UserEntity entity = UserEntity.builder().id(1L).build();
         UserModel model = UserModel.builder().id(1L).build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
-        when(userMapper.toModel(entity)).thenReturn(model);
+        when(identityServiceClient.getUserById(1L)).thenReturn(model);
 
-        UserModel result = service.getById(1L);
-
-        assertEquals(1L, result.getId());
+        assertEquals(1L, service.getById(1L).getId());
     }
 
     @Test
     void getById_notFound_throwsResourceNotFoundException() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getUserById(99L)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class, () -> service.getById(99L));
     }
 
+    // ── getByIdentification ───────────────────────────────────────────────────
+
     @Test
     void getByIdentification_found_returnsModel() {
-        UserEntity entity = UserEntity.builder().id(2L).identification("12345").build();
         UserModel model = UserModel.builder().id(2L).build();
-        when(userRepository.findByIdentification("12345")).thenReturn(Optional.of(entity));
-        when(userMapper.toModel(entity)).thenReturn(model);
+        when(identityServiceClient.getUserByIdentification("12345")).thenReturn(model);
 
-        UserModel result = service.getByIdentification("12345");
-
-        assertEquals(2L, result.getId());
+        assertEquals(2L, service.getByIdentification("12345").getId());
     }
 
     @Test
     void getByIdentification_notFound_throwsResourceNotFoundException() {
-        when(userRepository.findByIdentification("xxx")).thenReturn(Optional.empty());
+        when(identityServiceClient.getUserByIdentification("xxx")).thenReturn(null);
 
-        assertThrows(ResourceNotFoundException.class, () -> service.getByIdentification("xxx"));
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.getByIdentification("xxx"));
     }
+
+    // ── getAll ────────────────────────────────────────────────────────────────
 
     @Test
     void getAll_returnsMappedList() {
-        UserEntity e1 = UserEntity.builder().id(1L).build();
-        UserEntity e2 = UserEntity.builder().id(2L).build();
-        UserModel m1 = UserModel.builder().id(1L).build();
-        UserModel m2 = UserModel.builder().id(2L).build();
-        when(userRepository.findAll()).thenReturn(List.of(e1, e2));
-        when(userMapper.toModel(e1)).thenReturn(m1);
-        when(userMapper.toModel(e2)).thenReturn(m2);
+        when(identityServiceClient.getAllUsers()).thenReturn(List.of(
+                UserModel.builder().id(1L).build(),
+                UserModel.builder().id(2L).build()));
 
-        List<UserModel> result = service.getAll();
-
-        assertEquals(2, result.size());
+        assertEquals(2, service.getAll().size());
     }
 
-    @Test
-    void create_setsStatusAndTimestamps_andReturnsModel() {
-        UserModel input = UserModel.builder()
-                .fullName("Carlos").email("carlos@eci.edu.co")
-                .password("hash").identification("123")
-                .build();
-        UserEntity entity = UserEntity.builder().id(10L).build();
-        UserModel expected = UserModel.builder().id(10L).status("ACTIVE").build();
+    // ── create ────────────────────────────────────────────────────────────────
 
-        when(userMapper.toEntity(any())).thenReturn(entity);
-        when(userRepository.save(entity)).thenReturn(entity);
-        when(userMapper.toModel(entity)).thenReturn(expected);
+    @Test
+    void create_setsStatusAndTimestamps_andDelegatesToClient() {
+        UserModel input = UserModel.builder().fullName("Carlos").build();
+        UserModel returned = UserModel.builder().id(10L).status("ACTIVE").build();
+        when(identityServiceClient.createUser(any())).thenReturn(returned);
 
         UserModel result = service.create(input);
 
@@ -187,139 +104,116 @@ class UserServiceImplTest {
         assertEquals(10L, result.getId());
     }
 
+    // ── update ────────────────────────────────────────────────────────────────
+
     @Test
-    void update_existingProfile_updatesAndReturnsModel() {
-        UserEntity existing = UserEntity.builder().id(1L).status("ACTIVE").build();
-        UserModel updateData = UserModel.builder().fullName("Nuevo").build();
-        UserModel updatedModel = UserModel.builder().id(1L).fullName("Nuevo").updatedAt(java.time.LocalDateTime.now()).build();
+    void update_success_logsAuditWhenSportProfileExists() {
+        Long id = 1L;
+        UserModel existing = UserModel.builder().id(id).status("ACTIVE").build();
+        UserModel incoming = UserModel.builder()
+                .fullName("New Name")
+                .schoolRelation(SchoolRelation.STUDENT)
+                .semester(3)
+                .build();
+        SportProfileEntity sp = SportProfileEntity.builder().id(10L).build();
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(userMapper.toModel(any(UserEntity.class))).thenReturn(updatedModel);
+        when(identityServiceClient.getUserById(id)).thenReturn(existing);
+        when(identityServiceClient.updateUser(eq(id), any())).thenReturn(incoming);
+        when(sportProfileRepository.findByUserId(id)).thenReturn(Optional.of(sp));
 
-        UserModel result = service.update(1L, updateData);
+        UserModel result = service.update(id, incoming);
 
-        assertEquals(1L, result.getId());
-        assertNotNull(result.getUpdatedAt());
+        assertThat(result).isNotNull();
+        verify(identityServiceClient).updateUser(eq(id), any());
+        verify(auditService).logSportProfile(10L, AuditAction.UPDATE,
+                "Admin updated user with id: " + id);
+    }
+
+    @Test
+    void update_noSportProfile_skipsAuditLog() {
+        Long id = 2L;
+        UserModel existing = UserModel.builder().id(id).status("ACTIVE").build();
+        UserModel incoming = UserModel.builder().fullName("Test").build();
+
+        when(identityServiceClient.getUserById(id)).thenReturn(existing);
+        when(identityServiceClient.updateUser(eq(id), any())).thenReturn(incoming);
+        when(sportProfileRepository.findByUserId(id)).thenReturn(Optional.empty());
+
+        service.update(id, incoming);
+
+        verify(auditService, never()).logSportProfile(any(), any(), any());
+    }
+
+    @Test
+    void update_throwsNotFoundWhenMissing() {
+        when(identityServiceClient.getUserById(99L)).thenReturn(null);
+
+        assertThatThrownBy(() -> service.update(99L, new UserModel()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User not found with id: 99");
+    }
+
+    @Test
+    void update_throwsWhenUserInactive() {
+        UserModel existing = UserModel.builder().id(2L).status("INACTIVE").build();
+        when(identityServiceClient.getUserById(2L)).thenReturn(existing);
+
+        assertThatThrownBy(() -> service.update(2L, new UserModel()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Cannot update an inactive user.");
+    }
+
+    @Test
+    void update_throwsWhenSemesterSetForNonStudent() {
+        UserModel existing = UserModel.builder().id(3L).status("ACTIVE").build();
+        UserModel incoming = UserModel.builder()
+                .schoolRelation(SchoolRelation.ADMINISTRATIVE)
+                .semester(2)
+                .build();
+        when(identityServiceClient.getUserById(3L)).thenReturn(existing);
+
+        assertThatThrownBy(() -> service.update(3L, incoming))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Semester can only be set for students.");
+    }
+
+    // ── updateProfile ──────────────────────────────────────────────────────
+
+    @Test
+    void updateProfile_delegatesToClient() {
+        UserModel existing = UserModel.builder().id(1L).status("ACTIVE").build();
+        UserModel updated = UserModel.builder().id(1L).fullName("Nuevo").build();
+        when(identityServiceClient.getUserById(1L)).thenReturn(existing);
+        when(identityServiceClient.updateUserProfile(eq(1L), any())).thenReturn(updated);
+
+        UserModel result = service.updateProfile(1L, new UserModel());
+
         assertEquals("Nuevo", result.getFullName());
     }
 
     @Test
-    void update_notFound_throwsResourceNotFoundException() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
-        UserModel emptyModel = UserModel.builder().build();
+    void updateProfile_notFound_throwsResourceNotFoundException() {
+        when(identityServiceClient.getUserById(55L)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class,
-                () -> service.update(99L, emptyModel));
-    }
-
-        // ── updateProfile ──────────────────────────────────────────────────────
-
-        @Test
-        void updateProfile_updatesAllowedFieldsAndPreservesCredentials() {
-        UserEntity existing = UserEntity.builder()
-            .id(1L)
-            .fullName("Anterior")
-            .email("old@eci.edu.co")
-            .password("secret")
-            .identification("111")
-            .build();
-        UserEntity updateData = UserEntity.builder()
-            .fullName("Nuevo")
-            .identification("222")
-            .birthDate(java.time.LocalDate.of(2000, 1, 1))
-            .gender("MALE")
-            .schoolRelation("STUDENT")
-            .academicProgram("Ingenieria")
-            .semester(4)
-            .build();
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(userMapper.toEntity(any())).thenReturn(updateData);
-        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(userMapper.toModel(any(UserEntity.class)))
-            .thenReturn(UserModel.builder().id(1L).fullName("Nuevo").build());
-
-        UserModel result = service.updateProfile(1L, UserModel.builder().build());
-
-        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
-        verify(userRepository).save(captor.capture());
-        UserEntity saved = captor.getValue();
-        assertEquals("Nuevo", saved.getFullName());
-        assertEquals("222", saved.getIdentification());
-        assertEquals("MALE", saved.getGender());
-        assertEquals("STUDENT", saved.getSchoolRelation());
-        assertEquals("Ingenieria", saved.getAcademicProgram());
-        assertEquals(4, saved.getSemester());
-        assertEquals("old@eci.edu.co", saved.getEmail());
-        assertEquals("secret", saved.getPassword());
-        assertNotNull(saved.getUpdatedAt());
-        assertEquals("Nuevo", result.getFullName());
-        }
-
-        @Test
-        void updateProfile_notFound_throwsResourceNotFoundException() {
-        when(userRepository.findById(55L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-            () -> service.updateProfile(55L, UserModel.builder().build()));
-        }
-
-    // ── search ───────────────────────────────────────────────────────────────
-
-    @Test
-    void search_withAllParams_normalizesAndCallsRepository() {
-        UserEntity e1 = UserEntity.builder().id(1L).build();
-        UserModel m1 = UserModel.builder().id(1L).build();
-        when(userRepository.searchPlayers("juan", "ACTIVE", "FORWARD")).thenReturn(List.of(e1));
-        when(userMapper.toModel(e1)).thenReturn(m1);
-
-        List<UserModel> result = service.search(" juan ", "forward", "active");
-
-        assertEquals(1, result.size());
-        verify(userRepository).searchPlayers("juan", "ACTIVE", "FORWARD");
-    }
-
-    @Test
-    void search_withWhitespaceInStatusAndPosition_trimsAndUppercasesBeforeRepositoryCall() {
-        UserEntity e1 = UserEntity.builder().id(1L).build();
-        UserModel m1 = UserModel.builder().id(1L).build();
-        when(userRepository.searchPlayers("juan", "ACTIVE", "FORWARD")).thenReturn(List.of(e1));
-        when(userMapper.toModel(e1)).thenReturn(m1);
-
-        List<UserModel> result = service.search(" juan ", " forward ", " active ");
-
-        assertEquals(1, result.size());
-        verify(userRepository).searchPlayers("juan", "ACTIVE", "FORWARD");
-    }
-
-    @Test
-    void search_withNullParams_passesNullsToRepository() {
-        when(userRepository.searchPlayers(null, null, null)).thenReturn(List.of());
-
-        List<UserModel> result = service.search(null, null, null);
-
-        assertTrue(result.isEmpty());
-        verify(userRepository).searchPlayers(null, null, null);
+                () -> service.updateProfile(55L, new UserModel()));
     }
 
     // ── deactivate ───────────────────────────────────────────────────────────
 
     @Test
-    void deactivate_setsStatusInactiveAndSaves() {
-        UserEntity entity = UserEntity.builder().id(1L).status("ACTIVE").build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
+    void deactivate_delegatesToClient() {
+        UserModel existing = UserModel.builder().id(1L).status("ACTIVE").build();
+        when(identityServiceClient.getUserById(1L)).thenReturn(existing);
 
         service.deactivate(1L);
 
-        assertEquals("INACTIVE", entity.getStatus());
-        assertNotNull(entity.getUpdatedAt());
-        verify(userRepository).save(entity);
+        verify(identityServiceClient).deactivateUser(1L);
     }
 
     @Test
     void deactivate_notFound_throwsResourceNotFoundException() {
-        when(userRepository.findById(5L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getUserById(5L)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class, () -> service.deactivate(5L));
     }
@@ -327,34 +221,80 @@ class UserServiceImplTest {
     // ── inactivate ─────────────────────────────────────────────────────────
 
     @Test
-    void inactivate_activeUserWithoutTeam_setsInactive() {
-        UserEntity entity = UserEntity.builder().id(2L).status("ACTIVE").build();
-        when(userRepository.findById(2L)).thenReturn(Optional.of(entity));
+    void inactivate_activeUserWithoutTeam_delegatesToClient() {
+        UserModel existing = UserModel.builder().id(2L).status("ACTIVE").build();
+        when(identityServiceClient.getUserById(2L)).thenReturn(existing);
         when(teamsServiceClient.isPlayerAssignedToTeam(2L)).thenReturn(false);
 
         service.inactivate(2L);
 
-        assertEquals("INACTIVE", entity.getStatus());
-        assertNotNull(entity.getUpdatedAt());
-        verify(userRepository).save(entity);
+        verify(identityServiceClient).inactivateUser(2L);
+    }
+
+    @Test
+    void inactivate_notFound_throwsResourceNotFoundException() {
+        when(identityServiceClient.getUserById(99L)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> service.inactivate(99L));
+        verify(identityServiceClient, never()).inactivateUser(any());
     }
 
     @Test
     void inactivate_alreadyInactive_throwsBusinessException() {
-        UserEntity entity = UserEntity.builder().id(3L).status("INACTIVE").build();
-        when(userRepository.findById(3L)).thenReturn(Optional.of(entity));
+        UserModel existing = UserModel.builder().id(3L).status("INACTIVE").build();
+        when(identityServiceClient.getUserById(3L)).thenReturn(existing);
 
         assertThrows(BusinessException.class, () -> service.inactivate(3L));
-        verify(userRepository, never()).save(any());
+        verify(identityServiceClient, never()).inactivateUser(any());
     }
 
     @Test
     void inactivate_userInActiveTeam_throwsBusinessException() {
-        UserEntity entity = UserEntity.builder().id(4L).status("ACTIVE").build();
-        when(userRepository.findById(4L)).thenReturn(Optional.of(entity));
+        UserModel existing = UserModel.builder().id(4L).status("ACTIVE").build();
+        when(identityServiceClient.getUserById(4L)).thenReturn(existing);
         when(teamsServiceClient.isPlayerAssignedToTeam(4L)).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> service.inactivate(4L));
-        verify(userRepository, never()).save(any());
+        verify(identityServiceClient, never()).inactivateUser(any());
+    }
+
+    // ── search ───────────────────────────────────────────────────────────────
+
+    @Test
+    void search_withAllParams_normalizesAndCallsClient() {
+        UserModel m1 = UserModel.builder().id(1L).build();
+        SportProfileEntity sp = SportProfileEntity.builder().userId(1L).position("FORWARD").build();
+        when(identityServiceClient.searchUsers("juan", "ACTIVE")).thenReturn(List.of(m1));
+        when(sportProfileRepository.findByPosition("FORWARD")).thenReturn(List.of(sp));
+
+        List<UserModel> result = service.search(" juan ", "forward", "active");
+
+        assertEquals(1, result.size());
+        verify(identityServiceClient).searchUsers("juan", "ACTIVE");
+    }
+
+    @Test
+    void search_withNullParams_passesNullsToClient() {
+        when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of());
+
+        List<UserModel> result = service.search(null, null, null);
+
+        assertTrue(result.isEmpty());
+        verify(identityServiceClient).searchUsers(null, null);
+    }
+
+    @Test
+    void search_withPosition_filtersToMatchingUsers() {
+        UserModel u1 = UserModel.builder().id(1L).build();
+        UserModel u2 = UserModel.builder().id(2L).build();
+        SportProfileEntity sp = SportProfileEntity.builder().userId(1L).position("GOALKEEPER").build();
+
+        when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of(u1, u2));
+        when(sportProfileRepository.findByPosition("GOALKEEPER")).thenReturn(List.of(sp));
+
+        List<UserModel> result = service.search(null, "GOALKEEPER", null);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
     }
 }

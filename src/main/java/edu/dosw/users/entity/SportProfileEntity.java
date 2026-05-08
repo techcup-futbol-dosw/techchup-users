@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 /**
  * JPA entity representing a player's sport profile.
  *
- * <p>Mapped to the {@code sport_profiles} table. Holds a {@code OneToOne}
- * relationship with {@link UserEntity} through the {@code user_id}
- * column. The {@code photoId} field stores the {@code ObjectId} of the
+ * <p>Mapped to the {@code sport_profiles} table. The {@code userId} field stores
+ * the identifier of the owner, which is managed by the identity service.
+ * The {@code photoId} field stores the {@code ObjectId} of the
  * {@code PlayerPhoto} document in MongoDB.</p>
  *
  * @see edu.dosw.users.model.SportProfileModel
@@ -58,8 +58,10 @@ public class SportProfileEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    /** User profile that owns this sport profile. */
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private UserEntity user;
+    /**
+     * Identifier of the user who owns this sport profile.
+     * Managed by the identity service; stored as a plain column without a JPA relationship.
+     */
+    @Column(name = "user_id", nullable = false, unique = true)
+    private Long userId;
 }

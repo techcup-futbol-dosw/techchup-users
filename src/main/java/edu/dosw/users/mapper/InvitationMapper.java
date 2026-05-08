@@ -10,10 +10,9 @@ import org.mapstruct.Mapping;
  * MapStruct mapper for bidirectional conversion between
  * {@link InvitationEntity} and {@link InvitationModel}.
  *
- * <p>When converting to a model, extracts the player identifier
- * ({@code player.id}) and assigns it to the {@code playerId} field of the
- * model. When converting to an entity, the {@code player} relationship is
- * ignored and must be resolved by the service layer.</p>
+ * <p>The entity stores the player identifier in a field named {@code userId}
+ * (column {@code player_id}), while the model uses {@code playerId} for
+ * API compatibility. Both directions are mapped explicitly.</p>
  */
 @Mapper(componentModel = "spring")
 public interface InvitationMapper {
@@ -24,18 +23,16 @@ public interface InvitationMapper {
      * @param entity source entity; may be {@code null}
      * @return resulting model, or {@code null} if the entity is {@code null}
      */
-    @Mapping(source = "player.id", target = "playerId")
+    @Mapping(source = "userId", target = "playerId")
     InvitationModel toModel(InvitationEntity entity);
 
     /**
      * Converts an invitation model to its JPA entity.
-     * The {@code player} relationship is left as {@code null} and must be
-     * assigned by the service layer.
      *
      * @param model source model; may be {@code null}
      * @return resulting entity, or {@code null} if the model is {@code null}
      */
-    @Mapping(target = "player", ignore = true)
+    @Mapping(source = "playerId", target = "userId")
     InvitationEntity toEntity(InvitationModel model);
 
     /** Converts a domain model to an {@link InvitationResponse}. */

@@ -1,15 +1,14 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
 import edu.dosw.users.entity.SportProfileEntity;
-import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.mapper.SportProfileMapper;
 import edu.dosw.users.model.SportProfileModel;
 import edu.dosw.users.repository.SportProfileRepository;
-import edu.dosw.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,11 +20,8 @@ import java.time.LocalDateTime;
  *
  * <p>Coordinates sport profile persistence with photo storage (MongoDB via
  * {@link ImageService}), team membership checks (via {@link TeamsServiceClient}),
+ * user existence validation (via {@link IdentityServiceClient}),
  * and audit logging (via {@link IAuditService}).</p>
- *
- * <p>Because {@link SportProfileMapper} ignores the {@code userProfile}
- * relationship, this class sets it manually using a partial entity reference
- * (id only) after mapping.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -34,7 +30,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
     private static final String SPORT_PROFILE_NOT_FOUND_ID = "Sport profile not found with id: ";
 
     private final SportProfileRepository sportProfileRepository;
-    private final UserRepository userRepository;
+    private final IdentityServiceClient identityServiceClient;
     private final SportProfileMapper sportProfileMapper;
     private final IAuditService auditService;
     private final ImageService imageService;
@@ -56,7 +52,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
      */
     @Override
     public SportProfileModel getByUserId(Long userId) {
-        return sportProfileRepository.findByUser_Id(userId)
+        return sportProfileRepository.findByUserId(userId)
                 .map(sportProfileMapper::toModel)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Sport profile not found for user id: " + userId));
@@ -65,17 +61,19 @@ public class SportProfileServiceImpl implements ISportProfileService {
     /**
      * {@inheritDoc}
      *
-     * <p>Creates the profile only when the user exists and does not already
-     * have one. If a photo is provided, it is uploaded before the profile is
-     * saved and the generated photo id is stored in the relational entity.</p>
+     * <p>Creates the profile only when the user exists in the identity service
+     * and does not already have one. If a photo is provided, it is uploaded
+     * before the profile is saved and the generated photo id is stored in the
+     * relational entity.</p>
      */
     @Override
     public SportProfileModel create(Long userId, SportProfileModel model, MultipartFile photo) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User profile not found with id: " + userId));
+        if (!identityServiceClient.userExists(userId)) {
+            throw new ResourceNotFoundException(
+                    "User profile not found with id: " + userId);
+        }
 
-        if (sportProfileRepository.findByUser_Id(userId).isPresent()) {
+        if (sportProfileRepository.findByUserId(userId).isPresent()) {
             throw new BusinessException(
                     "User with id " + userId + " already has a sport profile");
         }
@@ -84,7 +82,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
 
         LocalDateTime now = LocalDateTime.now();
         SportProfileEntity entity = sportProfileMapper.toEntity(model);
-        entity.setUser(UserEntity.builder().id(userId).build());
+        entity.setUserId(userId);
         entity.setPhotoId(photoId);
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
@@ -107,7 +105,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         SPORT_PROFILE_NOT_FOUND_ID + id));
 
-        Long userId = existing.getUser().getId();
+        Long userId = existing.getUserId();
         if (teamsServiceClient.isPlayerAssignedToTeam(userId)) {
             throw new BusinessException(
                     "Cannot update sport profile while player is assigned to a team");
@@ -117,7 +115,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
 
         SportProfileEntity updated = sportProfileMapper.toEntity(model);
         updated.setId(id);
-        updated.setUser(existing.getUser());
+        updated.setUserId(userId);
         updated.setPhotoId(photoId);
         updated.setCreatedAt(existing.getCreatedAt());
         updated.setUpdatedAt(LocalDateTime.now());
