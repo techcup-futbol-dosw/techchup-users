@@ -2,6 +2,8 @@ package edu.dosw.users.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,9 +36,27 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("!prod")
+    @Order(1)
+    public SecurityFilterChain localFilterChain(HttpSecurity http) {
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        try {
+            return http.build();
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to build the local security filter chain", ex);
+        }
+    }
+
+    @Bean
+    @Profile("prod")
+    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) {
-        // Keep Spring Security's default CSRF protection enabled for unsafe HTTP methods.
-        http.cors(cors -> {})
+        // CSRF disabled: stateless JWT API — no session cookies, so CSRF protection is unnecessary.
+        http.csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
 
                 // Use stateless session management: every request must carry auth info
                 .sessionManagement(session ->

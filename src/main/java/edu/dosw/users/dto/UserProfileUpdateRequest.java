@@ -46,7 +46,6 @@ public class UserProfileUpdateRequest {
     @NotBlank
     private String academicProgram;
 
-    @NotNull
     @Positive
     private Integer semester;
 }
