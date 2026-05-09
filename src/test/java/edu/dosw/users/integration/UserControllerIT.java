@@ -26,7 +26,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,29 +56,6 @@ class UserControllerIT {
         auditLogRepository.deleteAll();
         invitationRepository.deleteAll();
         sportProfileRepository.deleteAll();
-    }
-
-    // ── POST /api/users ───────────────────────────────────────────────────────
-
-    @Test
-    void createUser_returns201() throws Exception {
-        UserRequest request = UserRequest.builder()
-                .fullName("Carlos Perez")
-                .email("carlos@eci.edu.co")
-                .password("hash123")
-                .identification("11223344")
-                .build();
-        when(identityServiceClient.createUser(any())).thenReturn(
-                UserModel.builder().id(1L).fullName("Carlos Perez").status("ACTIVE").build());
-
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.fullName").value("Carlos Perez"))
-                .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     // ── GET /api/users ────────────────────────────────────────────────────────

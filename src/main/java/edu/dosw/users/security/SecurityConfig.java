@@ -36,7 +36,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("!prod")
+    @Profile("local")
     @Order(1)
     public SecurityFilterChain localFilterChain(HttpSecurity http) {
         http.csrf(csrf -> csrf.disable())
@@ -51,7 +51,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Profile("prod")
     @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) {
         // CSRF disabled: stateless JWT API — no session cookies, so CSRF protection is unnecessary.

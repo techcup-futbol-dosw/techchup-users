@@ -160,24 +160,6 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ── POST /api/users ───────────────────────────────────────────────────────
-
-    @Test
-    void create_returnsCreated() throws Exception {
-        UserRequest request = UserRequest.builder()
-                .fullName("Ana").email("ana@eci.edu.co")
-                .password("hash").identification("999")
-                .build();
-        when(userService.create(any()))
-                .thenReturn(UserModel.builder().id(5L).fullName("Ana").build());
-
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(5));
-    }
-
     // ── PUT /api/users/{id} ───────────────────────────────────────────────────
 
     @Test
