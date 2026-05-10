@@ -37,7 +37,7 @@ public class SecurityConfig {
     @Bean
     @Profile("!local")
     @SuppressWarnings("java:S4502")
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         // CSRF disabled: stateless JWT API — no session cookies, so CSRF protection is unnecessary.
         return http
                 .csrf(csrf -> csrf.disable())

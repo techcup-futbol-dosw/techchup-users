@@ -6,7 +6,6 @@ import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
-import edu.dosw.users.model.SportProfileModel;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.SportProfileRepository;
 import lombok.RequiredArgsConstructor;

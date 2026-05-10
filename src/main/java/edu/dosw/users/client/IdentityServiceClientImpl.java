@@ -27,28 +27,28 @@ import java.util.List;
 @Profile("prod")
 public class IdentityServiceClientImpl implements IdentityServiceClient {
 
-    private static final String USERS_PATH = "/api/users/";
-    private static final String USERS_ENDPOINT = "/api/users";
-
     private final String identityServiceUrl;
+    private final String usersBasePath;
     private final RestTemplate restTemplate;
 
     @Autowired
     public IdentityServiceClientImpl(
-            @Value("${identity.service.url}") String identityServiceUrl) {
-        this(identityServiceUrl, new RestTemplate());
+            @Value("${identity.service.url}") String identityServiceUrl,
+            @Value("${identity.service.users-path:/api/users}") String usersBasePath) {
+        this(identityServiceUrl, usersBasePath, new RestTemplate());
     }
 
     /** Package-private constructor used in unit tests to inject a mock RestTemplate. */
-    IdentityServiceClientImpl(String identityServiceUrl, RestTemplate restTemplate) {
+    IdentityServiceClientImpl(String identityServiceUrl, String usersBasePath, RestTemplate restTemplate) {
         this.identityServiceUrl = identityServiceUrl;
+        this.usersBasePath = usersBasePath;
         this.restTemplate = restTemplate;
     }
 
     @Override
     public boolean userExists(Long id) {
         try {
-            restTemplate.getForEntity(identityServiceUrl + USERS_PATH + id, Void.class);
+            restTemplate.getForEntity(identityServiceUrl + usersBasePath + "/" + id, Void.class);
             return true;
         } catch (HttpClientErrorException.NotFound e) {
             return false;
@@ -58,7 +58,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public UserModel getUserById(Long id) {
         try {
-            return restTemplate.getForObject(identityServiceUrl + USERS_PATH + id, UserModel.class);
+            return restTemplate.getForObject(identityServiceUrl + usersBasePath + "/" + id, UserModel.class);
         } catch (HttpClientErrorException.NotFound e) {
             return null;
         }
@@ -67,7 +67,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public UserModel getUserByIdentification(String identification) {
         URI uri = UriComponentsBuilder
-                .fromUriString(identityServiceUrl + USERS_ENDPOINT + "/identification/{id}")
+                .fromUriString(identityServiceUrl + usersBasePath + "/identification/{id}")
                 .buildAndExpand(identification)
                 .toUri();
         try {
@@ -80,7 +80,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public List<UserModel> getAllUsers() {
         ResponseEntity<List<UserModel>> response = restTemplate.exchange(
-                identityServiceUrl + USERS_ENDPOINT,
+                identityServiceUrl + usersBasePath,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<>() {});
@@ -90,7 +90,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public UserModel createUser(UserModel model) {
         return restTemplate.postForObject(
-                identityServiceUrl + USERS_ENDPOINT,
+                identityServiceUrl + usersBasePath,
                 model,
                 UserModel.class);
     }
@@ -99,7 +99,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     public UserModel updateUser(Long id, UserModel model) {
         HttpEntity<UserModel> entity = new HttpEntity<>(model);
         return restTemplate.exchange(
-                identityServiceUrl + USERS_PATH + id,
+                identityServiceUrl + usersBasePath + "/" + id,
                 HttpMethod.PUT,
                 entity,
                 UserModel.class).getBody();
@@ -111,7 +111,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
         headers.set("X-User-Id", userId.toString());
         HttpEntity<UserModel> entity = new HttpEntity<>(model, headers);
         return restTemplate.exchange(
-                identityServiceUrl + USERS_ENDPOINT + "/me",
+                identityServiceUrl + usersBasePath + "/me",
                 HttpMethod.PUT,
                 entity,
                 UserModel.class).getBody();
@@ -120,7 +120,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public void deactivateUser(Long id) {
         restTemplate.patchForObject(
-                identityServiceUrl + USERS_PATH + id + "/deactivate",
+                identityServiceUrl + usersBasePath + "/" + id + "/deactivate",
                 null,
                 Void.class);
     }
@@ -128,7 +128,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public void inactivateUser(Long id) {
         restTemplate.patchForObject(
-                identityServiceUrl + USERS_PATH + id + "/inactivate",
+                identityServiceUrl + usersBasePath + "/" + id + "/inactivate",
                 null,
                 Void.class);
     }
@@ -136,7 +136,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public List<UserModel> searchUsers(String name, String status) {
         UriComponentsBuilder uri = UriComponentsBuilder
-                .fromUriString(identityServiceUrl + USERS_ENDPOINT + "/search");
+                .fromUriString(identityServiceUrl + usersBasePath + "/search");
         if (name != null) uri.queryParam("name", name);
         if (status != null) uri.queryParam("status", status);
 
