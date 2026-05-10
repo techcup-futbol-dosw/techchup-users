@@ -27,6 +27,9 @@ import java.util.List;
 @Profile("prod")
 public class IdentityServiceClientImpl implements IdentityServiceClient {
 
+    private static final String USERS_PATH = "/api/users/";
+    private static final String USERS_ENDPOINT = "/api/users";
+
     private final String identityServiceUrl;
     private final RestTemplate restTemplate;
 
@@ -45,7 +48,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public boolean userExists(Long id) {
         try {
-            restTemplate.getForEntity(identityServiceUrl + "/api/users/" + id, Void.class);
+            restTemplate.getForEntity(identityServiceUrl + USERS_PATH + id, Void.class);
             return true;
         } catch (HttpClientErrorException.NotFound e) {
             return false;
@@ -55,7 +58,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public UserModel getUserById(Long id) {
         try {
-            return restTemplate.getForObject(identityServiceUrl + "/api/users/" + id, UserModel.class);
+            return restTemplate.getForObject(identityServiceUrl + USERS_PATH + id, UserModel.class);
         } catch (HttpClientErrorException.NotFound e) {
             return null;
         }
@@ -64,7 +67,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public UserModel getUserByIdentification(String identification) {
         URI uri = UriComponentsBuilder
-                .fromUriString(identityServiceUrl + "/api/users/identification/{id}")
+                .fromUriString(identityServiceUrl + USERS_ENDPOINT + "/identification/{id}")
                 .buildAndExpand(identification)
                 .toUri();
         try {
@@ -77,7 +80,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public List<UserModel> getAllUsers() {
         ResponseEntity<List<UserModel>> response = restTemplate.exchange(
-                identityServiceUrl + "/api/users",
+                identityServiceUrl + USERS_ENDPOINT,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<>() {});
@@ -87,7 +90,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public UserModel createUser(UserModel model) {
         return restTemplate.postForObject(
-                identityServiceUrl + "/api/users",
+                identityServiceUrl + USERS_ENDPOINT,
                 model,
                 UserModel.class);
     }
@@ -96,7 +99,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     public UserModel updateUser(Long id, UserModel model) {
         HttpEntity<UserModel> entity = new HttpEntity<>(model);
         return restTemplate.exchange(
-                identityServiceUrl + "/api/users/" + id,
+                identityServiceUrl + USERS_PATH + id,
                 HttpMethod.PUT,
                 entity,
                 UserModel.class).getBody();
@@ -108,7 +111,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
         headers.set("X-User-Id", userId.toString());
         HttpEntity<UserModel> entity = new HttpEntity<>(model, headers);
         return restTemplate.exchange(
-                identityServiceUrl + "/api/users/me",
+                identityServiceUrl + USERS_ENDPOINT + "/me",
                 HttpMethod.PUT,
                 entity,
                 UserModel.class).getBody();
@@ -117,7 +120,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public void deactivateUser(Long id) {
         restTemplate.patchForObject(
-                identityServiceUrl + "/api/users/" + id + "/deactivate",
+                identityServiceUrl + USERS_PATH + id + "/deactivate",
                 null,
                 Void.class);
     }
@@ -125,7 +128,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public void inactivateUser(Long id) {
         restTemplate.patchForObject(
-                identityServiceUrl + "/api/users/" + id + "/inactivate",
+                identityServiceUrl + USERS_PATH + id + "/inactivate",
                 null,
                 Void.class);
     }
@@ -133,7 +136,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     @Override
     public List<UserModel> searchUsers(String name, String status) {
         UriComponentsBuilder uri = UriComponentsBuilder
-                .fromUriString(identityServiceUrl + "/api/users/search");
+                .fromUriString(identityServiceUrl + USERS_ENDPOINT + "/search");
         if (name != null) uri.queryParam("name", name);
         if (status != null) uri.queryParam("status", status);
 
