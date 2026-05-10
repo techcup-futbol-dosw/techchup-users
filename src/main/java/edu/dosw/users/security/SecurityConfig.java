@@ -43,36 +43,33 @@ public class SecurityConfig {
     @Profile("local")
     @Order(1)
     @SuppressWarnings("java:S4502")
-    public SecurityFilterChain localFilterChain(HttpSecurity http) {
-        http.csrf(csrf -> csrf.disable())
+    public SecurityFilterChain localFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-        try {
-            return http.build();
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed to build the local security filter chain", ex);
-        }
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
     }
 
     @Bean
+    @Profile("!local")
     @Order(2)
     @SuppressWarnings("java:S4502")
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // CSRF disabled: stateless JWT API — no session cookies, so CSRF protection is unnecessary.
-        http.csrf(csrf -> csrf.disable())
+        return http
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
 
                 // Use stateless session management: every request must carry auth info
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Configure handlers for auth failures and access denied
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler)
-                )
+                        .accessDeniedHandler(accessDeniedHandler))
 
                 // Public endpoints (API docs) and require authentication for the rest
                 .authorizeHttpRequests(auth -> auth
@@ -80,19 +77,12 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
-                                // Add any public endpoints that this service may have.
                         ).permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
 
                 // Register JWT filter before the standard username/password filter
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        try {
-            return http.build();
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed to build the security filter chain", ex);
-        }
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 }
 
