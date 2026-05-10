@@ -6,7 +6,6 @@ import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
-import edu.dosw.users.model.SportProfileModel;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.SportProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
 
     private static final String USER_NOT_FOUND_ID = "User not found with id: ";
+    private static final String STATUS_ACTIVE = "ACTIVE";
 
     private final IdentityServiceClient identityServiceClient;
     private final TeamsServiceClient teamsServiceClient;
@@ -78,7 +78,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public UserModel create(UserModel model) {
         LocalDateTime now = LocalDateTime.now();
-        model.setStatus("ACTIVE");
+        model.setStatus(STATUS_ACTIVE);
         model.setProfileCreatedAt(now);
         model.setUpdatedAt(now);
         return identityServiceClient.createUser(model);
@@ -98,7 +98,7 @@ public class UserServiceImpl implements IUserService {
             throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
         }
 
-        if (!"ACTIVE".equalsIgnoreCase(existing.getStatus())) {
+        if (!STATUS_ACTIVE.equalsIgnoreCase(existing.getStatus())) {
             throw new BusinessException("Cannot update an inactive user.");
         }
 
@@ -153,7 +153,7 @@ public class UserServiceImpl implements IUserService {
         if (user == null) {
             throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
         }
-        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+        if (!STATUS_ACTIVE.equalsIgnoreCase(user.getStatus())) {
             throw new BusinessException("La cuenta ya se encuentra inactiva");
         }
         if (teamsServiceClient.isPlayerAssignedToTeam(id)) {

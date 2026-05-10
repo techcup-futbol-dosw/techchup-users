@@ -83,8 +83,8 @@ class SecurityConfigTest {
      }
 
       @Test
-      @DisplayName("Unsafe requests without a CSRF token are rejected even with a valid JWT")
-      void unsafeRequestWithoutCsrfTokenIsRejected() throws ServletException, IOException {
+      @DisplayName("POST request with valid JWT is allowed through (CSRF disabled for stateless API)")
+      void postRequestWithValidJwtIsAllowed() throws ServletException, IOException {
           MockHttpServletRequest request = buildRequest("POST");
           request.addHeader("Authorization", "Bearer " + createAccessToken("123"));
 
@@ -93,8 +93,8 @@ class SecurityConfigTest {
 
           filterChainProxy.doFilter(request, response, downstreamChain);
 
-          assertEquals(403, response.getStatus());
-          verify(downstreamChain, never()).doFilter(any(), any());
+          assertEquals(200, response.getStatus());
+          verify(downstreamChain).doFilter(any(), any());
       }
 
      @Test

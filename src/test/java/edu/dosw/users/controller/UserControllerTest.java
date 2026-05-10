@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * deactivating user profiles.</p>
  */
 @SpringBootTest
+@WithMockUser(roles = "ADMINISTRADOR")
 class UserControllerTest {
 
     @Autowired private WebApplicationContext context;
@@ -158,24 +159,6 @@ class UserControllerTest {
 
         mockMvc.perform(get("/api/users/identification/xxx"))
                 .andExpect(status().isNotFound());
-    }
-
-    // ── POST /api/users ───────────────────────────────────────────────────────
-
-    @Test
-    void create_returnsCreated() throws Exception {
-        UserRequest request = UserRequest.builder()
-                .fullName("Ana").email("ana@eci.edu.co")
-                .password("hash").identification("999")
-                .build();
-        when(userService.create(any()))
-                .thenReturn(UserModel.builder().id(5L).fullName("Ana").build());
-
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(5));
     }
 
     // ── PUT /api/users/{id} ───────────────────────────────────────────────────

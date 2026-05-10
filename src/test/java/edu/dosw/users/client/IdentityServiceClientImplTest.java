@@ -27,6 +27,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class IdentityServiceClientImplTest {
 
     private static final String BASE_URL = "http://localhost:8081";
+    private static final String USERS_BASE_PATH = "/api/users";
 
     private MockRestServiceServer server;
     private IdentityServiceClientImpl client;
@@ -37,7 +38,7 @@ class IdentityServiceClientImplTest {
     void setUp() {
         RestTemplate restTemplate = new RestTemplate();
         server = MockRestServiceServer.createServer(restTemplate);
-        client = new IdentityServiceClientImpl(BASE_URL, restTemplate);
+        client = new IdentityServiceClientImpl(BASE_URL, USERS_BASE_PATH, restTemplate);
     }
 
     // ── userExists ────────────────────────────────────────────────────────────

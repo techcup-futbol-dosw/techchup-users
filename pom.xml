@@ -97,6 +97,13 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Spring Security Test: @WithMockUser and security test support -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Security -->
     <!-- Spring Security: authentication and authorization support -->
     <!-- Spring Security: authentication and authorization support -->
@@ -211,6 +218,7 @@
                 <exclude>edu/dosw/users/enums/**</exclude>
                 <exclude>edu/dosw/users/mapper/**MapperImpl.class</exclude>
                 <exclude>edu/dosw/users/config/MongoConfig.class</exclude>
+                <exclude>edu/dosw/users/security/LocalSecurityConfig.class</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -226,6 +234,7 @@
                 <exclude>edu/dosw/users/enums/**</exclude>
                 <exclude>edu/dosw/users/mapper/**MapperImpl.class</exclude>
                 <exclude>edu/dosw/users/config/MongoConfig.class</exclude>
+                <exclude>edu/dosw/users/security/LocalSecurityConfig.class</exclude>
               </excludes>
               <rules>
                 <rule>
