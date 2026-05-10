@@ -35,9 +35,14 @@ public class SecurityConfig {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
+    // S4502: CSRF disabled intentionally — this is a stateless JWT REST API.
+    // Authentication is carried in the Authorization header (Bearer token), never in session cookies.
+    // Browsers do not attach Authorization headers automatically on cross-origin requests,
+    // so there is no CSRF attack surface regardless of HTTP method.
     @Bean
     @Profile("local")
     @Order(1)
+    @SuppressWarnings("java:S4502")
     public SecurityFilterChain localFilterChain(HttpSecurity http) {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
@@ -52,6 +57,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
+    @SuppressWarnings("java:S4502")
     public SecurityFilterChain filterChain(HttpSecurity http) {
         // CSRF disabled: stateless JWT API — no session cookies, so CSRF protection is unnecessary.
         http.csrf(csrf -> csrf.disable())
