@@ -8,6 +8,7 @@ import edu.dosw.users.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,14 @@ import java.util.List;
  * REST controller for user profile management.
  *
  * <p>Base path: {@code /api/users}</p>
+ *
+ * <p>Access control summary:
+ * <ul>
+ *   <li>ADMINISTRADOR — full access to all endpoints.</li>
+ *   <li>CAPITAN — can search players by filter and look up by identification.</li>
+ *   <li>Any authenticated user — can read and update their own profile.</li>
+ * </ul>
+ * </p>
  */
 @RestController
 @RequestMapping("/api/users")
@@ -33,8 +42,12 @@ public class UserController {
     private final IUserService userService;
     private final UserMapper userMapper;
 
-    /** Returns players matching the given filters (all parameters optional). */
+    /**
+     * Returns players matching the given filters.
+     * Only captains and admins may search for players (per project requirements).
+     */
     @GetMapping("/search")
+    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<UserResponse>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String position,
@@ -45,8 +58,12 @@ public class UserController {
                         .toList());
     }
 
-    /** Returns all user profiles. */
+    /**
+     * Returns all user profiles.
+     * Restricted to administrators only.
+     */
     @GetMapping
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<UserResponse>> getAll() {
         return ResponseEntity.ok(
                 userService.getAll().stream()
@@ -54,15 +71,23 @@ public class UserController {
                         .toList());
     }
 
-    /** Returns the user profile with the given identifier. */
+    /**
+     * Returns the user profile with the given identifier.
+     * Accessible by the owner or an administrator.
+     */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(
                 userMapper.toResponse(userService.getById(id)));
     }
 
-    /** Returns the user profile with the given official identification number. */
+    /**
+     * Returns the user profile with the given official identification number.
+     * Captains use this when building their roster; admins have full access.
+     */
     @GetMapping("/identification/{identification}")
+    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<UserResponse> getByIdentification(
             @PathVariable String identification) {
         return ResponseEntity.ok(
@@ -70,8 +95,12 @@ public class UserController {
                         userService.getByIdentification(identification)));
     }
 
-    /** Replaces an existing user profile and returns the updated response. */
+    /**
+     * Replaces an existing user profile (admin operation).
+     * Only administrators can perform full user updates.
+     */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<UserResponse> update(
             @PathVariable Long id, @RequestBody AdminUserUpdateRequest request) {
         return ResponseEntity.ok(
@@ -79,8 +108,12 @@ public class UserController {
                         userService.update(id, userMapper.toModel(request))));
     }
 
-    /** Updates the current user's profile. */
+    /**
+     * Updates the current user's own profile.
+     * Any authenticated user may update their own basic information.
+     */
     @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> updateMe(
             @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody UserProfileUpdateRequest request) {
@@ -89,15 +122,23 @@ public class UserController {
                         userService.updateProfile(userId, userMapper.toModel(request))));
     }
 
-    /** Sets the profile status to INACTIVE. Returns 204 No Content. */
+    /**
+     * Deactivates a user account (admin operation).
+     * Only administrators can forcibly deactivate any account.
+     */
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         userService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 
-    /** Inactivates the user profile after validating tournament participation. */
+    /**
+     * Inactivates the user's own account after validating tournament participation.
+     * The user may inactivate their own account; admins may inactivate any account.
+     */
     @PatchMapping("/{id}/inactivate")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
     public ResponseEntity<Void> inactivate(@PathVariable Long id) {
         userService.inactivate(id);
         return ResponseEntity.noContent().build();
