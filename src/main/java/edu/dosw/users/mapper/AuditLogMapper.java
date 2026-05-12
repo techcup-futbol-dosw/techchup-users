@@ -1,5 +1,6 @@
 package edu.dosw.users.mapper;
 
+import edu.dosw.users.dto.AuditLogResponse;
 import edu.dosw.users.entity.AuditLogEntity;
 import edu.dosw.users.model.AuditLogModel;
 import org.mapstruct.Mapper;
@@ -39,4 +40,7 @@ public interface AuditLogMapper {
     @Mapping(target = "sportProfile", ignore = true)
     @Mapping(target = "invitation", ignore = true)
     AuditLogEntity toEntity(AuditLogModel model);
+
+    /** Converts a domain model to an {@link AuditLogResponse}. */
+    AuditLogResponse toResponse(AuditLogModel model);
 }
