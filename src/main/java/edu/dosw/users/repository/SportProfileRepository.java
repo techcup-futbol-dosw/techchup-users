@@ -31,4 +31,21 @@ public interface SportProfileRepository extends JpaRepository<SportProfileEntity
      * @return list of sport profiles with the requested position
      */
     List<SportProfileEntity> findByPosition(String position);
+
+    /**
+     * Finds all sport profiles matching the given availability flag.
+     *
+     * @param available {@code true} to return only available players
+     * @return list of sport profiles with the requested availability
+     */
+    List<SportProfileEntity> findByAvailable(boolean available);
+
+    /**
+     * Finds all sport profiles matching both position and availability.
+     *
+     * @param position  position string to filter by
+     * @param available availability flag to filter by
+     * @return list of sport profiles matching both criteria
+     */
+    List<SportProfileEntity> findByPositionAndAvailable(String position, boolean available);
 }
