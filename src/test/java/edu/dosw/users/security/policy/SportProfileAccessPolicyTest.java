@@ -1,7 +1,10 @@
 package edu.dosw.users.security.policy;
 
+import edu.dosw.users.entity.SportProfileEntity;
+import edu.dosw.users.repository.SportProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -11,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,10 +28,15 @@ class SportProfileAccessPolicyTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private SportProfileRepository sportProfileRepository;
+
     @BeforeEach
     void setUp() {
-        policy = new SportProfileAccessPolicy();
+        policy = new SportProfileAccessPolicy(sportProfileRepository);
     }
+
+    // ── canAccessOwnSportProfile ──────────────────────────────────────────────
 
     @ParameterizedTest(name = "principal={0}, requestedId={1}")
     @CsvSource({
@@ -76,5 +85,45 @@ class SportProfileAccessPolicyTest {
                 Arguments.of(123L, null, null, true)
         );
     }
-}
 
+    // ── canModifyOwnSportProfile ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Owner can modify their own sport profile")
+    void canModifyOwnSportProfile_ownerAllowed() {
+        SportProfileEntity profile = SportProfileEntity.builder().id(10L).userId(42L).build();
+        when(sportProfileRepository.findById(10L)).thenReturn(Optional.of(profile));
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("42");
+
+        assertTrue(policy.canModifyOwnSportProfile(10L, authentication));
+    }
+
+    @Test
+    @DisplayName("Non-owner cannot modify another user's sport profile")
+    void canModifyOwnSportProfile_nonOwnerDenied() {
+        SportProfileEntity profile = SportProfileEntity.builder().id(10L).userId(99L).build();
+        when(sportProfileRepository.findById(10L)).thenReturn(Optional.of(profile));
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("42");
+
+        assertFalse(policy.canModifyOwnSportProfile(10L, authentication));
+    }
+
+    @Test
+    @DisplayName("Returns false when sport profile does not exist")
+    void canModifyOwnSportProfile_profileNotFound_returnsFalse() {
+        when(sportProfileRepository.findById(999L)).thenReturn(Optional.empty());
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("42");
+
+        assertFalse(policy.canModifyOwnSportProfile(999L, authentication));
+    }
+
+    @Test
+    @DisplayName("Returns false when authentication is null")
+    void canModifyOwnSportProfile_nullAuth_returnsFalse() {
+        assertFalse(policy.canModifyOwnSportProfile(10L, null));
+        verifyNoInteractions(sportProfileRepository);
+    }
+}

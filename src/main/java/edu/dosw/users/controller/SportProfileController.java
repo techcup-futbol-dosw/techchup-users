@@ -58,10 +58,10 @@ public class SportProfileController {
 
     /**
      * Returns the sport profile associated with the given user.
-     * Readable by any authenticated user.
+     * Accessible by the profile owner, captains (player search) and administrators.
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<SportProfileResponse> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(
                 sportProfileMapper.toResponse(sportProfileService.getByUserId(userId)));
@@ -95,7 +95,7 @@ public class SportProfileController {
      * @param photo   optional new photo; omitting it keeps the existing one
      */
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@sportProfileAccessPolicy.canModifyOwnSportProfile(#id, authentication) or hasRole('ADMINISTRADOR')")
     public ResponseEntity<SportProfileResponse> update(
             @PathVariable Long id,
             @RequestPart("profile") SportProfileRequest request,
@@ -113,7 +113,7 @@ public class SportProfileController {
      * @param available new availability value (query param)
      */
     @PatchMapping("/{id}/availability")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@sportProfileAccessPolicy.canModifyOwnSportProfile(#id, authentication) or hasRole('ADMINISTRADOR')")
     public ResponseEntity<Void> updateAvailability(
             @PathVariable Long id,
             @RequestParam boolean available) {

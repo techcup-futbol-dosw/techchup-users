@@ -76,10 +76,10 @@ public class InvitationController {
 
     /**
      * Accepts a pending invitation.
-     * Only the invited player (authenticated owner) may accept.
+     * Only the invited player (owner) or an administrator may accept.
      */
     @PatchMapping("/{id}/accept")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
     public ResponseEntity<InvitationResponse> accept(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.accept(id)));
@@ -87,10 +87,10 @@ public class InvitationController {
 
     /**
      * Rejects a pending invitation.
-     * Only the invited player (authenticated owner) may reject.
+     * Only the invited player (owner) or an administrator may reject.
      */
     @PatchMapping("/{id}/reject")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
     public ResponseEntity<InvitationResponse> reject(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.reject(id)));

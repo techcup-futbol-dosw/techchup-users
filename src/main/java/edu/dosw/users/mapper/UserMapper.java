@@ -2,7 +2,6 @@ package edu.dosw.users.mapper;
 
 import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
-import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.model.UserModel;
 import org.mapstruct.Mapper;
@@ -17,13 +16,6 @@ import org.mapstruct.Mapping;
  */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
-    /** Converts a {@link UserRequest} to its domain model. */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "profileCreatedAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    UserModel toModel(UserRequest request);
 
     /**
      * Converts an administrator update request to a domain model containing

@@ -1,7 +1,10 @@
 package edu.dosw.users.security.policy;
 
+import edu.dosw.users.entity.InvitationEntity;
+import edu.dosw.users.repository.InvitationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -11,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,10 +28,15 @@ class InvitationAccessPolicyTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private InvitationRepository invitationRepository;
+
     @BeforeEach
     void setUp() {
-        policy = new InvitationAccessPolicy();
+        policy = new InvitationAccessPolicy(invitationRepository);
     }
+
+    // ── canAccessOwnInvitation ────────────────────────────────────────────────
 
     @ParameterizedTest(name = "principal={0}, requestedId={1}")
     @CsvSource({
@@ -76,5 +85,45 @@ class InvitationAccessPolicyTest {
                 Arguments.of(123L, null, null, true)
         );
     }
-}
 
+    // ── canRespondToInvitation ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Recipient can respond to their own invitation")
+    void canRespondToInvitation_recipientAllowed() {
+        InvitationEntity invitation = InvitationEntity.builder().id(5L).userId(42L).build();
+        when(invitationRepository.findById(5L)).thenReturn(Optional.of(invitation));
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("42");
+
+        assertTrue(policy.canRespondToInvitation(5L, authentication));
+    }
+
+    @Test
+    @DisplayName("Non-recipient cannot respond to another user's invitation")
+    void canRespondToInvitation_nonRecipientDenied() {
+        InvitationEntity invitation = InvitationEntity.builder().id(5L).userId(99L).build();
+        when(invitationRepository.findById(5L)).thenReturn(Optional.of(invitation));
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("42");
+
+        assertFalse(policy.canRespondToInvitation(5L, authentication));
+    }
+
+    @Test
+    @DisplayName("Returns false when invitation does not exist")
+    void canRespondToInvitation_invitationNotFound_returnsFalse() {
+        when(invitationRepository.findById(999L)).thenReturn(Optional.empty());
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn("42");
+
+        assertFalse(policy.canRespondToInvitation(999L, authentication));
+    }
+
+    @Test
+    @DisplayName("Returns false when authentication is null")
+    void canRespondToInvitation_nullAuth_returnsFalse() {
+        assertFalse(policy.canRespondToInvitation(5L, null));
+        verifyNoInteractions(invitationRepository);
+    }
+}
