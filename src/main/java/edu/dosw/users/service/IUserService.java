@@ -39,15 +39,6 @@ public interface IUserService {
     List<UserModel> getAll();
 
     /**
-     * Persists a new user profile. Sets {@code profileCreatedAt}, {@code updatedAt}
-     * and {@code status} to {@code "ACTIVE"} automatically.
-     *
-     * @param model profile data to create
-     * @return the saved model with its generated identifier
-     */
-    UserModel create(UserModel model);
-
-    /**
      * Updates an existing user profile with the data provided.
      *
      * @param id    identifier of the profile to update

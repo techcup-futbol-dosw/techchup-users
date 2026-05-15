@@ -7,14 +7,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Security configuration active only when the {@code local} profile is enabled.
  *
- * <p>Permits all requests without authentication so that developers can call the
- * API freely from Postman or Swagger without needing a JWT token during local
- * development. This bean is intentionally excluded from JaCoCo coverage because
- * it cannot be integration-tested without a running MongoDB instance.</p>
+ * <p>Installs the {@link JwtAuthenticationFilter} so that {@code @PreAuthorize}
+ * annotations on controllers can resolve the authenticated user from the Bearer
+ * token. All requests are still permitted at the filter-chain level, which means
+ * Swagger and H2 console remain accessible without a token.</p>
  *
  * <p><strong>CSRF note (S4502):</strong> CSRF protection is disabled because this
  * is a stateless JWT REST API. Authentication is carried in the
@@ -27,6 +28,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @SuppressWarnings("java:S4502")
 public class LocalSecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public LocalSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Bean
     @Order(1)
     public SecurityFilterChain localFilterChain(HttpSecurity http) {
@@ -35,6 +42,7 @@ public class LocalSecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

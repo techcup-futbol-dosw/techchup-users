@@ -11,7 +11,6 @@ import edu.dosw.users.repository.SportProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,21 +66,6 @@ public class UserServiceImpl implements IUserService {
     @Override
     public List<UserModel> getAll() {
         return identityServiceClient.getAllUsers();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Pre-populates {@code status}, {@code profileCreatedAt} and
-     * {@code updatedAt} before delegating to the identity service.</p>
-     */
-    @Override
-    public UserModel create(UserModel model) {
-        LocalDateTime now = LocalDateTime.now();
-        model.setStatus(STATUS_ACTIVE);
-        model.setProfileCreatedAt(now);
-        model.setUpdatedAt(now);
-        return identityServiceClient.createUser(model);
     }
 
     /**

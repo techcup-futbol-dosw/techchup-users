@@ -10,6 +10,8 @@
 📦 techchup-users
 ├── 📁 .github/                 # Configuración de GitHub (workflows, etc.)
 ├── 📁 .mvn/                    # Archivos auxiliares de Maven
+├── 📄 .gitignore
+├── 📄 lombok.config
 ├── 📄 pom.xml                  # Dependencias y configuración de build
 ├── 📁 src/
 │   ├── 📁 main/
@@ -17,10 +19,39 @@
 │   │   │   └── 📁 edu/
 │   │   │       └── 📁 dosw/
 │   │   │           └── 📁 users/
-│   │   │               └── App.java  # Clase principal / punto de entrada
-│   │   └── 📁 resources/       # application.yml/properties, estáticos, etc.
+│   │   │               ├── 📄 App.java                # Clase principal / punto de entrada
+│   │   │               ├── 📁 client/
+│   │   │               ├── 📁 config/
+│   │   │               ├── 📁 controller/
+│   │   │               ├── 📁 dto/
+│   │   │               ├── 📁 entity/
+│   │   │               ├── 📁 enums/
+│   │   │               ├── 📁 exception/
+│   │   │               ├── 📁 mapper/
+│   │   │               ├── 📁 model/
+│   │   │               ├── 📁 repository/
+│   │   │               └── 📁 service/
+│   │   ├── 📁 resources/
+│   │   │   ├── 📄 application.properties
+│   │   │   ├── 📄 application-prod.properties
+│   │   │   ├── 📄 application-local.properties.example
+│   │   │   └── 📁 docs/
+│   │   └── 📁 sql/
 │   └── 📁 test/
-│       └── 📁 java/            # Pruebas automatizadas
+│       ├── 📁 java/
+│       │   └── 📁 edu/
+│       │       └── 📁 dosw/
+│       │           └── 📁 users/
+│       │               ├── 📄 AppTest.java
+│       │               ├── 📁 controller/
+│       │               ├── 📁 integration/
+│       │               ├── 📁 mapper/
+│       │               ├── 📁 model/
+│       │               ├── 📁 repository/
+│       │               └── 📁 service/
+│       ├── 📁 resources/
+│       │   └── 📄 application.properties
+│       └── 📁 sql/
 └── 📄 README.md
 ```
 

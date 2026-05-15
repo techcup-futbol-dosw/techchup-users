@@ -3,7 +3,7 @@ package edu.dosw.users.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.dosw.users.client.IdentityServiceClient;
-import edu.dosw.users.dto.UserRequest;
+import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.model.UserModel;
 import edu.dosw.users.repository.AuditLogRepository;
 import edu.dosw.users.repository.InvitationRepository;
@@ -126,11 +126,8 @@ class UserControllerIT {
         when(identityServiceClient.updateUser(eq(1L), any())).thenReturn(
                 UserModel.builder().id(1L).fullName("Nombre Nuevo").build());
 
-        UserRequest updated = UserRequest.builder()
+        AdminUserUpdateRequest updated = AdminUserUpdateRequest.builder()
                 .fullName("Nombre Nuevo")
-                .email("nuevo@eci.edu.co")
-                .password("hash")
-                .identification("77778888")
                 .build();
 
         mockMvc.perform(put("/api/users/1")
@@ -143,8 +140,8 @@ class UserControllerIT {
     @Test
     void updateUser_nonExistent_returns404() throws Exception {
         when(identityServiceClient.getUserById(9999L)).thenReturn(null);
-        UserRequest request = UserRequest.builder()
-                .fullName("X").email("x@x.com").password("x").identification("x")
+        AdminUserUpdateRequest request = AdminUserUpdateRequest.builder()
+                .fullName("X")
                 .build();
 
         mockMvc.perform(put("/api/users/9999")
