@@ -51,9 +51,15 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String position,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String identification,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Integer semester,
+            @RequestParam(required = false) Integer age,
+            @RequestParam(required = false) Boolean available) {
         return ResponseEntity.ok(
-                userService.search(name, position, status).stream()
+                userService.search(name, position, status, identification, gender, semester, age, available)
+                        .stream()
                         .map(userMapper::toResponse)
                         .toList());
     }
