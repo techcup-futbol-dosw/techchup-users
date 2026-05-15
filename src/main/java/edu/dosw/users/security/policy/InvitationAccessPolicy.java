@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class InvitationAccessPolicy {
+public class InvitationAccessPolicy extends AccessPolicySupport {
 
     private final InvitationRepository invitationRepository;
 
@@ -30,23 +30,5 @@ public class InvitationAccessPolicy {
         return invitationRepository.findById(invitationId)
                 .map(invitation -> matchesPrincipal(invitation.getUserId(), authentication))
                 .orElse(false);
-    }
-
-    private boolean matchesPrincipal(Long userId, Authentication authentication) {
-        if (!isAuthenticatedUser(authentication)) {
-            return false;
-        }
-        try {
-            Long currentUserId = Long.valueOf(authentication.getPrincipal().toString());
-            return userId.equals(currentUserId);
-        } catch (NumberFormatException ex) {
-            return false;
-        }
-    }
-
-    private boolean isAuthenticatedUser(Authentication authentication) {
-        return authentication != null
-                && authentication.isAuthenticated()
-                && authentication.getPrincipal() != null;
     }
 }
