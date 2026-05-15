@@ -76,12 +76,22 @@ public interface IUserService {
     void inactivate(Long id);
 
     /**
-     * Searches for players (users with a sport profile) matching the given filters.
+     * Searches for players matching the given filters.
      *
-     * @param name     optional partial name filter (case-insensitive)
-     * @param position optional position filter (e.g. {@code "FORWARD"}); {@code null} returns all positions
-     * @param status   optional status filter (e.g. {@code "ACTIVE"}); {@code null} returns all statuses
+     * <p>Name and status are delegated to the identity service; the remaining
+     * filters are applied locally using sport-profile and user-model data.</p>
+     *
+     * @param name           optional partial name filter (case-insensitive)
+     * @param position       optional position filter (e.g. {@code "FORWARD"})
+     * @param status         optional status filter (e.g. {@code "ACTIVE"})
+     * @param identification optional exact identification number filter
+     * @param gender         optional gender filter
+     * @param semester       optional exact semester filter
+     * @param age            optional exact age filter (calculated from birthDate)
+     * @param onlyAvailable  when {@code true}, only returns players whose sport profile is available
      * @return list of matching user models, may be empty
      */
-    List<UserModel> search(String name, String position, String status);
+    List<UserModel> search(String name, String position, String status,
+                           String identification, String gender,
+                           Integer semester, Integer age, Boolean onlyAvailable);
 }

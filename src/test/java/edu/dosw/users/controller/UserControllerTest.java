@@ -68,7 +68,7 @@ class UserControllerTest {
 
     @Test
     void search_noParams_returnsOkWithList() throws Exception {
-        when(userService.search(null, null, null)).thenReturn(List.of(
+        when(userService.search(null, null, null, null, null, null, null, null)).thenReturn(List.of(
                 UserModel.builder().id(1L).fullName("Carlos").build(),
                 UserModel.builder().id(2L).fullName("Ana").build()));
 
@@ -79,7 +79,7 @@ class UserControllerTest {
 
     @Test
     void search_withNameAndPosition_returnsFilteredList() throws Exception {
-        when(userService.search("carlos", "FORWARD", null)).thenReturn(List.of(
+        when(userService.search("carlos", "FORWARD", null, null, null, null, null, null)).thenReturn(List.of(
                 UserModel.builder().id(1L).fullName("Carlos").build()));
 
         mockMvc.perform(get("/api/users/search")
@@ -92,7 +92,7 @@ class UserControllerTest {
 
     @Test
     void search_withStatus_returnsFilteredList() throws Exception {
-        when(userService.search(null, null, "ACTIVE")).thenReturn(List.of(
+        when(userService.search(null, null, "ACTIVE", null, null, null, null, null)).thenReturn(List.of(
                 UserModel.builder().id(3L).fullName("Luis").build()));
 
         mockMvc.perform(get("/api/users/search")
