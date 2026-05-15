@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SportProfileAccessPolicy {
+public class SportProfileAccessPolicy extends AccessPolicySupport {
 
     private final SportProfileRepository sportProfileRepository;
 
@@ -30,23 +30,5 @@ public class SportProfileAccessPolicy {
         return sportProfileRepository.findById(profileId)
                 .map(profile -> matchesPrincipal(profile.getUserId(), authentication))
                 .orElse(false);
-    }
-
-    private boolean matchesPrincipal(Long userId, Authentication authentication) {
-        if (!isAuthenticatedUser(authentication)) {
-            return false;
-        }
-        try {
-            Long currentUserId = Long.valueOf(authentication.getPrincipal().toString());
-            return userId.equals(currentUserId);
-        } catch (NumberFormatException ex) {
-            return false;
-        }
-    }
-
-    private boolean isAuthenticatedUser(Authentication authentication) {
-        return authentication != null
-                && authentication.isAuthenticated()
-                && authentication.getPrincipal() != null;
     }
 }
