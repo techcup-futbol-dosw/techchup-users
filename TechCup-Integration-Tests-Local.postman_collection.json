@@ -1,0 +1,1132 @@
+{
+  "info": {
+    "name": "TechCup Integration Tests - Local",
+    "_postman_id": "local-1778813850055",
+    "description": "Pruebas de integración completas para el microservicio de usuarios de TechCup.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiIsIkNBUElUQU4iXSwicGVybWlzc2lvbnMiOltdLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJleHAiOjk5OTk5OTk5OTl9.s5llgRWM4uWDWpp6ctaMEn1Efd_LBzAQ03DVAj0NQws",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "01 - Buscar usuarios por nombre",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Usuario pre-sembrado por DataSeeder al arrancar el servicio (id siempre = 1)",
+                  "pm.environment.set('userId', 1);",
+                  "pm.environment.set('testIdentification', '1234567890');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Resultados contienen el nombre buscado', () => {",
+                  "    const results = pm.response.json();",
+                  "    results.forEach(u => {",
+                  "        pm.expect(u.fullName.toLowerCase()).to.include('carlos');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?name=carlos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "carlos"
+                },
+                {
+                  "key": "position",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "02 - Buscar usuarios por status ACTIVE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Todos los usuarios tienen status ACTIVE', () => {",
+                  "    pm.response.json().forEach(u => {",
+                  "        pm.expect(u.status).to.eql('ACTIVE');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?status=ACTIVE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "position",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "03 - Listar todos los usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Array no está vacío', () => { pm.expect(pm.response.json().length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "04 - Obtener usuario por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('ID coincide', () => {",
+                  "    pm.expect(String(pm.response.json().id)).to.eql(String(pm.environment.get('userId')));",
+                  "});",
+                  "pm.test('Tiene fullName', () => { pm.expect(pm.response.json().fullName).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "05 - Obtener usuario por identificación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Identificación coincide', () => {",
+                  "    pm.expect(pm.response.json().identification).to.eql(pm.environment.get('testIdentification'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/identification/{{testIdentification}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "identification",
+                "{{testIdentification}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "06 - Actualizar perfil propio (me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Nombre actualizado', () => {",
+                  "    pm.expect(pm.response.json().fullName).to.eql('Carlos Rodríguez Actualizado');",
+                  "});",
+                  "pm.test('SchoolRelation actualizado', () => {",
+                  "    pm.expect(pm.response.json().schoolRelation).to.eql('GRADUATE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Id",
+                "value": "{{userId}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Carlos Rodríguez Actualizado\",\n  \"identification\": \"{{testIdentification}}\",\n  \"birthDate\": \"2000-05-15\",\n  \"gender\": \"MALE\",\n  \"schoolRelation\": \"GRADUATE\",\n  \"academicProgram\": \"Ingeniería de Sistemas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "07 - Actualizar usuario (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Nombre actualizado por admin', () => {",
+                  "    pm.expect(pm.response.json().fullName).to.eql('Carlos Rodríguez Admin');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Carlos Rodríguez Admin\",\n  \"schoolRelation\": \"GRADUATE\",\n  \"academicProgram\": \"Ingeniería de Sistemas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "08 - Desactivar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204 No Content', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}",
+                "deactivate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sport Profiles",
+      "item": [
+        {
+          "name": "09 - Crear perfil deportivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => { pm.response.to.have.status(201); });",
+                  "pm.test('Perfil tiene ID', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.be.a('number');",
+                  "    pm.environment.set('sportProfileId', body.id);",
+                  "    if (body.photoId) { pm.environment.set('photoId', body.photoId); }",
+                  "});",
+                  "pm.test('Posición correcta', () => { pm.expect(pm.response.json().position).to.eql('MIDFIELDER'); });",
+                  "pm.test('Dorsal correcto', () => { pm.expect(pm.response.json().dorsalNumber).to.eql(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profile",
+                  "value": "{\"position\": \"MIDFIELDER\", \"dorsalNumber\": 10, \"available\": true}",
+                  "type": "text",
+                  "contentType": "application/json"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "user",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "10 - Obtener perfil deportivo por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('ID coincide', () => {",
+                  "    pm.expect(String(pm.response.json().id)).to.eql(String(pm.environment.get('sportProfileId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "{{sportProfileId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11 - Obtener perfil deportivo por usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('userId coincide', () => {",
+                  "    pm.expect(String(pm.response.json().userId)).to.eql(String(pm.environment.get('userId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "user",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12 - Actualizar perfil deportivo con foto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Posición actualizada', () => { pm.expect(pm.response.json().position).to.eql('FORWARD'); });",
+                  "pm.test('Dorsal actualizado', () => { pm.expect(pm.response.json().dorsalNumber).to.eql(9); });",
+                  "pm.test('Guardar photoId', () => {",
+                  "    const body = pm.response.json();",
+                  "    if (body.photoId) {",
+                  "        pm.environment.set('photoId', body.photoId);",
+                  "        pm.expect(body.photoId).to.be.a('string');",
+                  "    } else {",
+                  "        console.log('photoId es null — no se subió foto o perfil no tiene foto aún');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profile",
+                  "value": "{\"position\": \"FORWARD\", \"dorsalNumber\": 9, \"available\": true}",
+                  "type": "text",
+                  "contentType": "application/json"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "{{sportProfileId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "13 - Obtener foto del perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const photoId = pm.environment.get('photoId');",
+                  "if (!photoId) {",
+                  "    console.log('Sin photoId — test omitido');",
+                  "    return;",
+                  "}",
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Content-Type es imagen', () => {",
+                  "    const ct = pm.response.headers.get('Content-Type');",
+                  "    pm.expect(ct).to.match(/^image\\//);",
+                  "});",
+                  "pm.test('Respuesta tiene contenido binario', () => {",
+                  "    pm.expect(pm.response.responseSize).to.be.greaterThan(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/photos/{{photoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "photos",
+                "{{photoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14 - Buscar usuarios por posición (FORWARD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Al menos un resultado', () => { pm.expect(pm.response.json().length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?position=FORWARD",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "position",
+                  "value": "FORWARD"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "15 - Cambiar disponibilidad a false",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204 No Content', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}/availability?available=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "{{sportProfileId}}",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "available",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "16 - Cambiar disponibilidad a true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204 No Content', () => { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}/availability?available=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sport-profiles",
+                "{{sportProfileId}}",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "available",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invitations",
+      "item": [
+        {
+          "name": "17 - Enviar invitación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => { pm.response.to.have.status(201); });",
+                  "pm.test('Invitación tiene ID', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.not.be.undefined;",
+                  "    pm.environment.set('invitationId', body.id);",
+                  "});",
+                  "pm.test('Estado es PENDING', () => { pm.expect(pm.response.json().status).to.eql('PENDING'); });",
+                  "pm.test('playerId coincide', () => {",
+                  "    pm.expect(String(pm.response.json().playerId)).to.eql(String(pm.environment.get('userId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/{{userId}}/team/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "user",
+                "{{userId}}",
+                "team",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "18 - Obtener invitación por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('ID coincide', () => {",
+                  "    pm.expect(String(pm.response.json().id)).to.eql(String(pm.environment.get('invitationId')));",
+                  "});",
+                  "pm.test('Estado es PENDING', () => { pm.expect(pm.response.json().status).to.eql('PENDING'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "{{invitationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "19 - Obtener invitaciones del jugador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Al menos una invitación', () => { pm.expect(pm.response.json().length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "user",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "20 - Enviar invitación duplicada (debe dar 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict — invitación duplicada', () => {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/{{userId}}/team/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "user",
+                "{{userId}}",
+                "team",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "21 - Aceptar invitación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Estado es ACCEPTED', () => { pm.expect(pm.response.json().status).to.eql('ACCEPTED'); });",
+                  "pm.test('respondedAt no es nulo', () => { pm.expect(pm.response.json().respondedAt).to.not.be.null; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "{{invitationId}}",
+                "accept"
+              ]
+            }
+          }
+        },
+        {
+          "name": "22 - Aceptar invitación ya aceptada (debe dar 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict — no se puede modificar invitación no pendiente', () => {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "{{invitationId}}",
+                "accept"
+              ]
+            }
+          }
+        },
+        {
+          "name": "23 - Enviar segunda invitación para rechazar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('invitationId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/{{userId}}/team/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "user",
+                "{{userId}}",
+                "team",
+                "2"
+              ]
+            }
+          }
+        },
+        {
+          "name": "24 - Rechazar invitación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Estado es REJECTED', () => { pm.expect(pm.response.json().status).to.eql('REJECTED'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "{{invitationId}}",
+                "reject"
+              ]
+            }
+          }
+        },
+        {
+          "name": "25 - Enviar tercera invitación para cancelar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('invitationId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/{{userId}}/team/3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "user",
+                "{{userId}}",
+                "team",
+                "3"
+              ]
+            }
+          }
+        },
+        {
+          "name": "26 - Cancelar invitación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Estado es CANCELLED', () => { pm.expect(pm.response.json().status).to.eql('CANCELLED'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invitations",
+                "{{invitationId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "28 - Obtener audit logs de perfil deportivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Cada entrada tiene los campos esperados', () => {",
+                  "    const logs = pm.response.json();",
+                  "    if (logs.length > 0) {",
+                  "        const log = logs[0];",
+                  "        pm.expect(log).to.have.property('id');",
+                  "        pm.expect(log).to.have.property('action');",
+                  "        pm.expect(log).to.have.property('timestamp');",
+                  "    }",
+                  "});",
+                  "pm.test('Los logs pertenecen al sportProfile correcto', () => {",
+                  "    const logs = pm.response.json();",
+                  "    const sportProfileId = pm.environment.get('sportProfileId');",
+                  "    logs.forEach(log => {",
+                  "        pm.expect(String(log.sportProfileId)).to.eql(String(sportProfileId));",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs/sport-profiles/{{sportProfileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit-logs",
+                "sport-profiles",
+                "{{sportProfileId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "29 - Obtener audit logs de invitación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Cada entrada tiene los campos esperados', () => {",
+                  "    const logs = pm.response.json();",
+                  "    if (logs.length > 0) {",
+                  "        const log = logs[0];",
+                  "        pm.expect(log).to.have.property('id');",
+                  "        pm.expect(log).to.have.property('action');",
+                  "        pm.expect(log).to.have.property('timestamp');",
+                  "    }",
+                  "});",
+                  "pm.test('Los logs pertenecen a la invitación correcta', () => {",
+                  "    const logs = pm.response.json();",
+                  "    const invitationId = pm.environment.get('invitationId');",
+                  "    logs.forEach(log => {",
+                  "        pm.expect(String(log.invitationId)).to.eql(String(invitationId));",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs/invitations/{{invitationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit-logs",
+                "invitations",
+                "{{invitationId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "27 - Inactivar usuario (cleanup)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// El usuario puede estar ya INACTIVE si fue desactivado antes.",
+                  "// Se acepta 204 (inactivado ahora) o 409 (ya estaba inactivo).",
+                  "pm.test('Usuario inactivado o ya inactivo', () => {",
+                  "    pm.expect([204, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/inactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}",
+                "inactivate"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
+}

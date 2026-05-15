@@ -2,8 +2,8 @@ package edu.dosw.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
-import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.enums.Gender;
 import edu.dosw.users.enums.SchoolRelation;
@@ -165,7 +165,7 @@ class UserControllerTest {
 
     @Test
     void update_returnsOk() throws Exception {
-        UserRequest request = UserRequest.builder().fullName("Nuevo nombre").build();
+        AdminUserUpdateRequest request = AdminUserUpdateRequest.builder().fullName("Nuevo nombre").build();
         when(userService.update(eq(1L), any()))
                 .thenReturn(UserModel.builder().id(1L).fullName("Nuevo nombre").build());
 
@@ -184,7 +184,7 @@ class UserControllerTest {
         mockMvc.perform(put("/api/users/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                UserRequest.builder().fullName("x").build())))
+                                AdminUserUpdateRequest.builder().fullName("x").build())))
                 .andExpect(status().isNotFound());
     }
 

@@ -88,22 +88,6 @@ class UserServiceImplTest {
         assertEquals(2, service.getAll().size());
     }
 
-    // ── create ────────────────────────────────────────────────────────────────
-
-    @Test
-    void create_setsStatusAndTimestamps_andDelegatesToClient() {
-        UserModel input = UserModel.builder().fullName("Carlos").build();
-        UserModel returned = UserModel.builder().id(10L).status("ACTIVE").build();
-        when(identityServiceClient.createUser(any())).thenReturn(returned);
-
-        UserModel result = service.create(input);
-
-        assertEquals("ACTIVE", input.getStatus());
-        assertNotNull(input.getProfileCreatedAt());
-        assertNotNull(input.getUpdatedAt());
-        assertEquals(10L, result.getId());
-    }
-
     // ── update ────────────────────────────────────────────────────────────────
 
     @Test
