@@ -64,3 +64,8 @@ HELP.md
 # Spring Boot - local config
 # =========================
 src/main/resources/application-local.properties
+
+# =========================
+# Docker / Secrets
+# =========================
+.env
