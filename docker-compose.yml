@@ -42,7 +42,7 @@ services:
       SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/techchup_photos?authSource=admin
       SECURITY_JWT_SECRET: ${JWT_SECRET}
       IDENTITY_SERVICE_URL: ${IDENTITY_SERVICE_URL}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${DDL_AUTO:-update}
     depends_on:
       postgres:
         condition: service_healthy
