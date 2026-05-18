@@ -1,11 +1,20 @@
 # TECHCUP FÚTBOL 
 
 > [!IMPORTANT]
-> Este repositorio contiene el **BackEnd** para el servicio de **[nombre-del-servicio]**
+> Este repositorio contiene el **BackEnd** para el servicio de **[Usuarios y Jugadores]**
 
 > [!NOTE]
-> [Descripción breve: qué dominio cubre este servicio y cómo encaja en la arquitectura general.]
+> Gestiona la información de los participantes del torneo y su perfil deportivo
 
+| Funcionalidad | Descripción |
+|---------------|-------------|
+| **Actualizar usuario** | El usuario y el administrador podrán actualizar la información básica del usuario: nombre completo, relación con la Escuela (estudiante, profesor, administrativo, graduado o familiar), programa académico, semestre (si es estudiante). El correo y la contraseña no se podrán modificar. |
+| **Crear perfil deportivo** | Cada jugador podrá crear un perfil deportivo indicando: posición de juego predefinida (portero, defensa, volante, delantero), número dorsal predefinido, foto y si se encuentra disponible o no para ser convocado por algún equipo. |
+| **Actualizar perfil deportivo** | El jugador podrá actualizar todos los datos de su perfil deportivo siempre y cuando no esté asignado a un equipo. |
+| **Eliminar perfil deportivo** | El sistema no permitirá eliminar un perfil deportivo. |
+| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. |
+| **Invitaciones** | Los jugadores podrán recibir invitaciones de equipos y aceptar o rechazar invitaciones. |
+| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios. Y de gestión del perfil. |
 ---
 
 ## Integrantes
@@ -28,14 +37,10 @@
 ![JPA](https://img.shields.io/badge/JPA-Hibernate-59666C?style=for-the-badge)
 ![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
 
----
-
 ### Base de Datos
 
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-
----
 
 ### Testing & Calidad
 
@@ -43,8 +48,6 @@
 ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge)
 ![JaCoCo](https://img.shields.io/badge/JaCoCo-Coverage-BB0A30?style=for-the-badge)
 ![SonarQube](https://img.shields.io/badge/SonarQube-4E9BCD?style=for-the-badge&logo=sonarqube&logoColor=white)
-
----
 
 ### Herramientas & DevOps
 
