@@ -377,24 +377,24 @@ NestJS maneja las excepciones de forma centralizada mediante **ExceptionFilters*
 
 ## Calidad de código y pruebas
 
-### Pruebas unitarias (Jest)
-
+### Pruebas unitarias (JUnit + JaCoCo)
 ```bash
 # Ejecutar pruebas unitarias
-npm run test
+mvn test
 
-# Ejecutar con cobertura
-npm run test:cov
-
-# Ejecutar pruebas e2e
-npm run test:e2e
+# Ejecutar pruebas con cobertura
+mvn clean test jacoco:report
 ```
 
-![Jest Coverage](src/docs/images/jestCoverage.png)
+> [!TIP]
+El reporte de cobertura se genera en:
+target/site/jacoco/index.html
+
+![jacocoReport.png](src/main/resources/docs/images/jacocoReport.png)
 
 ### Análisis estático (SonarQube)
 
-![SonarQube](src/docs/images/sonarQubeAnalysis.png)
+![SonarQube](src/main/resources/docs/images/sonarQubeAnalysis.png)
 
 ```bash
 # Ejecutar análisis local
@@ -406,7 +406,7 @@ npx sonar-scanner \
 
 ### Pruebas de integración (Postman / Newman)
 
-![Postman Tests](src/docs/images/postmanTests.png)
+![Postman Tests](src/main/resources/docs/images/postmanTests.png)
 
 ```bash
 npm install -g newman
