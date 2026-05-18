@@ -216,7 +216,7 @@ Controller → Service → Repository → Base de datos
 
 ### Diagrama de contenedores
 
-![ContainerDiagram](src/main/resources/docs/uml/ContainerDiagram.png)
+![ContainerDiagram](src/main/resources/docs/uml/containerDiagram.png)
 
 > Descripción de cómo este servicio interactúa con los demás componentes del sistema.
 
