@@ -10,14 +10,11 @@
 
 ## Integrantes
 
-| Rol | Nombre | Contacto |
-|-----|--------|----------|
-| Product Owner | [Nombre Apellido](https://github.com/usuario) | [correo@mail.escuelaing.edu.co](mailto:correo@mail.escuelaing.edu.co) |
-| Líder técnico | [Nombre Apellido](https://github.com/usuario) | [correo@mail.escuelaing.edu.co](mailto:correo@mail.escuelaing.edu.co) |
-| Analista funcional | [Nombre Apellido](https://github.com/usuario) | [correo@mail.escuelaing.edu.co](mailto:correo@mail.escuelaing.edu.co) |
-| Analista funcional | [Nombre Apellido](https://github.com/usuario) | [correo@mail.escuelaing.edu.co](mailto:correo@mail.escuelaing.edu.co) |
-| Desarrollador | [Nombre Apellido](https://github.com/usuario) | [correo@mail.escuelaing.edu.co](mailto:correo@mail.escuelaing.edu.co) |
-| Desarrollador | [Nombre Apellido](https://github.com/usuario) | [correo@mail.escuelaing.edu.co](mailto:correo@mail.escuelaing.edu.co) |
+* **Product Owner:** [JUAN SEBASTIÁN GUAYAZÁN CLAVIJO](https://github.com/JuanGuayazanC) → [juan.guayazan-c@mail.escuelaing.edu.co](mailto:juan.guayazan-c@mail.escuelaing.edu.co)
+* **Líder técnico:** [BRAYAN LOAIZA LEAL](https://github.com/brloa05) → [brayan.loaiza-l@mail.escuelaing.edu.co](mailto:brayan.loaiza-l@mail.escuelaing.edu.co)
+* **Analista funcional:** [JUAN ESTEBAN CRUZ RICO](https://github.com/Cruz-Juan-r) → [juan.cruz-r@mail.escuelaing.edu.co](mailto:juan.cruz-r@mail.escuelaing.edu.co)
+* **Desarrollador:** [JUAN JOSÉ LAVERDE RÍOS](https://github.com/juanlaverde777) → [juan.laverde-r@mail.escuelaing.edu.co](mailto:juan.laverde-r@mail.escuelaing.edu.co)
+* **Desarrollador:** [JUAN MANUEL VILLEGAS MEDINA](https://github.com/juanmavill) → [juan.vmedina@mail.escuelaing.edu.co](mailto:juan.vmedina@mail.escuelaing.edu.co)
 
 ---
 
