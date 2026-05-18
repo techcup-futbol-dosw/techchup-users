@@ -55,6 +55,7 @@ public class SecurityConfig {
                 // Public endpoints (API docs) and require authentication for the rest
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
