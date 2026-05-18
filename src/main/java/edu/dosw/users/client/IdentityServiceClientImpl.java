@@ -33,7 +33,7 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
 
     @Autowired
     public IdentityServiceClientImpl(
-            @Value("${identity.service.url}") String identityServiceUrl,
+            @Value("${identity.service.url:}") String identityServiceUrl,
             @Value("${identity.service.users-path:/api/users}") String usersBasePath) {
         this(identityServiceUrl, usersBasePath, new RestTemplate());
     }

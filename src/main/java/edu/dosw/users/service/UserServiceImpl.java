@@ -2,6 +2,7 @@ package edu.dosw.users.service;
 
 import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.exception.BusinessException;
@@ -11,7 +12,6 @@ import edu.dosw.users.repository.SportProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,21 +67,6 @@ public class UserServiceImpl implements IUserService {
     @Override
     public List<UserModel> getAll() {
         return identityServiceClient.getAllUsers();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Pre-populates {@code status}, {@code profileCreatedAt} and
-     * {@code updatedAt} before delegating to the identity service.</p>
-     */
-    @Override
-    public UserModel create(UserModel model) {
-        LocalDateTime now = LocalDateTime.now();
-        model.setStatus(STATUS_ACTIVE);
-        model.setProfileCreatedAt(now);
-        model.setUpdatedAt(now);
-        return identityServiceClient.createUser(model);
     }
 
     /**
@@ -167,28 +152,62 @@ public class UserServiceImpl implements IUserService {
      * {@inheritDoc}
      *
      * <p>Fetches users from the identity service filtered by name and status,
-     * then applies a local position filter using sport-profile data when
-     * {@code position} is provided.</p>
+     * then applies local filters for position, availability, identification,
+     * gender, semester and age.</p>
      */
     @Override
-    public List<UserModel> search(String name, String position, String status) {
-        String nameParam = (name == null || name.isBlank()) ? null : name.trim();
-        String statusParam = (status == null || status.isBlank()) ? null : status.trim().toUpperCase();
-        String positionParam = (position == null || position.isBlank()) ? null : position.trim().toUpperCase();
+    public List<UserModel> search(String name, String position, String status,
+                                  String identification, String gender,
+                                  Integer semester, Integer age, Boolean onlyAvailable) {
+        String nameParam       = blank(name)     ? null : name.trim();
+        String statusParam     = blank(status)   ? null : status.trim().toUpperCase();
+        String positionParam   = blank(position) ? null : position.trim().toUpperCase();
+        String genderParam     = blank(gender)   ? null : gender.trim().toUpperCase();
 
         List<UserModel> users = identityServiceClient.searchUsers(nameParam, statusParam);
 
-        if (positionParam != null) {
-            String pos = positionParam;
-            Set<Long> userIdsWithPosition = sportProfileRepository.findByPosition(pos)
-                    .stream()
-                    .map(sp -> sp.getUserId())
-                    .collect(Collectors.toSet());
+        // ── Sport-profile filters (position + availability) ───────────────────
+        boolean filterPosition  = positionParam != null;
+        boolean filterAvailable = Boolean.TRUE.equals(onlyAvailable);
+
+        if (filterPosition || filterAvailable) {
+            Set<Long> ids = getSportProfileUserIds(positionParam, filterPosition, filterAvailable);
+            users = users.stream().filter(u -> ids.contains(u.getId())).toList();
+        }
+
+        // ── Identity-model local filters ──────────────────────────────────────
+        if (identification != null && !identification.isBlank()) {
+            String id = identification.trim();
+            users = users.stream().filter(u -> id.equals(u.getIdentification())).toList();
+        }
+        if (genderParam != null) {
             users = users.stream()
-                    .filter(u -> userIdsWithPosition.contains(u.getId()))
+                    .filter(u -> u.getGender() != null && genderParam.equals(u.getGender().name()))
                     .toList();
+        }
+        if (semester != null) {
+            users = users.stream().filter(u -> semester.equals(u.getSemester())).toList();
+        }
+        if (age != null) {
+            users = users.stream().filter(u -> age == u.getAge()).toList();
         }
 
         return users;
+    }
+
+    private Set<Long> getSportProfileUserIds(String position, boolean filterPosition, boolean filterAvailable) {
+        List<SportProfileEntity> profiles;
+        if (filterPosition && filterAvailable) {
+            profiles = sportProfileRepository.findByPositionAndAvailable(position, true);
+        } else if (filterPosition) {
+            profiles = sportProfileRepository.findByPosition(position);
+        } else {
+            profiles = sportProfileRepository.findByAvailable(true);
+        }
+        return profiles.stream().map(SportProfileEntity::getUserId).collect(Collectors.toSet());
+    }
+
+    private boolean blank(String s) {
+        return s == null || s.isBlank();
     }
 }

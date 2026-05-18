@@ -88,22 +88,6 @@ class UserServiceImplTest {
         assertEquals(2, service.getAll().size());
     }
 
-    // ── create ────────────────────────────────────────────────────────────────
-
-    @Test
-    void create_setsStatusAndTimestamps_andDelegatesToClient() {
-        UserModel input = UserModel.builder().fullName("Carlos").build();
-        UserModel returned = UserModel.builder().id(10L).status("ACTIVE").build();
-        when(identityServiceClient.createUser(any())).thenReturn(returned);
-
-        UserModel result = service.create(input);
-
-        assertEquals("ACTIVE", input.getStatus());
-        assertNotNull(input.getProfileCreatedAt());
-        assertNotNull(input.getUpdatedAt());
-        assertEquals(10L, result.getId());
-    }
-
     // ── update ────────────────────────────────────────────────────────────────
 
     @Test
@@ -267,7 +251,7 @@ class UserServiceImplTest {
         when(identityServiceClient.searchUsers("juan", "ACTIVE")).thenReturn(List.of(m1));
         when(sportProfileRepository.findByPosition("FORWARD")).thenReturn(List.of(sp));
 
-        List<UserModel> result = service.search(" juan ", "forward", "active");
+        List<UserModel> result = service.search(" juan ", "forward", "active", null, null, null, null, null);
 
         assertEquals(1, result.size());
         verify(identityServiceClient).searchUsers("juan", "ACTIVE");
@@ -277,7 +261,7 @@ class UserServiceImplTest {
     void search_withNullParams_passesNullsToClient() {
         when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of());
 
-        List<UserModel> result = service.search(null, null, null);
+        List<UserModel> result = service.search(null, null, null, null, null, null, null, null);
 
         assertTrue(result.isEmpty());
         verify(identityServiceClient).searchUsers(null, null);
@@ -292,7 +276,48 @@ class UserServiceImplTest {
         when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of(u1, u2));
         when(sportProfileRepository.findByPosition("GOALKEEPER")).thenReturn(List.of(sp));
 
-        List<UserModel> result = service.search(null, "GOALKEEPER", null);
+        List<UserModel> result = service.search(null, "GOALKEEPER", null, null, null, null, null, null);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
+    }
+
+    @Test
+    void search_withOnlyAvailable_filtersToAvailablePlayers() {
+        UserModel u1 = UserModel.builder().id(1L).build();
+        UserModel u2 = UserModel.builder().id(2L).build();
+        SportProfileEntity sp = SportProfileEntity.builder().userId(1L).available(true).build();
+
+        when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of(u1, u2));
+        when(sportProfileRepository.findByAvailable(true)).thenReturn(List.of(sp));
+
+        List<UserModel> result = service.search(null, null, null, null, null, null, null, true);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
+    }
+
+    @Test
+    void search_withGender_filtersLocally() {
+        UserModel u1 = UserModel.builder().id(1L).gender(edu.dosw.users.enums.Gender.MALE).build();
+        UserModel u2 = UserModel.builder().id(2L).gender(edu.dosw.users.enums.Gender.FEMALE).build();
+
+        when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of(u1, u2));
+
+        List<UserModel> result = service.search(null, null, null, null, "MALE", null, null, null);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
+    }
+
+    @Test
+    void search_withSemester_filtersLocally() {
+        UserModel u1 = UserModel.builder().id(1L).semester(5).build();
+        UserModel u2 = UserModel.builder().id(2L).semester(8).build();
+
+        when(identityServiceClient.searchUsers(null, null)).thenReturn(List.of(u1, u2));
+
+        List<UserModel> result = service.search(null, null, null, null, null, 5, null, null);
 
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());

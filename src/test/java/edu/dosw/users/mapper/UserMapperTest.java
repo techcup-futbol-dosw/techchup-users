@@ -2,7 +2,6 @@ package edu.dosw.users.mapper;
 
 import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
-import edu.dosw.users.dto.UserRequest;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.enums.Gender;
 import edu.dosw.users.enums.SchoolRelation;
@@ -28,40 +27,6 @@ class UserMapperTest {
     @BeforeEach
     void setUp() {
         mapper = new UserMapperImpl();
-    }
-
-    // ── toModel(UserRequest) ──────────────────────────────────────────────────
-
-    @Test
-    void toModel_fromRequest_mapsFieldsAndIgnoresMetadata() {
-        UserRequest request = UserRequest.builder()
-                .fullName("Ana García")
-                .email("ana@escuelaing.edu.co")
-                .password("hashed")
-                .identification("87654321")
-                .birthDate(LocalDate.of(1999, 3, 20))
-                .gender(Gender.FEMALE)
-                .schoolRelation(SchoolRelation.STUDENT)
-                .academicProgram("Ingeniería Civil")
-                .semester(4)
-                .build();
-
-        UserModel model = mapper.toModel(request);
-
-        assertNotNull(model);
-        assertNull(model.getId());
-        assertNull(model.getStatus());
-        assertNull(model.getProfileCreatedAt());
-        assertNull(model.getUpdatedAt());
-        assertEquals("Ana García", model.getFullName());
-        assertEquals("ana@escuelaing.edu.co", model.getEmail());
-        assertEquals("hashed", model.getPassword());
-        assertEquals("87654321", model.getIdentification());
-        assertEquals(LocalDate.of(1999, 3, 20), model.getBirthDate());
-        assertEquals(Gender.FEMALE, model.getGender());
-        assertEquals(SchoolRelation.STUDENT, model.getSchoolRelation());
-        assertEquals("Ingeniería Civil", model.getAcademicProgram());
-        assertEquals(4, model.getSemester());
     }
 
     // ── toModel(AdminUserUpdateRequest) ──────────────────────────────────────
