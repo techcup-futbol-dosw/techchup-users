@@ -73,29 +73,82 @@
 
 ### Árbol de directorios
 
-```
-📦 nombre-del-servicio/
-├── 📂 .azure/
-│   └── 📄 azure-pipelines.yml      # Pipeline CI/CD Azure DevOps
-├── 📂 src/
-│   ├── 📂 config/                  # Configuración global y variables de entorno
-│   ├── 📂 modules/
-│   │   └── 📂 [modulo]/
-│   │       ├── 📄 [modulo].controller.ts
-│   │       ├── 📄 [modulo].service.ts
-│   │       ├── 📄 [modulo].module.ts
-│   │       ├── 📂 dto/             # Objetos de transferencia de datos
-│   │       ├── 📂 entities/        # Entidades TypeORM
-│   │       └── 📂 guards/          # Guards de autenticación y autorización
-│   ├── 📄 app.module.ts
-│   └── 📄 main.ts
-├── 📂 test/                        # Pruebas e2e
-├── 📄 .env.example
-├── 📄 Dockerfile
-├── 📄 jest.config.ts
-├── 📄 package.json
-├── 📄 tsconfig.json
-└── 📄 README.md
+```text
+📦 techchup-users/
+├── 📁 .github/                                 # Configuración de GitHub (workflows, templates)
+│   └── 📁 workflows/                           # Pipelines/acciones CI
+├── 📁 .mvn/                                    # Archivos del Maven Wrapper
+│   └── 📁 wrapper/                             # Configuración interna del wrapper
+├── 📄 .gitignore                               # Exclusiones de control de versiones
+├── 📄 lombok.config                            # Reglas globales de Lombok
+├── 📄 pom.xml                                  # Dependencias y build Maven
+├── 📄 README.md                                # Documentación principal
+├── 📄 test_output.txt                          # Registro auxiliar de pruebas (si aplica)
+├── 📁 src/
+│   ├── 📁 main/                                # Código productivo
+│   │   ├── 📁 java/
+│   │   │   └── 📁 edu/
+│   │   │       └── 📁 dosw/
+│   │   │           └── 📁 users/
+│   │   │               ├── 📄 App.java        # Punto de entrada de Spring Boot
+│   │   │               ├── 📁 client/         # Clientes de integraciones externas
+│   │   │               ├── 📁 config/         # Configuración global de aplicación
+│   │   │               ├── 📁 controller/     # Endpoints REST
+│   │   │               │   ├── 📄 UserController.java
+│   │   │               │   ├── 📄 InvitationController.java
+│   │   │               │   └── 📄 SportProfileController.java
+│   │   │               ├── 📁 dto/            # DTOs de entrada/salida
+│   │   │               ├── 📁 entity/         # Entidades JPA
+│   │   │               ├── 📁 enums/          # Enumeraciones de dominio
+│   │   │               ├── 📁 exception/      # Manejo de excepciones
+│   │   │               ├── 📁 mapper/         # Mapeos DTO <-> modelo
+│   │   │               ├── 📁 model/          # Modelos de negocio
+│   │   │               ├── 📁 repository/     # Repositorios Spring Data JPA
+│   │   │               ├── 📁 security/       # Seguridad (JWT, filtros, autorización)
+│   │   │               │   ├── 📄 SecurityConfig.java
+│   │   │               │   ├── 📄 JwtAuthenticationFilter.java
+│   │   │               │   ├── 📄 AccessDeniedHandlerImpl.java
+│   │   │               │   ├── 📄 AuthenticationEntryPointImpl.java
+│   │   │               │   ├── 📄 JwtService.java
+│   │   │               │   └── 📁 policy/     # Policies de acceso por recurso
+│   │   │               │       ├── 📄 UserAccessPolicy.java
+│   │   │               │       ├── 📄 SportProfileAccessPolicy.java
+│   │   │               │       ├── 📄 InvitationAccessPolicy.java
+│   │   │               │       └── 📄 ResourceAccessPolicy.java
+│   │   │               └── 📁 service/        # Lógica de negocio
+│   │   ├── 📁 resources/                       # Configuración y recursos runtime
+│   │   │   ├── 📄 application.properties
+│   │   │   ├── 📄 application-prod.properties
+│   │   │   ├── 📄 application-local.properties.example
+│   │   │   └── 📁 docs/
+│   │   └── 📁 sql/                             # Scripts SQL de aplicación
+│   └── 📁 test/                                # Código de pruebas
+│       ├── 📁 java/
+│       │   └── 📁 edu/
+│       │       └── 📁 dosw/
+│       │           └── 📁 users/
+│       │               ├── 📄 AppTest.java
+│       │               ├── 📁 controller/     # Tests de controladores
+│       │               ├── 📁 integration/    # Tests de integración
+│       │               ├── 📁 mapper/         # Tests de mappers
+│       │               ├── 📁 model/          # Tests de modelos
+│       │               ├── 📁 repository/     # Tests de repositorios
+│       │               ├── 📁 security/       # Tests de seguridad
+│       │               │   └── 📁 policy/     # Tests de policies
+│       │               └── 📁 service/        # Tests de servicios
+│       ├── 📁 resources/                       # Configuración para pruebas
+│       │   └── 📄 application.properties
+│       └── 📁 sql/                             # SQL de soporte para tests
+└── 📁 target/                                  # Artefactos generados por Maven
+    ├── 📄 jacoco.exec                          # Datos de cobertura JaCoCo
+    ├── 📁 classes/                             # Clases compiladas de producción
+    ├── 📁 generated-sources/                   # Fuentes generadas
+    ├── 📁 generated-test-sources/              # Fuentes de test generadas
+    ├── 📁 maven-status/                        # Estado interno del build
+    ├── 📁 site/
+    │   └── 📁 jacoco/                          # Reporte HTML de cobertura
+    ├── 📁 surefire-reports/                    # Reportes de ejecución de tests
+    └── 📁 test-classes/                        # Clases compiladas de pruebas
 ```
 
 ---
