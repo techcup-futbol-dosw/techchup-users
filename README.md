@@ -216,19 +216,19 @@ Controller → Service → Repository → Base de datos
 
 ### Diagrama de contenedores
 
-![ContainerDiagram](src/docs/uml/ContainerDiagram.png)
+![ContainerDiagram](src/main/resources/docs/uml/ContainerDiagram.png)
 
 > Descripción de cómo este servicio interactúa con los demás componentes del sistema.
 
 ### Diagrama de clases
 
-![ClassDiagram](src/docs/uml/classDiagram.png)
+![ClassDiagram](src/main/resources/docs/uml/classDiagram.png)
 
 > Descripción de las principales clases y sus relaciones.
 
 ### Diagrama Entidad-Relación
 
-![DatabaseDiagram](src/docs/uml/dataBaseDiagram.png)
+![DatabaseDiagram](src/main/resources/docs/uml/dataBaseDiagram.png)
 
 > Descripción del modelo de datos y las relaciones entre tablas.
 
