@@ -8,11 +8,11 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://techcup-user-bjdyd0gzdmb8apds.brazilsouth-01.azurewebsites.net"
+      "value": "https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net"
     },
     {
       "key": "token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiJdLCJwZXJtaXNzaW9ucyI6W10sInRva2VuVHlwZSI6IkFDQ0VTUyIsImV4cCI6OTk5OTk5OTk5OX0.ScyAlPml0-hjhxf_crBLYoU4U7XZ_5k2wNaLIK3f-nw",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZXMiOlsiQURNSU4iLCJDQVBJVEFOIl0sInBlcm1pc3Npb25zIjpbXSwidG9rZW5UeXBlIjoiQUNDRVNTIiwiZXhwIjo5OTk5OTk5OTk5fQ.g71YVM_GPLDN58LsmEI8Xz4qk99c_TZmhm3mmzwzddw",
       "type": "string"
     }
   ],
@@ -124,6 +124,180 @@
                 {
                   "key": "status",
                   "value": "ACTIVE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "02b - Buscar por identificación",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": []
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Resultado tiene la identificacion buscada', () => {",
+                  "    const results = pm.response.json();",
+                  "    if (results.length > 0) pm.expect(results[0].identification).to.eql('1234567890');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?identification=1234567890",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "identification",
+                  "value": "1234567890"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "02c - Buscar por género MALE",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": []
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Todos los resultados son genero MALE', () => {",
+                  "    pm.response.json().forEach(u => {",
+                  "        if (u.gender) pm.expect(u.gender).to.eql('MALE');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?gender=MALE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "gender",
+                  "value": "MALE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "02d - Buscar por semestre 6",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": []
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });",
+                  "pm.test('Todos los resultados tienen semestre 6', () => {",
+                  "    pm.response.json().forEach(u => {",
+                  "        if (u.semester !== undefined) pm.expect(u.semester).to.eql(6);",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?semester=6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "semester",
+                  "value": "6"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "02e - Buscar jugadores disponibles",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": []
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => { pm.response.to.have.status(200); });",
+                  "pm.test('Respuesta es un array', () => { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?available=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "available",
+                  "value": "true"
                 }
               ]
             }

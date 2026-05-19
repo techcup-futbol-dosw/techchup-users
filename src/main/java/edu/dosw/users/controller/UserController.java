@@ -28,7 +28,7 @@ import java.util.List;
  *
  * <p>Resumen de control de acceso:
  * <ul>
- *   <li>ADMINISTRADOR — acceso completo a todos los endpoints.</li>
+ *   <li>ADMIN — acceso completo a todos los endpoints.</li>
  *   <li>CAPITAN — puede buscar jugadores por filtro y consultar por número de identificación.</li>
  *   <li>Cualquier usuario autenticado — puede leer y actualizar su propio perfil.</li>
  * </ul>
@@ -61,7 +61,7 @@ public class UserController {
      * @return lista de usuarios que cumplen con todos los filtros proporcionados
      */
     @GetMapping("/search")
-    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String position,
@@ -86,7 +86,7 @@ public class UserController {
      * @return lista completa de usuarios registrados
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getAll() {
         return ResponseEntity.ok(
                 userService.getAll().stream()
@@ -103,7 +103,7 @@ public class UserController {
      * @return respuesta con los datos del perfil de usuario
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
+    @PreAuthorize("hasRole('ADMIN') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(
                 userMapper.toResponse(userService.getById(id)));
@@ -119,7 +119,7 @@ public class UserController {
      * @return respuesta con los datos del perfil de usuario
      */
     @GetMapping("/identification/{identification}")
-    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getByIdentification(
             @PathVariable String identification) {
         return ResponseEntity.ok(
@@ -139,7 +139,7 @@ public class UserController {
      * @return respuesta con los datos del perfil de usuario actualizado
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> update(
             @PathVariable Long id, @RequestBody AdminUserUpdateRequest request) {
         return ResponseEntity.ok(
@@ -177,7 +177,7 @@ public class UserController {
      * @return respuesta vacía con HTTP 204
      */
     @PatchMapping("/{id}/deactivate")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         userService.deactivate(id);
         return ResponseEntity.noContent().build();
@@ -194,7 +194,7 @@ public class UserController {
      * @return respuesta vacía con HTTP 204
      */
     @PatchMapping("/{id}/inactivate")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
+    @PreAuthorize("hasRole('ADMIN') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
     public ResponseEntity<Void> inactivate(@PathVariable Long id) {
         userService.inactivate(id);
         return ResponseEntity.noContent().build();

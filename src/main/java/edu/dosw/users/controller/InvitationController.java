@@ -25,7 +25,7 @@ import java.util.List;
  * <ul>
  *   <li>CAPITAN — puede enviar y cancelar invitaciones.</li>
  *   <li>JUGADOR (propietario) — puede consultar, aceptar y rechazar sus propias invitaciones.</li>
- *   <li>ADMINISTRADOR — acceso completo a todos los endpoints de invitación.</li>
+ *   <li>ADMIN — acceso completo a todos los endpoints de invitación.</li>
  * </ul>
  * </p>
  *
@@ -65,7 +65,7 @@ public class InvitationController {
      * @return lista de invitaciones asociadas al usuario
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("@invitationAccessPolicy.canAccessOwnInvitation(#userId, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@invitationAccessPolicy.canAccessOwnInvitation(#userId, authentication) or hasRole('ADMIN')")
     public ResponseEntity<List<InvitationResponse>> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(
                 invitationService.getByPlayerId(userId).stream()
@@ -101,7 +101,7 @@ public class InvitationController {
      * @return respuesta con los datos de la invitación actualizada
      */
     @PatchMapping("/{id}/accept")
-    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMIN')")
     public ResponseEntity<InvitationResponse> accept(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.accept(id)));
@@ -116,7 +116,7 @@ public class InvitationController {
      * @return respuesta con los datos de la invitación actualizada
      */
     @PatchMapping("/{id}/reject")
-    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMIN')")
     public ResponseEntity<InvitationResponse> reject(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.reject(id)));
