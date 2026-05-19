@@ -306,14 +306,27 @@ http://localhost:8080/swagger-ui.html
 
 ### [Recurso 1]
 
-| Método | Endpoint | Descripción | Roles |
-|--------|----------|-------------|-------|
-| GET | `/api/v1/{recurso}` | Listar todos | [roles] |
-| GET | `/api/v1/{recurso}/{id}` | Obtener por ID | [roles] |
-| POST | `/api/v1/{recurso}` | Crear nuevo | [roles] |
-| PUT | `/api/v1/{recurso}/{id}` | Reemplazar completo | [roles] |
-| PATCH | `/api/v1/{recurso}/{id}` | Actualización parcial | [roles] |
-| DELETE | `/api/v1/{recurso}/{id}` | Eliminar | [roles] |
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/users` | Listar todos los usuarios |
+| GET | `/api/users/{id}` | Obtener usuario por ID |
+| GET | `/api/users/identification/{identification}` | Obtener usuario por identificación |
+| POST | `/api/users` | Crear nuevo usuario |
+| PUT | `/api/users/{id}` | Reemplazar usuario completo (admin) |
+| PUT | `/api/users/me` | Actualizar el perfil del usuario actual (`X-User-Id`) |
+| PATCH | `/api/users/{id}/deactivate` | Desactivar usuario (estado INACTIVE) |
+| PATCH | `/api/users/{id}/inactivate` | Inactivar usuario validando participación en torneo |
+| GET | `/api/invitations/{id}` | Obtener invitación por ID |
+| GET | `/api/invitations/player/{playerId}` | Listar invitaciones recibidas por jugador |
+| POST | `/api/invitations/player/{playerId}/team/{teamId}` | Enviar invitación a jugador desde equipo |
+| PATCH | `/api/invitations/{id}/accept` | Aceptar invitación |
+| PATCH | `/api/invitations/{id}/reject` | Rechazar invitación |
+| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente |
+| GET | `/api/sport-profiles/{id}` | Obtener perfil deportivo por ID |
+| GET | `/api/sport-profiles/user/{userId}` | Obtener perfil deportivo por usuario |
+| POST | `/api/sport-profiles/user/{userId}` | Crear perfil deportivo para usuario (multipart: `profile`, `photo` opcional) |
+| PUT | `/api/sport-profiles/{id}` | Actualizar perfil deportivo (multipart: `profile`, `photo` opcional) |
+| PATCH | `/api/sport-profiles/{id}/availability?available={true\|false}` | Actualizar disponibilidad del perfil deportivo |
 
 ---
 
@@ -365,6 +378,6 @@ mvn clean verify sonar:sonar \
 | Campo | Valor |
 |-------|-------|
 | Plataforma | Azure Web Apps |
-| URL del servicio | [https://nombre-del-servicio.azurewebsites.net](https://nombre-del-servicio.azurewebsites.net) |
+| URL del servicio | [techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net](techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net) |
 | Swagger desplegado | [https://nombre-del-servicio.azurewebsites.net/swagger-ui.html](https://nombre-del-servicio.azurewebsites.net/swagger-ui.html) |
 | Última versión | ![Deploy](https://github.com/techcup-futbol-dosw/nombre-del-servicio/actions/workflows/cd.yml/badge.svg) |
