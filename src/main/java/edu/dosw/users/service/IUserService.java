@@ -1,5 +1,6 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.model.UserModel;
 
 import java.util.List;
@@ -94,4 +95,25 @@ public interface IUserService {
     List<UserModel> search(String name, String position, String status,
                            String identification, String gender,
                            Integer semester, Integer age, Boolean onlyAvailable);
+
+    /**
+     * Searches for players and enriches each result with sport profile data.
+     *
+     * <p>Delegates filtering to {@link #search} and then batch-loads sport profiles
+     * so that {@code position}, {@code dorsalNumber} and {@code available} are
+     * included in every result that has a sport profile.</p>
+     *
+     * @param name           optional partial name filter
+     * @param position       optional position filter (e.g. {@code "FORWARD"})
+     * @param status         optional status filter
+     * @param identification optional exact identification number filter
+     * @param gender         optional gender filter
+     * @param semester       optional exact semester filter
+     * @param age            optional exact age filter
+     * @param onlyAvailable  when {@code true}, only returns available players
+     * @return list of enriched player search responses, may be empty
+     */
+    List<PlayerSearchResponse> searchPlayers(String name, String position, String status,
+                                             String identification, String gender,
+                                             Integer semester, Integer age, Boolean onlyAvailable);
 }

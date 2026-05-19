@@ -48,4 +48,13 @@ public interface SportProfileRepository extends JpaRepository<SportProfileEntity
      * @return list of sport profiles matching both criteria
      */
     List<SportProfileEntity> findByPositionAndAvailable(String position, boolean available);
+
+    /**
+     * Finds all sport profiles whose owner is in the given set of user identifiers.
+     * Used to batch-load sport profiles after a user search.
+     *
+     * @param userIds set of user identifiers to look up
+     * @return list of sport profiles for the given users
+     */
+    List<SportProfileEntity> findByUserIdIn(java.util.Collection<Long> userIds);
 }
