@@ -274,7 +274,7 @@ docker run -d \
 
 ### Diagrama de contenedores
 
-![ContainerDiagram](src/main/resources/docs/uml/architecturalDesigns/ContainerDiagram.png)
+![ContainerDiagram](src/main/resources/docs/uml/architecturalDesigns/containerDiagram.png)
 
 > [Describir cómo este servicio interactúa con los demás componentes.]
 
