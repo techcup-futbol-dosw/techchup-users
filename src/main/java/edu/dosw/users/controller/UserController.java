@@ -28,7 +28,7 @@ import java.util.List;
  *
  * <p>Access control summary:
  * <ul>
- *   <li>ADMINISTRADOR — full access to all endpoints.</li>
+ *   <li>ADMIN — full access to all endpoints.</li>
  *   <li>CAPITAN — can search players by filter and look up by identification.</li>
  *   <li>Any authenticated user — can read and update their own profile.</li>
  * </ul>
@@ -47,7 +47,7 @@ public class UserController {
      * Only captains and admins may search for players (per project requirements).
      */
     @GetMapping("/search")
-    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String position,
@@ -69,7 +69,7 @@ public class UserController {
      * Restricted to administrators only.
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getAll() {
         return ResponseEntity.ok(
                 userService.getAll().stream()
@@ -82,7 +82,7 @@ public class UserController {
      * Accessible by the owner or an administrator.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
+    @PreAuthorize("hasRole('ADMIN') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(
                 userMapper.toResponse(userService.getById(id)));
@@ -93,7 +93,7 @@ public class UserController {
      * Captains use this when building their roster; admins have full access.
      */
     @GetMapping("/identification/{identification}")
-    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getByIdentification(
             @PathVariable String identification) {
         return ResponseEntity.ok(
@@ -106,7 +106,7 @@ public class UserController {
      * Only administrators can perform full user updates.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> update(
             @PathVariable Long id, @RequestBody AdminUserUpdateRequest request) {
         return ResponseEntity.ok(
@@ -133,7 +133,7 @@ public class UserController {
      * Only administrators can forcibly deactivate any account.
      */
     @PatchMapping("/{id}/deactivate")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         userService.deactivate(id);
         return ResponseEntity.noContent().build();
@@ -144,7 +144,7 @@ public class UserController {
      * The user may inactivate their own account; admins may inactivate any account.
      */
     @PatchMapping("/{id}/inactivate")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
+    @PreAuthorize("hasRole('ADMIN') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
     public ResponseEntity<Void> inactivate(@PathVariable Long id) {
         userService.inactivate(id);
         return ResponseEntity.noContent().build();

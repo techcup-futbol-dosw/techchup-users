@@ -32,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
  * <ul>
  *   <li>Any authenticated user — may read any sport profile or photo.</li>
  *   <li>Profile owner (JUGADOR) — may create, update and toggle their own profile.</li>
- *   <li>ADMINISTRADOR — full access.</li>
+ *   <li>ADMIN — full access.</li>
  * </ul>
  * </p>
  */
@@ -61,7 +61,7 @@ public class SportProfileController {
      * Accessible by the profile owner, captains (player search) and administrators.
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('CAPITAN') or hasRole('ADMIN')")
     public ResponseEntity<SportProfileResponse> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(
                 sportProfileMapper.toResponse(sportProfileService.getByUserId(userId)));
@@ -76,7 +76,7 @@ public class SportProfileController {
      * @param photo   optional player photo
      */
     @PostMapping(value = "/user/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('ADMIN')")
     public ResponseEntity<SportProfileResponse> create(
             @PathVariable Long userId,
             @RequestPart("profile") SportProfileRequest request,
@@ -95,7 +95,7 @@ public class SportProfileController {
      * @param photo   optional new photo; omitting it keeps the existing one
      */
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("@sportProfileAccessPolicy.canModifyOwnSportProfile(#id, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@sportProfileAccessPolicy.canModifyOwnSportProfile(#id, authentication) or hasRole('ADMIN')")
     public ResponseEntity<SportProfileResponse> update(
             @PathVariable Long id,
             @RequestPart("profile") SportProfileRequest request,
@@ -113,7 +113,7 @@ public class SportProfileController {
      * @param available new availability value (query param)
      */
     @PatchMapping("/{id}/availability")
-    @PreAuthorize("@sportProfileAccessPolicy.canModifyOwnSportProfile(#id, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@sportProfileAccessPolicy.canModifyOwnSportProfile(#id, authentication) or hasRole('ADMIN')")
     public ResponseEntity<Void> updateAvailability(
             @PathVariable Long id,
             @RequestParam boolean available) {

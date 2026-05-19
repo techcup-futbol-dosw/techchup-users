@@ -25,7 +25,7 @@ import java.util.List;
  * <ul>
  *   <li>CAPITAN — can send and cancel invitations.</li>
  *   <li>JUGADOR (owner) — can view, accept and reject their own invitations.</li>
- *   <li>ADMINISTRADOR — full access to all invitation endpoints.</li>
+ *   <li>ADMIN — full access to all invitation endpoints.</li>
  * </ul>
  * </p>
  */
@@ -53,7 +53,7 @@ public class InvitationController {
      * Only the invitation owner or an administrator may list them.
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("@invitationAccessPolicy.canAccessOwnInvitation(#userId, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@invitationAccessPolicy.canAccessOwnInvitation(#userId, authentication) or hasRole('ADMIN')")
     public ResponseEntity<List<InvitationResponse>> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(
                 invitationService.getByPlayerId(userId).stream()
@@ -79,7 +79,7 @@ public class InvitationController {
      * Only the invited player (owner) or an administrator may accept.
      */
     @PatchMapping("/{id}/accept")
-    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMIN')")
     public ResponseEntity<InvitationResponse> accept(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.accept(id)));
@@ -90,7 +90,7 @@ public class InvitationController {
      * Only the invited player (owner) or an administrator may reject.
      */
     @PatchMapping("/{id}/reject")
-    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMIN')")
     public ResponseEntity<InvitationResponse> reject(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.reject(id)));

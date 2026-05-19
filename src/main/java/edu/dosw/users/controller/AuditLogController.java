@@ -36,7 +36,7 @@ public class AuditLogController {
      * @return list of audit log entries ordered as stored
      */
     @GetMapping("/sport-profiles/{sportProfileId}")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AuditLogResponse>> getBySportProfile(
             @PathVariable Long sportProfileId) {
         List<AuditLogResponse> logs = auditService.getLogsForSportProfile(sportProfileId)
@@ -53,7 +53,7 @@ public class AuditLogController {
      * @return list of audit log entries ordered as stored
      */
     @GetMapping("/invitations/{invitationId}")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AuditLogResponse>> getByInvitation(
             @PathVariable Long invitationId) {
         List<AuditLogResponse> logs = auditService.getLogsForInvitation(invitationId)

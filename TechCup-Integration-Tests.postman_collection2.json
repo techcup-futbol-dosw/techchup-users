@@ -12,7 +12,7 @@
     },
     {
       "key": "token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZXMiOlsiQURNSU5JU1RSQURPUiIsIkNBUElUQU4iXSwicGVybWlzc2lvbnMiOltdLCJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJleHAiOjk5OTk5OTk5OTl9.4zVbKaLKAOm0-7v9uPDMz9OVsxp3dbmR5L1ztEaVf1k",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZXMiOlsiQURNSU4iLCJDQVBJVEFOIl0sInBlcm1pc3Npb25zIjpbXSwidG9rZW5UeXBlIjoiQUNDRVNTIiwiZXhwIjo5OTk5OTk5OTk5fQ.g71YVM_GPLDN58LsmEI8Xz4qk99c_TZmhm3mmzwzddw",
       "type": "string"
     }
   ],
