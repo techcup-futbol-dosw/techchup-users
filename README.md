@@ -378,6 +378,6 @@ mvn clean verify sonar:sonar \
 | Campo | Valor |
 |-------|-------|
 | Plataforma | Azure Web Apps |
-| URL del servicio | [techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net](techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net) |
-| Swagger desplegado | [https://nombre-del-servicio.azurewebsites.net/swagger-ui.html](https://nombre-del-servicio.azurewebsites.net/swagger-ui.html) |
-| Última versión | ![Deploy](https://github.com/techcup-futbol-dosw/nombre-del-servicio/actions/workflows/cd.yml/badge.svg) |
+| URL del servicio | [https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net](https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net) |
+| Swagger desplegado | [https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net/swagger-ui/index.html](https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net/swagger-ui/index.html) |
+| Última versión | ![Deploy](https://github.com/techcup-futbol-dosw/techchup-users/actions/workflows/cd.yml/badge.svg) |
