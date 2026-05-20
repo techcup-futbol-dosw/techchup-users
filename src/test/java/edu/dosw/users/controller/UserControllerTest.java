@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * deactivating user profiles.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "ADMIN")
 class UserControllerTest {
 
     @Autowired private WebApplicationContext context;
