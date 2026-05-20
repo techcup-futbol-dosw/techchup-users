@@ -15,24 +15,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Entry point invoked when authentication is required but missing or invalid.
+ * Punto de entrada invocado cuando se requiere autenticación pero esta falta o es inválida.
  *
- * <p>Returns a structured JSON payload with HTTP 401 status to inform the
- * client that authentication failed or is absent.</p>
+ * <p>Retorna un payload JSON estructurado con estado HTTP 401 para informar al cliente
+ * que la autenticación falló o está ausente.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Component
 public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
 
     /**
-     * Sends a 401 Unauthorized response with a JSON body describing the error.
-     * The JSON keys mirror the format used by {@code AccessDeniedHandlerImpl}
-     * to keep API error responses consistent.
+     * Envía una respuesta 401 Unauthorized con un cuerpo JSON que describe el error.
+     * Las claves JSON reflejan el formato utilizado por {@code AccessDeniedHandlerImpl}
+     * para mantener consistencia en las respuestas de error de la API.
      *
-     * @param request current HTTP request
-     * @param response current HTTP response where the JSON payload will be written
-     * @param authException the authentication exception thrown by the security layer
-     * @throws IOException when writing the response fails
-     * @throws ServletException present to conform with the interface signature
+     * @param request       solicitud HTTP actual
+     * @param response      respuesta HTTP actual donde se escribirá el payload JSON
+     * @param authException excepción de autenticación lanzada por la capa de seguridad
+     * @throws IOException      si falla la escritura de la respuesta
+     * @throws ServletException presente para conformar con la firma de la interfaz
      */
     @Override
     public void commence(HttpServletRequest request,

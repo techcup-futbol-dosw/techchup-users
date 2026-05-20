@@ -18,17 +18,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Component
 /**
- * Filter that authenticates requests based on a Bearer JWT token.
+ * Filtro que autentica las solicitudes basándose en un token JWT Bearer.
  *
- * <p>Responsibilities:
+ * <p>Responsabilidades:
  * <ul>
- *   <li>Extract the Bearer token from the Authorization header</li>
- *   <li>Validate the token using {@code JwtService}</li>
- *   <li>Extract user id, roles and permissions and populate the Spring Security context</li>
+ *   <li>Extraer el token Bearer del encabezado {@code Authorization}.</li>
+ *   <li>Validar el token mediante {@link edu.dosw.users.service.JwtService}.</li>
+ *   <li>Extraer el id de usuario, roles y permisos, y poblar el contexto de Spring Security.</li>
  * </ul>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;

@@ -16,12 +16,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 
 /**
- * Default implementation of {@link ISportProfileService}.
+ * Implementación por defecto de {@link ISportProfileService}.
  *
- * <p>Coordinates sport profile persistence with photo storage (MongoDB via
- * {@link ImageService}), team membership checks (via {@link TeamsServiceClient}),
- * user existence validation (via {@link IdentityServiceClient}),
- * and audit logging (via {@link IAuditService}).</p>
+ * <p>Coordina la persistencia del perfil deportivo con el almacenamiento de fotos
+ * (MongoDB a través de {@link ImageService}), la verificación de pertenencia a equipos
+ * (vía {@link TeamsServiceClient}), la validación de existencia de usuarios
+ * (vía {@link IdentityServiceClient}) y el registro de auditoría (vía {@link IAuditService}).</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -61,10 +64,9 @@ public class SportProfileServiceImpl implements ISportProfileService {
     /**
      * {@inheritDoc}
      *
-     * <p>Creates the profile only when the user exists in the identity service
-     * and does not already have one. If a photo is provided, it is uploaded
-     * before the profile is saved and the generated photo id is stored in the
-     * relational entity.</p>
+     * <p>Crea el perfil solo cuando el usuario existe en el servicio de identidad
+     * y aún no tiene uno. Si se proporciona una foto, se sube antes de guardar el
+     * perfil y el id de foto generado se almacena en la entidad relacional.</p>
      */
     @Override
     public SportProfileModel create(Long userId, SportProfileModel model, MultipartFile photo) {
@@ -96,8 +98,9 @@ public class SportProfileServiceImpl implements ISportProfileService {
     /**
      * {@inheritDoc}
      *
-     * <p>Prevents updates while the player is assigned to a team. When a new
-     * photo is provided, the previous stored photo is deleted and replaced.</p>
+     * <p>Impide las actualizaciones mientras el jugador esté asignado a un equipo.
+     * Cuando se proporciona una nueva foto, la foto almacenada anteriormente se
+     * elimina y se reemplaza.</p>
      */
     @Override
     public SportProfileModel update(Long id, SportProfileModel model, MultipartFile photo) {
@@ -129,7 +132,8 @@ public class SportProfileServiceImpl implements ISportProfileService {
     /**
      * {@inheritDoc}
      *
-     * <p>Updates only the availability flag and the modification timestamp.</p>
+     * <p>Actualiza únicamente el indicador de disponibilidad y la marca de tiempo
+     * de modificación.</p>
      */
     @Override
     public void updateAvailability(Long id, boolean available) {
@@ -144,13 +148,12 @@ public class SportProfileServiceImpl implements ISportProfileService {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Uploads a new photo and deletes the previous one when a new file is
-     * provided. Returns the current {@code photoId} unchanged when no file
-     * is given.
+     * Sube una nueva foto y elimina la anterior cuando se proporciona un nuevo archivo.
+     * Retorna el {@code photoId} actual sin cambios cuando no se proporciona ningún archivo.
      *
-     * @param photo optional multipart file to upload
-     * @param currentPhotoId current stored photo identifier
-     * @return new photo identifier, or the current one when no new file exists
+     * @param photo          archivo multipart a subir (opcional)
+     * @param currentPhotoId identificador de la foto actualmente almacenada
+     * @return nuevo identificador de foto, o el identificador actual si no hay nuevo archivo
      */
     private String uploadIfPresent(MultipartFile photo, String currentPhotoId) {
         if (photo == null || photo.isEmpty()) {

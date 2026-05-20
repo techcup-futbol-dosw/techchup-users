@@ -1,21 +1,24 @@
 package edu.dosw.users.enums;
 
 /**
- * Type of relationship between the user and Escuela Colombiana de Ingeniería
+ * Tipo de relación entre el usuario y la Escuela Colombiana de Ingeniería
  * Julio Garavito.
  *
- * <p>Defines the institutional link of the player and may be used
- * for eligibility validation in internal tournaments.</p>
+ * <p>Define el vínculo institucional del jugador y puede usarse para la
+ * validación de elegibilidad en torneos internos.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public enum SchoolRelation {
-    /** Active student of the institution. */
+    /** Estudiante activo de la institución. */
     STUDENT,
-    /** Professor affiliated with the institution. */
+    /** Docente vinculado a la institución. */
     PROFESSOR,
-    /** Administrative staff of the institution. */
+    /** Personal administrativo de la institución. */
     ADMINISTRATIVE,
-    /** Graduate of an academic programme at the institution. */
+    /** Egresado de un programa académico de la institución. */
     GRADUATE,
-    /** Family member of an institutional community member. */
+    /** Familiar de un miembro de la comunidad institucional. */
     FAMILY
 }

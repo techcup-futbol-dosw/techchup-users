@@ -22,17 +22,20 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST controller for user profile management.
+ * Controlador REST para la gestión de perfiles de usuario.
  *
- * <p>Base path: {@code /api/users}</p>
+ * <p>Ruta base: {@code /api/users}</p>
  *
- * <p>Access control summary:
+ * <p>Resumen de control de acceso:
  * <ul>
- *   <li>ADMINISTRADOR — full access to all endpoints.</li>
- *   <li>CAPITAN — can search players by filter and look up by identification.</li>
- *   <li>Any authenticated user — can read and update their own profile.</li>
+ *   <li>ADMINISTRADOR — acceso completo a todos los endpoints.</li>
+ *   <li>CAPITAN — puede buscar jugadores por filtro y consultar por número de identificación.</li>
+ *   <li>Cualquier usuario autenticado — puede leer y actualizar su propio perfil.</li>
  * </ul>
  * </p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/api/users")
@@ -43,8 +46,19 @@ public class UserController {
     private final UserMapper userMapper;
 
     /**
-     * Returns players matching the given filters.
-     * Only captains and admins may search for players (per project requirements).
+     * Retorna los jugadores que coinciden con los filtros indicados.
+     *
+     * <p>Solo capitanes y administradores pueden buscar jugadores (según requisitos del proyecto).</p>
+     *
+     * @param name           nombre o parte del nombre del jugador (opcional)
+     * @param position       posición en el campo, p. ej. {@code GOALKEEPER} (opcional)
+     * @param status         estado de la cuenta del usuario (opcional)
+     * @param identification número de identificación oficial del jugador (opcional)
+     * @param gender         género del jugador (opcional)
+     * @param semester       semestre académico en curso (opcional)
+     * @param age            edad del jugador (opcional)
+     * @param available      indica si el jugador está disponible para unirse a un equipo (opcional)
+     * @return lista de usuarios que cumplen con todos los filtros proporcionados
      */
     @GetMapping("/search")
     @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
@@ -65,8 +79,11 @@ public class UserController {
     }
 
     /**
-     * Returns all user profiles.
-     * Restricted to administrators only.
+     * Retorna todos los perfiles de usuario del sistema.
+     *
+     * <p>Restringido únicamente a administradores.</p>
+     *
+     * @return lista completa de usuarios registrados
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -78,8 +95,12 @@ public class UserController {
     }
 
     /**
-     * Returns the user profile with the given identifier.
-     * Accessible by the owner or an administrator.
+     * Retorna el perfil de usuario con el identificador indicado.
+     *
+     * <p>Accesible por el propio usuario o un administrador.</p>
+     *
+     * @param id identificador del usuario
+     * @return respuesta con los datos del perfil de usuario
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
@@ -89,8 +110,13 @@ public class UserController {
     }
 
     /**
-     * Returns the user profile with the given official identification number.
-     * Captains use this when building their roster; admins have full access.
+     * Retorna el perfil de usuario con el número de identificación oficial indicado.
+     *
+     * <p>Los capitanes utilizan este endpoint al construir su plantilla; los administradores
+     * tienen acceso completo.</p>
+     *
+     * @param identification número de identificación oficial del usuario
+     * @return respuesta con los datos del perfil de usuario
      */
     @GetMapping("/identification/{identification}")
     @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMINISTRADOR')")
@@ -102,8 +128,15 @@ public class UserController {
     }
 
     /**
-     * Replaces an existing user profile (admin operation).
-     * Only administrators can perform full user updates.
+     * Reemplaza un perfil de usuario existente (operación de administrador).
+     *
+     * <p>Solo los administradores pueden realizar actualizaciones completas de usuario.
+     * Delega la persistencia al servicio de identidad externo y registra auditoría
+     * automáticamente sobre el perfil deportivo asociado.</p>
+     *
+     * @param id      identificador del usuario a actualizar
+     * @param request datos completos de actualización con privilegios de administrador
+     * @return respuesta con los datos del perfil de usuario actualizado
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -115,8 +148,15 @@ public class UserController {
     }
 
     /**
-     * Updates the current user's own profile.
-     * Any authenticated user may update their own basic information.
+     * Actualiza el perfil del usuario autenticado actualmente.
+     *
+     * <p>Cualquier usuario autenticado puede actualizar su propia información básica.
+     * El identificador de usuario se extrae del encabezado {@code X-User-Id} propagado
+     * por el gateway.</p>
+     *
+     * @param userId  identificador del usuario autenticado (encabezado {@code X-User-Id})
+     * @param request datos de actualización del propio perfil
+     * @return respuesta con los datos del perfil actualizado
      */
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -129,8 +169,12 @@ public class UserController {
     }
 
     /**
-     * Deactivates a user account (admin operation).
-     * Only administrators can forcibly deactivate any account.
+     * Desactiva una cuenta de usuario (operación de administrador).
+     *
+     * <p>Solo los administradores pueden desactivar forzosamente cualquier cuenta.</p>
+     *
+     * @param id identificador del usuario a desactivar
+     * @return respuesta vacía con HTTP 204
      */
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -140,8 +184,14 @@ public class UserController {
     }
 
     /**
-     * Inactivates the user's own account after validating tournament participation.
-     * The user may inactivate their own account; admins may inactivate any account.
+     * Inactiva la cuenta de un usuario tras validar su participación en el torneo.
+     *
+     * <p>El propio usuario puede inactivar su cuenta; los administradores pueden
+     * inactivar cualquier cuenta. El servicio valida que el jugador no pertenezca
+     * a un equipo activo antes de proceder.</p>
+     *
+     * @param id identificador del usuario a inactivar
+     * @return respuesta vacía con HTTP 204
      */
     @PatchMapping("/{id}/inactivate")
     @PreAuthorize("hasRole('ADMINISTRADOR') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")

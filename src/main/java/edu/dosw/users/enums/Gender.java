@@ -1,17 +1,19 @@
 package edu.dosw.users.enums;
 
 /**
- * Gender of the user as recorded in their platform profile.
+ * Género del usuario tal como está registrado en su perfil de la plataforma.
  *
- * <p>Stored as a {@code String} in the relational database and converted
- * to this enum by MapStruct when mapping from {@code UserEntity}
- * to {@code UserModel}.</p>
+ * <p>Se almacena como {@code String} en la base de datos relacional y se convierte
+ * a este enum por MapStruct al mapear desde {@code UserEntity} a {@code UserModel}.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public enum Gender {
-    /** Male. */
+    /** Masculino. */
     MALE,
-    /** Female. */
+    /** Femenino. */
     FEMALE,
-    /** Other gender or not specified. */
+    /** Otro género o no especificado. */
     OTHER
 }

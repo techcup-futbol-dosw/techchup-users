@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Read-only view of a sport profile returned by the API.
+ * Vista de solo lectura de un perfil deportivo retornada por la API.
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Getter
 @Builder

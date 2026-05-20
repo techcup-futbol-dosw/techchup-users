@@ -15,10 +15,14 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 /**
- * Payload accepted for updating the current user's profile.
+ * Payload aceptado para actualizar el perfil del usuario actual.
  *
- * <p>Deliberately excludes email and password, which are managed by the
- * identity service and cannot be modified through this endpoint.</p>
+ * <p>Excluye deliberadamente el correo electrónico y la contraseña, que son gestionados
+ * por el servicio de identidad y no pueden modificarse a través de este endpoint.
+ * Todos los campos están sujetos a validación con Bean Validation.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Getter
 @Setter

@@ -1,16 +1,19 @@
 package edu.dosw.users.enums;
 
 /**
- * Action types that can be recorded in the system audit log.
+ * Tipos de acción que pueden registrarse en el log de auditoría del sistema.
  *
- * <p>Each value corresponds to a business event that modifies the state
- * of a sport profile or a team invitation.</p>
+ * <p>Cada valor corresponde a un evento de negocio que modifica el estado
+ * de un perfil deportivo o una invitación de equipo.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public enum AuditAction {
-    /** Creation of a sport profile or an invitation. */
+    /** Creación de un perfil deportivo o una invitación. */
     CREATE,
-    /** Update of data belonging to a sport profile or invitation. */
+    /** Actualización de datos de un perfil deportivo o una invitación. */
     UPDATE,
-    /** Deactivation of a sport profile (no physical deletion). */
+    /** Desactivación de un perfil deportivo (sin eliminación física). */
     DEACTIVATE
 }

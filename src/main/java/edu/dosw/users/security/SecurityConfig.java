@@ -9,18 +9,20 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración central de seguridad del servicio.
+ *
+ * <p>Establece autenticación sin estado basada en JWT registrando el
+ * {@link JwtAuthenticationFilter} antes del filtro estándar de Spring Security
+ * {@link UsernamePasswordAuthenticationFilter}. También define el manejo de
+ * excepciones y qué endpoints son públicos.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    /**
-     * Central security configuration for the service.
-     *
-     * <p>Configures stateless JWT-based authentication by registering the
-     * {@link JwtAuthenticationFilter} before Spring Security's
-     * {@link UsernamePasswordAuthenticationFilter}.
-     * It also defines exception handling and which endpoints are public.</p>
-     */
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
@@ -34,6 +36,15 @@ public class SecurityConfig {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
+    /**
+     * Configura la cadena de filtros de seguridad para todos los perfiles excepto {@code local}.
+     *
+     * <p>CSRF deshabilitado: API REST sin estado con JWT — sin cookies de sesión, por lo que
+     * la protección CSRF es innecesaria.</p>
+     *
+     * @param http constructor de configuración HTTP de Spring Security
+     * @return cadena de filtros de seguridad configurada
+     */
     @Bean
     @Profile("!local")
     @SuppressWarnings("java:S4502")
