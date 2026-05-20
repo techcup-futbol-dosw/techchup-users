@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
  * <p>Resumen de control de acceso:
  * <ul>
  *   <li>Cualquier usuario autenticado — puede leer cualquier perfil deportivo o foto.</li>
- *   <li>Propietario del perfil (JUGADOR) — puede crear, actualizar y alternar su propio perfil.</li>
+ *   <li>Propietario del perfil (PLAYER) — puede crear, actualizar y alternar su propio perfil.</li>
  *   <li>ADMIN — acceso completo.</li>
  * </ul>
  * </p>
@@ -73,7 +73,7 @@ public class SportProfileController {
      * @return respuesta con los datos del perfil deportivo
      */
     @GetMapping("/user/{userId}")
-    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('CAPITAN') or hasRole('ADMIN')")
+    @PreAuthorize("@sportProfileAccessPolicy.canAccessOwnSportProfile(#userId, authentication) or hasRole('CAPTAIN') or hasRole('ADMIN')")
     public ResponseEntity<SportProfileResponse> getByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(
                 sportProfileMapper.toResponse(sportProfileService.getByUserId(userId)));

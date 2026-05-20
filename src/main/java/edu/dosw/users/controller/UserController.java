@@ -29,7 +29,7 @@ import java.util.List;
  * <p>Resumen de control de acceso:
  * <ul>
  *   <li>ADMIN — acceso completo a todos los endpoints.</li>
- *   <li>CAPITAN — puede buscar jugadores por filtro y consultar por número de identificación.</li>
+ *   <li>CAPTAIN — puede buscar jugadores por filtro y consultar por número de identificación.</li>
  *   <li>Cualquier usuario autenticado — puede leer y actualizar su propio perfil.</li>
  * </ul>
  * </p>
@@ -61,7 +61,7 @@ public class UserController {
      * @return lista de usuarios que cumplen con todos los filtros proporcionados
      */
     @GetMapping("/search")
-    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('CAPTAIN') or hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String position,
@@ -119,7 +119,7 @@ public class UserController {
      * @return respuesta con los datos del perfil de usuario
      */
     @GetMapping("/identification/{identification}")
-    @PreAuthorize("hasRole('CAPITAN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('CAPTAIN') or hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getByIdentification(
             @PathVariable String identification) {
         return ResponseEntity.ok(

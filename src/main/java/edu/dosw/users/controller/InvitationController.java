@@ -23,8 +23,8 @@ import java.util.List;
  *
  * <p>Resumen de control de acceso:
  * <ul>
- *   <li>CAPITAN — puede enviar y cancelar invitaciones.</li>
- *   <li>JUGADOR (propietario) — puede consultar, aceptar y rechazar sus propias invitaciones.</li>
+ *   <li>CAPTAIN — puede enviar y cancelar invitaciones.</li>
+ *   <li>PLAYER (propietario) — puede consultar, aceptar y rechazar sus propias invitaciones.</li>
  *   <li>ADMIN — acceso completo a todos los endpoints de invitación.</li>
  * </ul>
  * </p>
@@ -84,7 +84,7 @@ public class InvitationController {
      * @return respuesta con los datos de la invitación creada (HTTP 201)
      */
     @PostMapping("/user/{userId}/team/{teamId}")
-    @PreAuthorize("hasRole('CAPITAN')")
+    @PreAuthorize("hasRole('CAPTAIN')")
     public ResponseEntity<InvitationResponse> send(
             @PathVariable Long userId,
             @PathVariable Long teamId) {
@@ -131,7 +131,7 @@ public class InvitationController {
      * @return respuesta con los datos de la invitación cancelada
      */
     @PatchMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('CAPITAN')")
+    @PreAuthorize("hasRole('CAPTAIN')")
     public ResponseEntity<InvitationResponse> cancel(@PathVariable Long id) {
         return ResponseEntity.ok(
                 invitationMapper.toResponse(invitationService.cancel(id)));
