@@ -3,6 +3,7 @@ package edu.dosw.users.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
+import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.enums.Gender;
@@ -68,9 +69,9 @@ class UserControllerTest {
 
     @Test
     void search_noParams_returnsOkWithList() throws Exception {
-        when(userService.search(null, null, null, null, null, null, null, null)).thenReturn(List.of(
-                UserModel.builder().id(1L).fullName("Carlos").build(),
-                UserModel.builder().id(2L).fullName("Ana").build()));
+        when(userService.searchPlayers(null, null, null, null, null, null, null, null)).thenReturn(List.of(
+                PlayerSearchResponse.builder().id(1L).fullName("Carlos").build(),
+                PlayerSearchResponse.builder().id(2L).fullName("Ana").build()));
 
         mockMvc.perform(get("/api/users/search"))
                 .andExpect(status().isOk())
@@ -79,21 +80,22 @@ class UserControllerTest {
 
     @Test
     void search_withNameAndPosition_returnsFilteredList() throws Exception {
-        when(userService.search("carlos", "FORWARD", null, null, null, null, null, null)).thenReturn(List.of(
-                UserModel.builder().id(1L).fullName("Carlos").build()));
+        when(userService.searchPlayers("carlos", "FORWARD", null, null, null, null, null, null)).thenReturn(List.of(
+                PlayerSearchResponse.builder().id(1L).fullName("Carlos").position("FORWARD").build()));
 
         mockMvc.perform(get("/api/users/search")
                         .param("name", "carlos")
                         .param("position", "FORWARD"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].fullName").value("Carlos"));
+                .andExpect(jsonPath("$[0].fullName").value("Carlos"))
+                .andExpect(jsonPath("$[0].position").value("FORWARD"));
     }
 
     @Test
     void search_withStatus_returnsFilteredList() throws Exception {
-        when(userService.search(null, null, "ACTIVE", null, null, null, null, null)).thenReturn(List.of(
-                UserModel.builder().id(3L).fullName("Luis").build()));
+        when(userService.searchPlayers(null, null, "ACTIVE", null, null, null, null, null)).thenReturn(List.of(
+                PlayerSearchResponse.builder().id(3L).fullName("Luis").status("ACTIVE").build()));
 
         mockMvc.perform(get("/api/users/search")
                         .param("status", "ACTIVE"))

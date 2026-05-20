@@ -2,6 +2,7 @@ package edu.dosw.users.service;
 
 import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -208,6 +210,44 @@ public class UserServiceImpl implements IUserService {
             profiles = sportProfileRepository.findByAvailable(true);
         }
         return profiles.stream().map(SportProfileEntity::getUserId).collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<PlayerSearchResponse> searchPlayers(String name, String position, String status,
+                                                     String identification, String gender,
+                                                     Integer semester, Integer age, Boolean onlyAvailable) {
+        List<UserModel> users = search(name, position, status, identification, gender, semester, age, onlyAvailable);
+
+        if (users.isEmpty()) {
+            return List.of();
+        }
+
+        // Batch-load sport profiles and index by userId for O(1) lookup
+        Set<Long> userIds = users.stream().map(UserModel::getId).collect(Collectors.toSet());
+        Map<Long, SportProfileEntity> profileByUserId = sportProfileRepository.findByUserIdIn(userIds)
+                .stream()
+                .collect(Collectors.toMap(SportProfileEntity::getUserId, sp -> sp));
+
+        return users.stream().map(u -> {
+            SportProfileEntity sp = profileByUserId.get(u.getId());
+            return PlayerSearchResponse.builder()
+                    .id(u.getId())
+                    .fullName(u.getFullName())
+                    .email(u.getEmail())
+                    .identification(u.getIdentification())
+                    .birthDate(u.getBirthDate())
+                    .gender(u.getGender())
+                    .schoolRelation(u.getSchoolRelation())
+                    .academicProgram(u.getAcademicProgram())
+                    .semester(u.getSemester())
+                    .status(u.getStatus())
+                    .profileCreatedAt(u.getProfileCreatedAt())
+                    .updatedAt(u.getUpdatedAt())
+                    .position(sp != null ? sp.getPosition() : null)
+                    .dorsalNumber(sp != null ? sp.getDorsalNumber() : null)
+                    .available(sp != null ? sp.isAvailable() : null)
+                    .build();
+        }).toList();
     }
 
     private boolean blank(String s) {

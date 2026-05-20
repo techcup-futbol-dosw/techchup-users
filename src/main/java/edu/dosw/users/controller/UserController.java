@@ -2,6 +2,7 @@ package edu.dosw.users.controller;
 
 import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
+import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.dto.UserResponse;
 import edu.dosw.users.mapper.UserMapper;
 import edu.dosw.users.service.IUserService;
@@ -72,10 +73,7 @@ public class UserController {
             @RequestParam(required = false) Integer age,
             @RequestParam(required = false) Boolean available) {
         return ResponseEntity.ok(
-                userService.search(name, position, status, identification, gender, semester, age, available)
-                        .stream()
-                        .map(userMapper::toResponse)
-                        .toList());
+                userService.searchPlayers(name, position, status, identification, gender, semester, age, available));
     }
 
     /**
