@@ -16,11 +16,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Default implementation of {@link IInvitationService}.
+ * Implementación por defecto de {@link IInvitationService}.
  *
- * <p>Manages the full lifecycle of a team invitation. User existence is
- * validated via {@link IdentityServiceClient} before creating an invitation.
- * {@link InvitationMapper} handles conversion between entity and model.</p>
+ * <p>Gestiona el ciclo de vida completo de una invitación de equipo. La existencia
+ * del usuario se valida a través de {@link IdentityServiceClient} antes de crear
+ * una invitación. {@link InvitationMapper} se encarga de la conversión entre
+ * entidad y modelo.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -56,9 +60,8 @@ public class InvitationServiceImpl implements IInvitationService {
     /**
      * {@inheritDoc}
      *
-     * <p>Validates that the player exists in the identity service and that there
-     * is no pending invitation from the same team before creating the new
-     * invitation.</p>
+     * <p>Valida que el jugador exista en el servicio de identidad y que no haya
+     * una invitación pendiente del mismo equipo antes de crear la nueva invitación.</p>
      */
     @Override
     public InvitationModel send(Long playerId, Long teamId) {
@@ -124,14 +127,14 @@ public class InvitationServiceImpl implements IInvitationService {
     }
 
     /**
-     * Applies a state transition to a pending invitation, persists it, and
-     * records the corresponding audit log entry.
+     * Aplica una transición de estado a una invitación pendiente, la persiste y
+     * registra la entrada de auditoría correspondiente.
      *
-     * @param id identifier of the invitation to modify
-     * @param action state transition to apply to the invitation model
-     * @param auditAction audit action to record after saving
-     * @param details audit details describing the transition
-     * @return updated invitation model
+     * @param id          identificador de la invitación a modificar
+     * @param action      transición de estado a aplicar sobre el modelo de invitación
+     * @param auditAction acción de auditoría a registrar tras guardar
+     * @param details     descripción de auditoría que explica la transición
+     * @return modelo de invitación actualizado
      */
     private InvitationModel respondToInvitation(Long id, InvitationAction action,
                                                 AuditAction auditAction, String details) {

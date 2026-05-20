@@ -12,12 +12,15 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 
 /**
- * Seeds the in-memory identity stub with a fixed test user on startup.
+ * Carga el stub en memoria del servicio de identidad con un usuario de prueba fijo al inicio.
  *
- * <p>Active only in non-production profiles. The seeded user always receives
- * id=1 (the stub's counter starts at 1), so Postman integration tests can
- * reference a predictable {@code userId} without needing to call a create
- * endpoint.</p>
+ * <p>Activo únicamente en perfiles no productivos. El usuario sembrado siempre recibe
+ * id=1 (el contador del stub comienza en 1), por lo que las pruebas de integración en
+ * Postman pueden referenciar un {@code userId} predecible sin necesidad de llamar a
+ * un endpoint de creación.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Component
 @Profile("!prod")
@@ -29,6 +32,12 @@ public class DataSeeder implements ApplicationRunner {
         this.identityServiceClient = identityServiceClient;
     }
 
+    /**
+     * Ejecuta la siembra de datos al arrancar la aplicación creando el usuario de prueba
+     * predefinido en el stub del servicio de identidad.
+     *
+     * @param args argumentos de la aplicación (no utilizados)
+     */
     @Override
     public void run(ApplicationArguments args) {
         UserModel testUser = UserModel.builder()

@@ -7,40 +7,47 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * MapStruct mapper for bidirectional conversion between
- * {@link AuditLogEntity} and {@link AuditLogModel}.
+ * Mapper MapStruct para la conversión bidireccional entre {@link AuditLogEntity} y {@link AuditLogModel}.
  *
- * <p>When converting to a model, extracts the identifiers from the nested
- * relationships ({@code sportProfile.id} and {@code invitation.id}) and
- * assigns them to the flat fields of the model. When converting to an entity,
- * both relationships are ignored and must be resolved by the service layer.</p>
+ * <p>Al convertir a modelo, extrae los identificadores de las relaciones anidadas
+ * ({@code sportProfile.id} e {@code invitation.id}) y los asigna a los campos planos
+ * del modelo. Al convertir a entidad, ambas relaciones se ignoran y deben ser resueltas
+ * por la capa de servicio.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Mapper(componentModel = "spring")
 public interface AuditLogMapper {
 
     /**
-     * Converts an audit log entity to its domain model, extracting the
-     * identifiers from {@code sportProfile} and {@code invitation}.
+     * Convierte una entidad de auditoría a su modelo de dominio, extrayendo los
+     * identificadores de {@code sportProfile} e {@code invitation}.
      *
-     * @param entity source entity; may be {@code null}
-     * @return resulting model, or {@code null} if the entity is {@code null}
+     * @param entity entidad fuente; puede ser {@code null}
+     * @return modelo resultante, o {@code null} si la entidad es {@code null}
      */
     @Mapping(source = "sportProfile.id", target = "sportProfileId")
     @Mapping(source = "invitation.id", target = "invitationId")
     AuditLogModel toModel(AuditLogEntity entity);
 
     /**
-     * Converts an audit log model to its JPA entity.
-     * The {@code sportProfile} and {@code invitation} relationships are left
-     * as {@code null} and must be assigned by the service layer.
+     * Convierte un modelo de auditoría a su entidad JPA.
+     * Las relaciones {@code sportProfile} e {@code invitation} se dejan como
+     * {@code null} y deben ser asignadas por la capa de servicio.
      *
-     * @param model source model; may be {@code null}
-     * @return resulting entity, or {@code null} if the model is {@code null}
+     * @param model modelo fuente; puede ser {@code null}
+     * @return entidad resultante, o {@code null} si el modelo es {@code null}
      */
     @Mapping(target = "sportProfile", ignore = true)
     @Mapping(target = "invitation", ignore = true)
     AuditLogEntity toEntity(AuditLogModel model);
 
-    /** Converts a domain model to an {@link AuditLogResponse}. */
+    /**
+     * Convierte un modelo de dominio a un {@link AuditLogResponse}.
+     *
+     * @param model modelo fuente; puede ser {@code null}
+     * @return DTO de respuesta resultante, o {@code null} si el modelo es {@code null}
+     */
     AuditLogResponse toResponse(AuditLogModel model);
 }

@@ -20,22 +20,28 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
- * Provides fallback (no-op / in-memory) implementations for beans that are
- * absent in local and test environments.
+ * Proporciona implementaciones de respaldo (no-op / en memoria) para beans
+ * que están ausentes en entornos locales y de prueba.
  *
  * <ul>
- *   <li>{@link ImageService} stub — active in all profiles except {@code prod}.</li>
- *   <li>{@link IdentityServiceClient} stub — active in all profiles except {@code prod};
- *       keeps an in-memory store so local development works end-to-end.</li>
- *   <li>{@link TeamsServiceClient} stub — active until a real HTTP client is registered.</li>
+ *   <li>Stub de {@link ImageService} — activo en todos los perfiles excepto {@code prod}.</li>
+ *   <li>Stub de {@link IdentityServiceClient} — activo en todos los perfiles excepto {@code prod};
+ *       mantiene un almacén en memoria para que el desarrollo local funcione de extremo a extremo.</li>
+ *   <li>Stub de {@link TeamsServiceClient} — activo hasta que se registre un cliente HTTP real.</li>
  * </ul>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Configuration
 public class FallbackBeansConfig {
 
     /**
-     * No-op {@link ImageService}: upload returns {@code null}, getPhoto returns
-     * {@code null}, delete is a no-op. Active in all profiles except {@code prod}.
+     * Stub no-op de {@link ImageService}: {@code upload} retorna {@code null},
+     * {@code getPhoto} retorna {@code null} y {@code delete} no hace nada.
+     * Activo en todos los perfiles excepto {@code prod}.
+     *
+     * @return implementación stub de {@link ImageService}
      */
     @Bean
     @Profile("!prod")
@@ -59,10 +65,12 @@ public class FallbackBeansConfig {
     }
 
     /**
-     * In-memory {@link IdentityServiceClient} stub. Active in all profiles except
-     * {@code prod}. Stores users in a thread-safe map so that local development
-     * and integration tests can exercise the full request flow without a running
-     * identity service.
+     * Stub en memoria de {@link IdentityServiceClient}. Activo en todos los perfiles
+     * excepto {@code prod}. Almacena usuarios en un mapa thread-safe para que el
+     * desarrollo local y las pruebas de integración puedan ejercitar el flujo completo
+     * de solicitudes sin necesidad de un servicio de identidad en ejecución.
+     *
+     * @return implementación stub en memoria de {@link IdentityServiceClient}
      */
     @Bean
     @Profile("!prod")
@@ -153,8 +161,10 @@ public class FallbackBeansConfig {
     }
 
     /**
-     * Stub {@link TeamsServiceClient}: always returns {@code false} (player
-     * not in any team). Active until a real HTTP client is registered.
+     * Stub de {@link TeamsServiceClient}: siempre retorna {@code false} (el jugador
+     * no pertenece a ningún equipo). Activo hasta que se registre un cliente HTTP real.
+     *
+     * @return implementación stub de {@link TeamsServiceClient}
      */
     @Bean
     @ConditionalOnMissingBean(TeamsServiceClient.class)

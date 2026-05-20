@@ -6,29 +6,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * Spring Data JPA repository for {@link AuditLogEntity} persistence operations.
+ * Repositorio Spring Data JPA para operaciones de persistencia de {@link AuditLogEntity}.
  *
- * <p>Provides the standard CRUD operations inherited from {@link JpaRepository}
- * and derived queries used to retrieve audit trail entries associated with sport
- * profiles or invitations.</p>
+ * <p>Provee las operaciones CRUD estándar heredadas de {@link JpaRepository} y
+ * consultas derivadas para recuperar entradas de auditoría asociadas a perfiles
+ * deportivos o invitaciones.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see AuditLogEntity
  */
 public interface AuditLogRepository extends JpaRepository<AuditLogEntity, Long> {
 
     /**
-     * Finds all audit log entries linked to the given sport profile.
+     * Busca todas las entradas de auditoría vinculadas al perfil deportivo indicado.
      *
-     * @param sportProfileId identifier of the sport profile whose audit entries are requested
-     * @return list of audit log entries associated with the sport profile
+     * @param sportProfileId identificador del perfil deportivo cuyas entradas de auditoría se solicitan
+     * @return lista de entradas de auditoría asociadas al perfil deportivo
      */
     List<AuditLogEntity> findBySportProfile_Id(Long sportProfileId);
 
     /**
-     * Finds all audit log entries linked to the given invitation.
+     * Busca todas las entradas de auditoría vinculadas a la invitación indicada.
      *
-     * @param invitationId identifier of the invitation whose audit entries are requested
-     * @return list of audit log entries associated with the invitation
+     * @param invitationId identificador de la invitación cuyas entradas de auditoría se solicitan
+     * @return lista de entradas de auditoría asociadas a la invitación
      */
     List<AuditLogEntity> findByInvitation_Id(Long invitationId);
 }

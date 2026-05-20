@@ -15,33 +15,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Handler invoked when an authenticated principal attempts to access a
- * resource for which they lack sufficient privileges.
+ * Manejador invocado cuando un principal autenticado intenta acceder a un recurso
+ * para el que no tiene privilegios suficientes.
  *
- * <p>Produces a concise JSON error response with fields:
+ * <p>Produce una respuesta de error JSON concisa con los campos:
  * <ul>
- *   <li>timestamp - ISO timestamp of the error</li>
- *   <li>status - HTTP status code (403)</li>
- *   <li>error - short error phrase</li>
- *   <li>message - human readable message</li>
- *   <li>path - request URI</li>
+ *   <li>{@code timestamp} — marca de tiempo ISO del error</li>
+ *   <li>{@code status} — código de estado HTTP (403)</li>
+ *   <li>{@code error} — frase corta del error</li>
+ *   <li>{@code message} — mensaje legible por humanos</li>
+ *   <li>{@code path} — URI de la solicitud</li>
  * </ul>
- * This class centralizes the format so all access-denied responses are
- * consistent across the service.
+ * Esta clase centraliza el formato para que todas las respuestas de acceso denegado
+ * sean consistentes en todo el servicio.
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Component
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 
     /**
-     * Handles an AccessDeniedException by writing a structured JSON body and
-     * setting the response status to 403 (Forbidden).
+     * Maneja una {@link AccessDeniedException} escribiendo un cuerpo JSON estructurado
+     * y estableciendo el estado de la respuesta en 403 (Forbidden).
      *
-     * @param request current HTTP request
-     * @param response current HTTP response (written with JSON payload)
-     * @param accessDeniedException the exception raised by the security framework
-     * @throws IOException when writing the response fails
-     * @throws ServletException never thrown in current implementation but kept
-     *                          to satisfy the interface contract
+     * @param request               solicitud HTTP actual
+     * @param response              respuesta HTTP actual donde se escribe el payload JSON
+     * @param accessDeniedException excepción lanzada por el framework de seguridad
+     * @throws IOException      si falla la escritura de la respuesta
+     * @throws ServletException nunca lanzada en la implementación actual, pero presente
+     *                          para satisfacer el contrato de la interfaz
      */
     @Override
     public void handle(HttpServletRequest request,

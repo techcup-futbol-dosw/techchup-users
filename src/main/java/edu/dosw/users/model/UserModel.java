@@ -13,14 +13,15 @@ import java.time.LocalDateTime;
 import java.time.Period;
 
 /**
- * Domain model representing the basic profile of a user registered on the
- * TechCup Fútbol platform.
+ * Modelo de dominio que representa el perfil básico de un usuario registrado en la
+ * plataforma TechCup Fútbol.
  *
- * <p>Stores personal information and the user's academic relationship with the
- * institution. Authentication and password management are the exclusive
- * responsibility of the identity service.</p>
+ * <p>Almacena la información personal y la relación académica del usuario con la
+ * institución. La autenticación y la gestión de contraseñas son responsabilidad
+ * exclusiva del servicio de identidad.</p>
  *
- * @see edu.dosw.users.entity.UserEntity
+ * @author CodeForge
+ * @since 1.0
  * @see edu.dosw.users.mapper.UserMapper
  */
 @Getter
@@ -30,49 +31,49 @@ import java.time.Period;
 @AllArgsConstructor
 public class UserModel {
 
-    /** Unique identifier of the user profile. */
+    /** Identificador único del perfil de usuario. */
     private Long id;
-    /** Full name of the user. */
+    /** Nombre completo del usuario. */
     private String fullName;
-    /** Institutional or personal email address of the user. */
+    /** Dirección de correo electrónico institucional o personal del usuario. */
     private String email;
-    /** Hashed password; managed by the identity service. */
+    /** Contraseña hasheada; gestionada por el servicio de identidad. */
     private String password;
-    /** Official identification number of the user. */
+    /** Número de identificación oficial del usuario. */
     private String identification;
-    /** Date of birth of the user. */
+    /** Fecha de nacimiento del usuario. */
     private LocalDate birthDate;
-    /** Gender of the user. */
+    /** Género del usuario. */
     private Gender gender;
-    /** Type of relationship between the user and the educational institution. */
+    /** Tipo de relación entre el usuario y la institución educativa. */
     private SchoolRelation schoolRelation;
-    /** Name of the academic programme in which the user is enrolled. */
+    /** Nombre del programa académico en el que está matriculado el usuario. */
     private String academicProgram;
-    /** Current academic semester of the user. */
+    /** Semestre académico actual del usuario. */
     private Integer semester;
-    /** Current profile status (e.g. {@code "ACTIVE"}, {@code "INACTIVE"}). */
+    /** Estado actual del perfil (p. ej. {@code "ACTIVE"}, {@code "INACTIVE"}). */
     private String status;
-    /** Date and time when the profile was created. */
+    /** Fecha y hora en que se creó el perfil. */
     private LocalDateTime profileCreatedAt;
-    /** Date and time of the last profile update. */
+    /** Fecha y hora de la última actualización del perfil. */
     private LocalDateTime updatedAt;
 
     /**
-     * Indicates whether the user's profile is currently active.
+     * Indica si el perfil del usuario está actualmente activo.
      *
-     * <p>The comparison is case-insensitive, so both {@code "ACTIVE"} and
-     * {@code "active"} return {@code true}.</p>
+     * <p>La comparación es insensible a mayúsculas, por lo que tanto {@code "ACTIVE"}
+     * como {@code "active"} retornan {@code true}.</p>
      *
-     * @return {@code true} if the status equals {@code "ACTIVE"} (any casing)
+     * @return {@code true} si el estado es igual a {@code "ACTIVE"} (en cualquier capitalización)
      */
     public boolean isActive() {
         return "ACTIVE".equalsIgnoreCase(status);
     }
 
     /**
-     * Calculates the user's current age in full years from {@link #birthDate}.
+     * Calcula la edad actual del usuario en años completos a partir de {@link #birthDate}.
      *
-     * @return age in years, or {@code 0} if {@link #birthDate} is {@code null}
+     * @return edad en años, o {@code 0} si {@link #birthDate} es {@code null}
      */
     public int getAge() {
         if (birthDate == null) return 0;

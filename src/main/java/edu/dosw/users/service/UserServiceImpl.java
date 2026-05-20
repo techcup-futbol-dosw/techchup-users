@@ -17,12 +17,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link IUserService} that delegates all user-data
- * operations to the identity microservice via {@link IdentityServiceClient}.
+ * Implementación de {@link IUserService} que delega todas las operaciones de datos
+ * de usuario al microservicio de identidad a través de {@link IdentityServiceClient}.
  *
- * <p>Business rules that belong to this service (team participation checks,
- * sport-profile audit logging, position-based search filtering) are applied
- * locally before or after the identity-service call.</p>
+ * <p>Las reglas de negocio propias de este servicio (validación de participación en
+ * equipos, registro de auditoría del perfil deportivo, filtrado de búsqueda por posición)
+ * se aplican localmente antes o después de la llamada al servicio de identidad.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -72,9 +75,9 @@ public class UserServiceImpl implements IUserService {
     /**
      * {@inheritDoc}
      *
-     * <p>Enforces that the user is active and applies the semester/school-relation
-     * constraint before delegating the update to the identity service. If the
-     * user has a sport profile, an audit entry is recorded.</p>
+     * <p>Verifica que el usuario esté activo y aplica la restricción de semestre/relación
+     * escolar antes de delegar la actualización al servicio de identidad. Si el usuario
+     * tiene un perfil deportivo, se registra una entrada de auditoría.</p>
      */
     @Override
     public UserModel update(Long id, UserModel model) {
@@ -129,8 +132,8 @@ public class UserServiceImpl implements IUserService {
     /**
      * {@inheritDoc}
      *
-     * <p>Validates the user's current status and team participation before
-     * delegating the inactivation to the identity service.</p>
+     * <p>Valida el estado actual del usuario y su participación en equipos antes
+     * de delegar la inactivación al servicio de identidad.</p>
      */
     @Override
     public void inactivate(Long id) {
@@ -151,9 +154,9 @@ public class UserServiceImpl implements IUserService {
     /**
      * {@inheritDoc}
      *
-     * <p>Fetches users from the identity service filtered by name and status,
-     * then applies local filters for position, availability, identification,
-     * gender, semester and age.</p>
+     * <p>Obtiene usuarios del servicio de identidad filtrados por nombre y estado,
+     * y luego aplica filtros locales de posición, disponibilidad, identificación,
+     * género, semestre y edad.</p>
      */
     @Override
     public List<UserModel> search(String name, String position, String status,

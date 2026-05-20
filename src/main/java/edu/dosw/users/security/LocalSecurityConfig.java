@@ -10,18 +10,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Security configuration active only when the {@code local} profile is enabled.
+ * Configuración de seguridad activa únicamente cuando el perfil {@code local} está habilitado.
  *
- * <p>Installs the {@link JwtAuthenticationFilter} so that {@code @PreAuthorize}
- * annotations on controllers can resolve the authenticated user from the Bearer
- * token. All requests are still permitted at the filter-chain level, which means
- * Swagger and H2 console remain accessible without a token.</p>
+ * <p>Instala el {@link JwtAuthenticationFilter} para que las anotaciones {@code @PreAuthorize}
+ * en los controladores puedan resolver el usuario autenticado desde el token Bearer. Todas las
+ * solicitudes se permiten a nivel de cadena de filtros, lo que significa que Swagger y la consola
+ * H2 permanecen accesibles sin token.</p>
  *
- * <p><strong>CSRF note (S4502):</strong> CSRF protection is disabled because this
- * is a stateless JWT REST API. Authentication is carried in the
- * {@code Authorization: Bearer} header — never in session cookies — so browsers
- * cannot be tricked into sending credentials automatically on cross-site
- * requests.</p>
+ * <p><strong>Nota CSRF (S4502):</strong> La protección CSRF está deshabilitada porque esta es
+ * una API REST sin estado con JWT. La autenticación se transporta en el encabezado
+ * {@code Authorization: Bearer} — nunca en cookies de sesión — por lo que los navegadores
+ * no pueden ser engañados para enviar credenciales automáticamente en solicitudes entre sitios.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Configuration
 @Profile("local")
@@ -34,6 +36,14 @@ public class LocalSecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+    /**
+     * Configura la cadena de filtros de seguridad para el perfil {@code local}.
+     * Permite todas las solicitudes sin autenticación obligatoria, pero instala
+     * el filtro JWT para que los endpoints protegidos con {@code @PreAuthorize} funcionen.
+     *
+     * @param http constructor de configuración HTTP de Spring Security
+     * @return cadena de filtros de seguridad local configurada
+     */
     @Bean
     @Order(1)
     public SecurityFilterChain localFilterChain(HttpSecurity http) {

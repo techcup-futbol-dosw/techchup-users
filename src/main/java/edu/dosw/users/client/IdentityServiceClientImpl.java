@@ -18,10 +18,13 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * HTTP implementation of {@link IdentityServiceClient}.
+ * Implementación HTTP de {@link IdentityServiceClient}.
  *
- * <p>Active only in the {@code prod} profile. In other profiles the in-memory
- * stub registered in {@code FallbackBeansConfig} is used instead.</p>
+ * <p>Activa únicamente en el perfil {@code prod}. En otros perfiles se utiliza
+ * el stub en memoria registrado en {@code FallbackBeansConfig}.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 @Profile("prod")
@@ -38,7 +41,14 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
         this(identityServiceUrl, usersBasePath, new RestTemplate());
     }
 
-    /** Package-private constructor used in unit tests to inject a mock RestTemplate. */
+    /**
+     * Constructor de visibilidad de paquete utilizado en pruebas unitarias para inyectar
+     * un {@link RestTemplate} mock.
+     *
+     * @param identityServiceUrl URL base del servicio de identidad
+     * @param usersBasePath      ruta base del recurso de usuarios (p. ej. {@code /api/users})
+     * @param restTemplate       cliente HTTP a utilizar
+     */
     IdentityServiceClientImpl(String identityServiceUrl, String usersBasePath, RestTemplate restTemplate) {
         this.identityServiceUrl = identityServiceUrl;
         this.usersBasePath = usersBasePath;

@@ -17,17 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST controller for team invitation management.
+ * Controlador REST para la gestión de invitaciones a equipos.
  *
- * <p>Base path: {@code /api/invitations}</p>
+ * <p>Ruta base: {@code /api/invitations}</p>
  *
- * <p>Access control summary:
+ * <p>Resumen de control de acceso:
  * <ul>
- *   <li>CAPITAN — can send and cancel invitations.</li>
- *   <li>JUGADOR (owner) — can view, accept and reject their own invitations.</li>
- *   <li>ADMINISTRADOR — full access to all invitation endpoints.</li>
+ *   <li>CAPITAN — puede enviar y cancelar invitaciones.</li>
+ *   <li>JUGADOR (propietario) — puede consultar, aceptar y rechazar sus propias invitaciones.</li>
+ *   <li>ADMINISTRADOR — acceso completo a todos los endpoints de invitación.</li>
  * </ul>
  * </p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/api/invitations")
@@ -38,8 +41,13 @@ public class InvitationController {
     private final InvitationMapper invitationMapper;
 
     /**
-     * Returns the invitation with the given identifier.
-     * Accessible by any authenticated user; service layer enforces ownership.
+     * Retorna la invitación con el identificador indicado.
+     *
+     * <p>Accesible por cualquier usuario autenticado; la capa de servicio impone
+     * las reglas de propiedad sobre el recurso.</p>
+     *
+     * @param id identificador de la invitación
+     * @return respuesta con los datos de la invitación
      */
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
@@ -49,8 +57,12 @@ public class InvitationController {
     }
 
     /**
-     * Returns all invitations received by the given user.
-     * Only the invitation owner or an administrator may list them.
+     * Retorna todas las invitaciones recibidas por el usuario indicado.
+     *
+     * <p>Solo el propietario de las invitaciones o un administrador puede listarlas.</p>
+     *
+     * @param userId identificador del usuario jugador
+     * @return lista de invitaciones asociadas al usuario
      */
     @GetMapping("/user/{userId}")
     @PreAuthorize("@invitationAccessPolicy.canAccessOwnInvitation(#userId, authentication) or hasRole('ADMINISTRADOR')")
@@ -62,8 +74,14 @@ public class InvitationController {
     }
 
     /**
-     * Sends a new invitation from a team to a player.
-     * Only captains may send invitations (they manage their team roster).
+     * Envía una nueva invitación de un equipo a un jugador.
+     *
+     * <p>Solo los capitanes pueden enviar invitaciones, ya que son quienes
+     * gestionan el plantel de su equipo.</p>
+     *
+     * @param userId identificador del jugador invitado
+     * @param teamId identificador del equipo que envía la invitación
+     * @return respuesta con los datos de la invitación creada (HTTP 201)
      */
     @PostMapping("/user/{userId}/team/{teamId}")
     @PreAuthorize("hasRole('CAPITAN')")
@@ -75,8 +93,12 @@ public class InvitationController {
     }
 
     /**
-     * Accepts a pending invitation.
-     * Only the invited player (owner) or an administrator may accept.
+     * Acepta una invitación pendiente.
+     *
+     * <p>Solo el jugador invitado (propietario) o un administrador puede aceptar.</p>
+     *
+     * @param id identificador de la invitación
+     * @return respuesta con los datos de la invitación actualizada
      */
     @PatchMapping("/{id}/accept")
     @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
@@ -86,8 +108,12 @@ public class InvitationController {
     }
 
     /**
-     * Rejects a pending invitation.
-     * Only the invited player (owner) or an administrator may reject.
+     * Rechaza una invitación pendiente.
+     *
+     * <p>Solo el jugador invitado (propietario) o un administrador puede rechazar.</p>
+     *
+     * @param id identificador de la invitación
+     * @return respuesta con los datos de la invitación actualizada
      */
     @PatchMapping("/{id}/reject")
     @PreAuthorize("@invitationAccessPolicy.canRespondToInvitation(#id, authentication) or hasRole('ADMINISTRADOR')")
@@ -97,8 +123,12 @@ public class InvitationController {
     }
 
     /**
-     * Cancels a pending invitation.
-     * Only the captain who sent it may cancel it.
+     * Cancela una invitación pendiente.
+     *
+     * <p>Solo el capitán que la envió puede cancelarla.</p>
+     *
+     * @param id identificador de la invitación
+     * @return respuesta con los datos de la invitación cancelada
      */
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasRole('CAPITAN')")

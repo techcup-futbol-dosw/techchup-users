@@ -10,13 +10,14 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Domain model representing a player's sport profile.
+ * Modelo de dominio que representa el perfil deportivo de un jugador.
  *
- * <p>Contains the player's field position, jersey number, reference to the
- * photo document stored in MongoDB, and the player's availability to be
- * called up. It cannot be deleted or modified while the player is assigned
- * to an active team.</p>
+ * <p>Contiene la posición en el campo, el número de dorsal, la referencia al documento
+ * de foto almacenado en MongoDB y la disponibilidad del jugador para ser convocado.
+ * No puede eliminarse ni modificarse mientras el jugador esté asignado a un equipo activo.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see edu.dosw.users.entity.SportProfileEntity
  * @see edu.dosw.users.mapper.SportProfileMapper
  */
@@ -27,20 +28,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SportProfileModel {
 
-    /** Unique identifier of the sport profile. */
+    /** Identificador único del perfil deportivo. */
     private Long id;
-    /** Identifier of the user who owns this sport profile. */
+    /** Identificador del usuario propietario de este perfil deportivo. */
     private Long userId;
-    /** Player's tactical position on the field. */
+    /** Posición táctica del jugador en el campo. */
     private Position position;
-    /** Player's jersey number. */
+    /** Número de dorsal del jugador. */
     private Integer dorsalNumber;
-    /** Identifier of the {@code PlayerPhoto} document in MongoDB. */
+    /** Identificador del documento {@code PlayerPhoto} en MongoDB. */
     private String photoId;
-    /** Indicates whether the player is available to participate in tournaments. */
+    /** Indica si el jugador está disponible para participar en torneos. */
     private boolean available;
-    /** Date and time when the sport profile was created. */
+    /** Fecha y hora en que se creó el perfil deportivo. */
     private LocalDateTime createdAt;
-    /** Date and time of the last update to the sport profile. */
+    /** Fecha y hora de la última actualización del perfil deportivo. */
     private LocalDateTime updatedAt;
 }

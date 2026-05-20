@@ -10,13 +10,15 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Domain model representing an invitation sent to a player to join a team
- * on the TechCup Fútbol platform.
+ * Modelo de dominio que representa una invitación enviada a un jugador para unirse
+ * a un equipo en la plataforma TechCup Fútbol.
  *
- * <p>Encapsulates the invitation lifecycle through the methods
- * {@link #accept()}, {@link #reject()} and {@link #cancel()}, which
- * automatically update the status and record the response timestamp.</p>
+ * <p>Encapsula el ciclo de vida de la invitación a través de los métodos
+ * {@link #accept()}, {@link #reject()} y {@link #cancel()}, que actualizan
+ * automáticamente el estado y registran la marca de tiempo de respuesta.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see edu.dosw.users.entity.InvitationEntity
  * @see edu.dosw.users.mapper.InvitationMapper
  * @see InvitationStatus
@@ -28,31 +30,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class InvitationModel {
 
-    /** Unique identifier of the invitation. */
+    /** Identificador único de la invitación. */
     private Long id;
-    /** Identifier of the player who receives the invitation. */
+    /** Identificador del jugador que recibe la invitación. */
     private Long playerId;
-    /** Identifier of the team that extends the invitation. */
+    /** Identificador del equipo que extiende la invitación. */
     private Long teamId;
-    /** Current status of the invitation in its lifecycle. */
+    /** Estado actual de la invitación en su ciclo de vida. */
     private InvitationStatus status;
-    /** Date and time when the invitation was sent. */
+    /** Fecha y hora en que se envió la invitación. */
     private LocalDateTime sentAt;
-    /** Date and time when the player or captain responded to the invitation. */
+    /** Fecha y hora en que el jugador o capitán respondió a la invitación. */
     private LocalDateTime respondedAt;
 
     /**
-     * Indicates whether the invitation is awaiting a response.
+     * Indica si la invitación está a la espera de una respuesta.
      *
-     * @return {@code true} if the status is {@link InvitationStatus#PENDING}
+     * @return {@code true} si el estado es {@link InvitationStatus#PENDING}
      */
     public boolean isPending() {
         return InvitationStatus.PENDING == status;
     }
 
     /**
-     * Accepts the invitation, changing the status to {@link InvitationStatus#ACCEPTED}
-     * and recording the response timestamp.
+     * Acepta la invitación, cambiando el estado a {@link InvitationStatus#ACCEPTED}
+     * y registrando la marca de tiempo de respuesta.
      */
     public void accept() {
         this.status = InvitationStatus.ACCEPTED;
@@ -60,8 +62,8 @@ public class InvitationModel {
     }
 
     /**
-     * Rejects the invitation, changing the status to {@link InvitationStatus#REJECTED}
-     * and recording the response timestamp.
+     * Rechaza la invitación, cambiando el estado a {@link InvitationStatus#REJECTED}
+     * y registrando la marca de tiempo de respuesta.
      */
     public void reject() {
         this.status = InvitationStatus.REJECTED;
@@ -69,8 +71,8 @@ public class InvitationModel {
     }
 
     /**
-     * Cancels the invitation, changing the status to {@link InvitationStatus#CANCELLED}
-     * and recording the cancellation timestamp.
+     * Cancela la invitación, cambiando el estado a {@link InvitationStatus#CANCELLED}
+     * y registrando la marca de tiempo de cancelación.
      */
     public void cancel() {
         this.status = InvitationStatus.CANCELLED;

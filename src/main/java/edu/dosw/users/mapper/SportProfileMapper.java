@@ -8,32 +8,42 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * MapStruct mapper for bidirectional conversion between
- * {@link SportProfileEntity} and {@link SportProfileModel}.
+ * Mapper MapStruct para la conversión bidireccional entre {@link SportProfileEntity} y {@link SportProfileModel}.
  *
- * <p>The {@code userId} field is mapped directly since both entity and model
- * share the same field name.</p>
+ * <p>El campo {@code userId} se mapea directamente ya que tanto la entidad como el modelo
+ * comparten el mismo nombre de campo. También convierte desde {@link SportProfileRequest}
+ * ignorando los campos gestionados por el servicio (id, userId, photoId, timestamps).</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Mapper(componentModel = "spring")
 public interface SportProfileMapper {
 
     /**
-     * Converts a sport profile entity to its domain model.
+     * Convierte una entidad de perfil deportivo a su modelo de dominio.
      *
-     * @param entity source entity; may be {@code null}
-     * @return resulting model, or {@code null} if the entity is {@code null}
+     * @param entity entidad fuente; puede ser {@code null}
+     * @return modelo resultante, o {@code null} si la entidad es {@code null}
      */
     SportProfileModel toModel(SportProfileEntity entity);
 
     /**
-     * Converts a sport profile model to its JPA entity.
+     * Convierte un modelo de perfil deportivo a su entidad JPA.
      *
-     * @param model source model; may be {@code null}
-     * @return resulting entity, or {@code null} if the model is {@code null}
+     * @param model modelo fuente; puede ser {@code null}
+     * @return entidad resultante, o {@code null} si el modelo es {@code null}
      */
     SportProfileEntity toEntity(SportProfileModel model);
 
-    /** Converts a {@link SportProfileRequest} to its domain model. */
+    /**
+     * Convierte un {@link SportProfileRequest} a su modelo de dominio.
+     * Los campos {@code id}, {@code userId}, {@code photoId} y los timestamps son
+     * ignorados y deben ser asignados por la capa de servicio.
+     *
+     * @param request DTO de solicitud fuente; puede ser {@code null}
+     * @return modelo resultante, o {@code null} si el request es {@code null}
+     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "photoId", ignore = true)
@@ -41,6 +51,11 @@ public interface SportProfileMapper {
     @Mapping(target = "updatedAt", ignore = true)
     SportProfileModel toModel(SportProfileRequest request);
 
-    /** Converts a domain model to a {@link SportProfileResponse}. */
+    /**
+     * Convierte un modelo de dominio a un {@link SportProfileResponse}.
+     *
+     * @param model modelo fuente; puede ser {@code null}
+     * @return DTO de respuesta resultante, o {@code null} si el modelo es {@code null}
+     */
     SportProfileResponse toResponse(SportProfileModel model);
 }

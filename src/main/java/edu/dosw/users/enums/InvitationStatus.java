@@ -1,19 +1,22 @@
 package edu.dosw.users.enums;
 
 /**
- * Possible states during the lifecycle of a team invitation.
+ * Estados posibles durante el ciclo de vida de una invitación de equipo.
  *
- * <p>State transitions are performed through the methods
- * {@code InvitationModel#accept()}, {@code InvitationModel#reject()} and
+ * <p>Las transiciones de estado se realizan a través de los métodos
+ * {@code InvitationModel#accept()}, {@code InvitationModel#reject()} y
  * {@code InvitationModel#cancel()}.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public enum InvitationStatus {
-    /** The invitation has been sent and has not yet received a response from the player. */
+    /** La invitación ha sido enviada y aún no ha recibido respuesta del jugador. */
     PENDING,
-    /** The player accepted the invitation and joined the team. */
+    /** El jugador aceptó la invitación y se unió al equipo. */
     ACCEPTED,
-    /** The player declined the invitation. */
+    /** El jugador rechazó la invitación. */
     REJECTED,
-    /** The captain or administrator cancelled the invitation before it was answered. */
+    /** El capitán o administrador canceló la invitación antes de que fuera respondida. */
     CANCELLED
 }
