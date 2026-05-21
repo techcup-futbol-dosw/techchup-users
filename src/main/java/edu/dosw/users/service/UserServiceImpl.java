@@ -153,6 +153,18 @@ public class UserServiceImpl implements IUserService {
         identityServiceClient.inactivateUser(id);
     }
 
+    @Override
+    public void reactivate(Long id) {
+        UserModel user = identityServiceClient.getUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+        }
+        if (STATUS_ACTIVE.equalsIgnoreCase(user.getStatus())) {
+            throw new BusinessException("La cuenta ya se encuentra activa");
+        }
+        identityServiceClient.reactivateUser(id);
+    }
+
     /**
      * {@inheritDoc}
      *

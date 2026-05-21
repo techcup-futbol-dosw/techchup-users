@@ -79,6 +79,15 @@ public interface IUserService {
     void inactivate(Long id);
 
     /**
+     * Reactiva un perfil de usuario estableciendo su estado a {@code ACTIVE}.
+     *
+     * @param id identificador del perfil a reactivar
+     * @throws edu.dosw.users.exception.ResourceNotFoundException si no se encuentra el usuario
+     * @throws edu.dosw.users.exception.BusinessException         si la cuenta ya está activa
+     */
+    void reactivate(Long id);
+
+    /**
      * Busca jugadores que coincidan con los filtros indicados.
      *
      * <p>Los filtros de nombre y estado se delegan al servicio de identidad; los

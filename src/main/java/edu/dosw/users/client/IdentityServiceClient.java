@@ -88,6 +88,13 @@ public interface IdentityServiceClient {
     void inactivateUser(Long id);
 
     /**
+     * Reactiva un usuario en el servicio de identidad estableciendo su estado a {@code ACTIVE}.
+     *
+     * @param id identificador del usuario a reactivar
+     */
+    void reactivateUser(Long id);
+
+    /**
      * Busca usuarios en el servicio de identidad que coincidan con los filtros indicados.
      *
      * @param name   filtro parcial de nombre (insensible a mayúsculas, opcional); {@code null} retorna todos
