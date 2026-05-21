@@ -1,7 +1,7 @@
 # TECHCUP FÚTBOL
 
 > [!IMPORTANT]
-> Este repositorio contiene el **BackEnd** para el servicio de **[Usuarios y Jugadores]**
+> Este repositorio contiene el *BackEnd* para el servicio de **Usuarios y Jugadores**
 
 > Para informacion general del proyecto consulta el [README general de la organización](https://github.com/techcup-futbol-dosw).
 
@@ -25,10 +25,6 @@
 
 ## Integrantes
 
-<!--
-  EDITAR: Completa con los datos reales de tu equipo.
--->
-
 * **Product Owner:** [JUAN SEBASTIÁN GUAYAZÁN CLAVIJO](https://github.com/JuanGuayazanC) → [juan.guayazan-c@mail.escuelaing.edu.co](mailto:juan.guayazan-c@mail.escuelaing.edu.co)
 * **Líder técnico:** [BRAYAN LOAIZA LEAL](https://github.com/brloa05) → [brayan.loaiza-l@mail.escuelaing.edu.co](mailto:brayan.loaiza-l@mail.escuelaing.edu.co)
 * **Analista funcional:** [JUAN ESTEBAN CRUZ RICO](https://github.com/Cruz-Juan-r) → [juan.cruz-r@mail.escuelaing.edu.co](mailto:juan.cruz-r@mail.escuelaing.edu.co)
@@ -44,19 +40,16 @@
 
 ### Funcionalidades del servicio
 
-<!--
-  EDITAR: Completa con las funcionalidades reales según el enunciado.
--->
-
-| Funcionalidad | Descripción |
-|---------------|-------------|
-| **Actualizar usuario** | El usuario y el administrador podrán actualizar la información básica del usuario: nombre completo, relación con la Escuela (estudiante, profesor, administrativo, graduado o familiar), programa académico, semestre (si es estudiante). El correo y la contraseña no se podrán modificar. |
-| **Crear perfil deportivo** | Cada jugador podrá crear un perfil deportivo indicando: posición de juego predefinida (portero, defensa, volante, delantero), número dorsal predefinido, foto y si se encuentra disponible o no para ser convocado por algún equipo. |
-| **Actualizar perfil deportivo** | El jugador podrá actualizar todos los datos de su perfil deportivo siempre y cuando no esté asignado a un equipo. |
-| **Eliminar perfil deportivo** | El sistema no permitirá eliminar un perfil deportivo. |
-| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. |
-| **Invitaciones** | Los jugadores podrán recibir invitaciones de equipos y aceptar o rechazar invitaciones. |
-| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios. Y de gestión del perfil. |
+| Funcionalidad | Descripción | Roles permitidos |
+|---------------|-------------|-----------------|
+| **Actualizar usuario** | El usuario y el administrador podrán actualizar la información básica del usuario: nombre completo, relación con la Escuela (estudiante, profesor, administrativo, graduado o familiar), programa académico, semestre (si es estudiante). El correo y la contraseña no se podrán modificar. | Jugador / Capitán / Organizador / Árbitro / Admin |
+| **Inactivar usuario** | El usuario podrá inactivar su propia cuenta y el administrador podrá inactivar cualquier cuenta, validando previamente que no esté participando en un torneo. | Jugador / Capitán / Organizador / Árbitro / Admin |
+| **Crear perfil deportivo** | Cada jugador podrá crear un perfil deportivo indicando: posición de juego predefinida (portero, defensa, volante, delantero), número dorsal predefinido, foto y si se encuentra disponible o no para ser convocado por algún equipo. | Jugador / Admin |
+| **Actualizar perfil deportivo** | El jugador podrá actualizar todos los datos de su perfil deportivo siempre y cuando no esté asignado a un equipo. | Jugador / Admin |
+| **Eliminar perfil deportivo** | El sistema no permitirá eliminar un perfil deportivo. | — |
+| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. | Capitán / Admin |
+| **Invitaciones** | Los capitanes envían invitaciones a jugadores; los jugadores pueden aceptar o rechazar; el capitán puede cancelar las que están pendientes. | Capitán (envía/cancela) · Jugador (acepta/rechaza) · Admin |
+| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios y de gestión del perfil deportivo e invitaciones. | Admin (consulta) |
 
 ---
 
@@ -67,10 +60,6 @@
 ---
 
 ## Stack tecnológico
-
-<!--
-  EDITAR: Elimina los badges y filas que NO uses en este servicio.
--->
 
 ### Backend
 
@@ -83,10 +72,8 @@
 
 ### Base de datos
 
-<!-- EDITAR: Deja solo los que uses -->
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-![H2](https://img.shields.io/badge/H2-4479A1?style=for-the-badge)
 
 ### Testing y calidad
 
@@ -106,87 +93,67 @@
 
 ## Estructura del proyecto
 
-<!--
-  EDITAR: Reemplaza [servicio] por el nombre real del paquete.
-  Elimina las carpetas que no existan. Agrega las que tengas.
--->
-
 ```text
 📦 techchup-users/
 ├── 📁 .github/                                 # Configuración de GitHub (workflows, templates)
-│   └── 📁 workflows/                           # Pipelines/acciones CI
+│   └── 📁 workflows/                           # Pipelines CI/CD
 ├── 📁 .mvn/                                    # Archivos del Maven Wrapper
-│   └── 📁 wrapper/                             # Configuración interna del wrapper
-├── 📄 .gitignore                               # Exclusiones de control de versiones
-├── 📄 lombok.config                            # Reglas globales de Lombok
-├── 📄 pom.xml                                  # Dependencias y build Maven
-├── 📄 README.md                                # Documentación principal
-├── 📄 test_output.txt                          # Registro auxiliar de pruebas (si aplica)
+│   └── 📁 wrapper/
+├── 📄 .env.example                             # Variables de entorno para docker-compose
+├── 📄 .gitignore
+├── 📄 Dockerfile                               # Imagen del servicio (multi-stage)
+├── 📄 docker-compose.yml                       # Orquesta servicio + Postgres + Mongo
+├── 📄 lombok.config
+├── 📄 pom.xml
+├── 📄 README.md
 ├── 📁 src/
-│   ├── 📁 main/                                # Código productivo
+│   ├── 📁 main/
 │   │   ├── 📁 java/
-│   │   │   └── 📁 edu/
-│   │   │       └── 📁 dosw/
-│   │   │           └── 📁 users/
-│   │   │               ├── 📄 App.java        # Punto de entrada de Spring Boot
-│   │   │               ├── 📁 client/         # Clientes de integraciones externas
-│   │   │               ├── 📁 config/         # Configuración global de aplicación
-│   │   │               ├── 📁 controller/     # Endpoints REST
-│   │   │               │   ├── 📄 UserController.java
-│   │   │               │   ├── 📄 InvitationController.java
-│   │   │               │   └── 📄 SportProfileController.java
-│   │   │               ├── 📁 dto/            # DTOs de entrada/salida
-│   │   │               ├── 📁 entity/         # Entidades JPA
-│   │   │               ├── 📁 enums/          # Enumeraciones de dominio
-│   │   │               ├── 📁 exception/      # Manejo de excepciones
-│   │   │               ├── 📁 mapper/         # Mapeos DTO <-> modelo
-│   │   │               ├── 📁 model/          # Modelos de negocio
-│   │   │               ├── 📁 repository/     # Repositorios Spring Data JPA
-│   │   │               ├── 📁 security/       # Seguridad (JWT, filtros, autorización)
-│   │   │               │   ├── 📄 SecurityConfig.java
-│   │   │               │   ├── 📄 JwtAuthenticationFilter.java
-│   │   │               │   ├── 📄 AccessDeniedHandlerImpl.java
-│   │   │               │   ├── 📄 AuthenticationEntryPointImpl.java
-│   │   │               │   ├── 📄 JwtService.java
-│   │   │               │   └── 📁 policy/     # Policies de acceso por recurso
-│   │   │               │       ├── 📄 UserAccessPolicy.java
-│   │   │               │       ├── 📄 SportProfileAccessPolicy.java
-│   │   │               │       ├── 📄 InvitationAccessPolicy.java
-│   │   │               │       └── 📄 ResourceAccessPolicy.java
-│   │   │               └── 📁 service/        # Lógica de negocio
-│   │   ├── 📁 resources/                       # Configuración y recursos runtime
-│   │   │   ├── 📄 application.properties
-│   │   │   ├── 📄 application-prod.properties
-│   │   │   ├── 📄 application-local.properties.example
-│   │   │   └── 📁 docs/
-│   │   └── 📁 sql/                             # Scripts SQL de aplicación
-│   └── 📁 test/                                # Código de pruebas
-│       ├── 📁 java/
-│       │   └── 📁 edu/
-│       │       └── 📁 dosw/
-│       │           └── 📁 users/
-│       │               ├── 📄 AppTest.java
-│       │               ├── 📁 controller/     # Tests de controladores
-│       │               ├── 📁 integration/    # Tests de integración
-│       │               ├── 📁 mapper/         # Tests de mappers
-│       │               ├── 📁 model/          # Tests de modelos
-│       │               ├── 📁 repository/     # Tests de repositorios
-│       │               ├── 📁 security/       # Tests de seguridad
-│       │               │   └── 📁 policy/     # Tests de policies
-│       │               └── 📁 service/        # Tests de servicios
-│       ├── 📁 resources/                       # Configuración para pruebas
-│       │   └── 📄 application.properties
-│       └── 📁 sql/                             # SQL de soporte para tests
-└── 📁 target/                                  # Artefactos generados por Maven
-    ├── 📄 jacoco.exec                          # Datos de cobertura JaCoCo
-    ├── 📁 classes/                             # Clases compiladas de producción
-    ├── 📁 generated-sources/                   # Fuentes generadas
-    ├── 📁 generated-test-sources/              # Fuentes de test generadas
-    ├── 📁 maven-status/                        # Estado interno del build
-    ├── 📁 site/
-    │   └── 📁 jacoco/                          # Reporte HTML de cobertura
-    ├── 📁 surefire-reports/                    # Reportes de ejecución de tests
-    └── 📁 test-classes/                        # Clases compiladas de pruebas
+│   │   │   └── 📁 edu/dosw/users/
+│   │   │       ├── 📄 App.java                 # Punto de entrada Spring Boot
+│   │   │       ├── 📁 client/                  # Clientes a servicios externos (identity-service)
+│   │   │       ├── 📁 config/                  # Configuración global
+│   │   │       ├── 📁 controller/              # Endpoints REST
+│   │   │       │   ├── 📄 UserController.java
+│   │   │       │   ├── 📄 InvitationController.java
+│   │   │       │   ├── 📄 SportProfileController.java
+│   │   │       │   └── 📄 AuditLogController.java
+│   │   │       ├── 📁 dto/                     # DTOs de entrada/salida
+│   │   │       ├── 📁 entity/                  # Entidades JPA / documentos Mongo
+│   │   │       ├── 📁 enums/                   # Enumeraciones de dominio
+│   │   │       ├── 📁 exception/               # Manejo global de excepciones
+│   │   │       ├── 📁 mapper/                  # Mapeos DTO ↔ modelo
+│   │   │       ├── 📁 model/                   # Modelos de negocio
+│   │   │       ├── 📁 repository/              # Repositorios Spring Data
+│   │   │       ├── 📁 security/                # JWT, filtros, autorización
+│   │   │       │   ├── 📄 SecurityConfig.java
+│   │   │       │   ├── 📄 JwtAuthenticationFilter.java
+│   │   │       │   ├── 📄 ServiceApiKeyAuthFilter.java
+│   │   │       │   ├── 📄 AccessDeniedHandlerImpl.java
+│   │   │       │   ├── 📄 AuthenticationEntryPointImpl.java
+│   │   │       │   ├── 📄 JwtService.java
+│   │   │       │   └── 📁 policy/              # Policies de acceso por recurso
+│   │   │       └── 📁 service/                 # Lógica de negocio
+│   │   └── 📁 resources/
+│   │       ├── 📄 application.properties
+│   │       ├── 📄 application-prod.properties
+│   │       └── 📁 docs/
+│   │           ├── 📁 uml/                     # Diagramas (clases, ER, contenedores)
+│   │           ├── 📁 images/                  # Screenshots (Swagger, JaCoCo, Sonar)
+│   │           ├── 📁 requirements/            # Requerimientos y alcance
+│   │           └── 📁 planning/                # Jira y desglose Scrum
+│   └── 📁 test/
+│       ├── 📁 java/edu/dosw/users/
+│       │   ├── 📁 controller/
+│       │   ├── 📁 integration/
+│       │   ├── 📁 mapper/
+│       │   ├── 📁 model/
+│       │   ├── 📁 repository/
+│       │   ├── 📁 security/
+│       │   │   └── 📁 policy/
+│       │   └── 📁 service/
+│       └── 📁 resources/
+│           └── 📄 application.properties
 ```
 
 ---
@@ -196,8 +163,8 @@
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/techcup-futbol-dosw/nombre-del-servicio.git
-cd nombre-del-servicio
+git clone https://github.com/techcup-futbol-dosw/techchup-users.git
+cd techchup-users
 ```
 
 ### 2. Compilar el proyecto
@@ -211,28 +178,33 @@ mvn clean install
 
 ### 3. Configurar variables de entorno
 
+Copia el archivo de ejemplo y completa los valores:
+
 ```bash
-cp src/main/resources/application-local.properties.example \
-   src/main/resources/application-local.properties
+cp .env.example .env
 ```
 
-<!--
-  EDITAR: Ajusta las variables según las que use tu servicio.
--->
-
 ```properties
-server.port=8080
+# Base de datos PostgreSQL
+DB_USER=admin
+DB_PASSWORD=cambia_esta_password
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/nombre_db
-spring.datasource.username=usuario
-spring.datasource.password=contrasena
+# MongoDB (fotos de jugadores)
+MONGO_USER=admin
+MONGO_PASSWORD=cambia_esta_password
 
-jwt.secret=clave_secreta
-jwt.expiration=3600000
+# Seguridad JWT (Base64 de 32 bytes, mismo secreto que identity-service)
+JWT_SECRET=reemplaza-con-un-base64-de-32-bytes
+
+# DDL: update en primera ejecución, validate después
+DDL_AUTO=update
+
+# Servicio externo de identidad
+IDENTITY_SERVICE_URL=https://tu-identity-service.azurewebsites.net
 ```
 
 > [!WARNING]
-> Nunca subas credenciales reales al repositorio. El archivo `application-local.properties` está en `.gitignore`.
+> Nunca subas credenciales reales al repositorio. El archivo `.env` está en `.gitignore`.
 
 ### 4. Ejecutar en desarrollo
 
@@ -247,56 +219,79 @@ mvn spring-boot:run
 
 ```bash
 mvn clean package
-java -jar target/nombre-del-servicio.jar
+java -jar target/*.jar
 ```
 
-### Ejecución con Docker
+### Ejecución con Docker Compose (recomendada)
+
+Levanta el servicio junto con PostgreSQL y MongoDB:
 
 ```bash
-docker build -t nombre-del-servicio .
+docker compose up -d --build
+```
+
+Para detenerlo:
+
+```bash
+docker compose down
+```
+
+### Ejecución solo del contenedor del servicio
+
+```bash
+docker build -t techchup-users .
 
 docker run -d \
-  --name nombre-del-servicio \
+  --name techchup-users \
   -p 8080:8080 \
-  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/nombre_db \
-  -e SPRING_DATASOURCE_USERNAME=usuario \
-  -e SPRING_DATASOURCE_PASSWORD=contrasena \
-  nombre-del-servicio
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/techchup_users \
+  -e SPRING_DATASOURCE_USERNAME=admin \
+  -e SPRING_DATASOURCE_PASSWORD=cambia_esta_password \
+  -e SPRING_DATA_MONGODB_URI=mongodb://admin:pwd@host:27017/techchup_photos?authSource=admin \
+  -e SECURITY_JWT_SECRET=base64_secret \
+  -e IDENTITY_SERVICE_URL=https://identity-service \
+  techchup-users
 ```
 
 ---
 
 ## Modelación y diagramas
 
-<!--
-  EDITAR: Actualiza las descripciones y sube las imágenes cuando estén listas.
--->
-
 ### Diagrama de contenedores
 
-![ContainerDiagram](src/main/resources/docs/uml/architecturalDesigns/containerDiagram.png)
+![ContainerDiagram](src/main/resources/docs/uml/containerDiagram.png)
 
-> [Describir cómo este servicio interactúa con los demás componentes.]
+> Los actores **Jugador**, **Capitán** y **Administrador** acceden vía HTTPS al **Frontend** (React + TypeScript), que envía todas las peticiones REST/HTTPS al **Orchestrator API Gateway** (punto de entrada con enrutamiento y seguridad). El gateway enruta a este **Users and Players Service** (Spring Boot), responsable de la lógica de negocio y persistencia de perfiles de usuario, perfiles deportivos e invitaciones. El servicio se integra con el **Entity service** (sincronización de usuarios y notificación de inactivación) y con el **Team service** (consulta del equipo activo del jugador y notificación de aceptación/rechazo de invitaciones). Persiste datos relacionales en **PostgreSQL** (`user_profiles`, `sport_profiles`, `invitations`) y archivos multimedia (fotos de jugadores) en **MongoDB**.
 
 ### Diagrama de clases
 
 ![ClassDiagram](src/main/resources/docs/uml/classDiagram.png)
 
-> [Describir las principales clases y sus relaciones.]
+> El diseño sigue una **arquitectura por capas** con separación estricta entre capas:
+>
+> - **ControllerLayer**: expone los endpoints REST (`UserProfileController`, `SportProfileController`, `InvitationController`) y delega en la capa de servicio.
+> - **ServiceLayer**: interfaces (`IUserProfileService`, `ISportProfileService`, `IInvitationService`, `IAuditService`) e implementaciones que concentran la lógica de negocio. `AuditServiceImpl` es transversal y lo invocan los demás servicios para registrar acciones.
+> - **MapperLayer**: mappers basados en MapStruct que convierten entre `Model` (dominio) y `Entity` (persistencia), aislando ambas representaciones.
+> - **RepositoryLayer**: interfaces Spring Data (`UserProfileRepository`, `SportProfileRepository`, `InvitationRepository`, `AuditLogRepository`) que abstraen el acceso a datos.
+> - **ModelLayer**: modelos de dominio (`UserProfileModel`, `SportProfileModel`, `InvitationModel`, `AuditLogModel`) y enumeraciones del negocio (`SchoolRelation`, `Gender`, `Position`, `InvitationStatus`, `AuditAction`).
+> - **EntityLayer**: entidades JPA (`UserProfileEntity`, `SportProfileEntity`, `InvitationEntity`, `AuditLogEntity`) que reflejan el esquema relacional.
+>
+> Las relaciones clave del dominio: un `UserProfile` tiene 1:1 un `SportProfile` y 1:N `Invitation`; cada cambio sobre perfiles e invitaciones genera registros en `AuditLog`.
 
 ### Diagrama Entidad-Relación
 
 ![DatabaseDiagram](src/main/resources/docs/uml/dataBaseDiagram.png)
 
-> [Describir el modelo de datos y las relaciones entre tablas.]
+> El modelo relacional gira en torno a la tabla **`Users`** (identidad, datos académicos y de contacto), con dos relaciones principales:
+>
+> - **`Users` 1 — 1 `SportProfile`**: cada usuario puede tener un único perfil deportivo (posición, dorsal, foto referenciada por `photo_id` en MongoDB, disponibilidad).
+> - **`Users` 1 — 0..* `Invitation`**: un jugador puede recibir múltiples invitaciones a equipos (`team_id`, `status`, `send_at`, `responded_at`).
+>
+> La tabla **`audit_log`** registra de forma transversal las acciones realizadas sobre `SportProfile` e `Invitation` (relaciones 1 — 0..*), guardando `performed_by`, `action`, `timestamp` y `details` para trazabilidad. Las llaves únicas en `Users` (`mail`, `identificationType`+`identificationNumber`) garantizan que no haya duplicados de identidad ni de correo institucional.
 
 ---
 
 ## API y Endpoints
-
-<!--
-  EDITAR: Reemplaza con los endpoints reales. Agrega una tabla por recurso.
--->
 
 ```
 http://localhost:8080/swagger-ui.html
@@ -304,39 +299,53 @@ http://localhost:8080/swagger-ui.html
 
 ![Swagger UI](src/main/resources/docs/images/swaggerUi.png)
 
-### [Recurso 1]
+### Usuarios
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/users` | Listar todos los usuarios |
-| GET | `/api/users/{id}` | Obtener usuario por ID |
-| GET | `/api/users/identification/{identification}` | Obtener usuario por identificación |
-| POST | `/api/users` | Crear nuevo usuario |
-| PUT | `/api/users/{id}` | Reemplazar usuario completo (admin) |
-| PUT | `/api/users/me` | Actualizar el perfil del usuario actual (`X-User-Id`) |
-| PATCH | `/api/users/{id}/deactivate` | Desactivar usuario (estado INACTIVE) |
-| PATCH | `/api/users/{id}/inactivate` | Inactivar usuario validando participación en torneo |
-| GET | `/api/invitations/{id}` | Obtener invitación por ID |
-| GET | `/api/invitations/player/{playerId}` | Listar invitaciones recibidas por jugador |
-| POST | `/api/invitations/player/{playerId}/team/{teamId}` | Enviar invitación a jugador desde equipo |
-| PATCH | `/api/invitations/{id}/accept` | Aceptar invitación |
-| PATCH | `/api/invitations/{id}/reject` | Rechazar invitación |
-| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente |
-| GET | `/api/sport-profiles/{id}` | Obtener perfil deportivo por ID |
-| GET | `/api/sport-profiles/user/{userId}` | Obtener perfil deportivo por usuario |
-| POST | `/api/sport-profiles/user/{userId}` | Crear perfil deportivo para usuario (multipart: `profile`, `photo` opcional) |
-| PUT | `/api/sport-profiles/{id}` | Actualizar perfil deportivo (multipart: `profile`, `photo` opcional) |
-| PATCH | `/api/sport-profiles/{id}/availability?available={true\|false}` | Actualizar disponibilidad del perfil deportivo |
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/users` | Listar todos los usuarios | Admin |
+| GET | `/api/users/search` | Búsqueda con filtros (nombre, posición, identificación, género, semestre, edad, disponibilidad) | Capitán / Admin |
+| GET | `/api/users/{id}` | Obtener usuario por ID | Dueño / Admin |
+| GET | `/api/users/identification/{identification}` | Obtener usuario por número de identificación | Capitán / Admin |
+| PUT | `/api/users/{id}` | Reemplazar usuario completo | Admin |
+| PUT | `/api/users/me` | Actualizar el perfil del usuario actual (`X-User-Id`) | Autenticado |
+| PATCH | `/api/users/{id}/deactivate` | Desactivar cuenta (estado INACTIVE) | Admin |
+| PATCH | `/api/users/{id}/inactivate` | Inactivar cuenta validando participación en torneo | Dueño / Admin |
+
+### Invitaciones
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/invitations/{id}` | Obtener invitación por ID | Autenticado |
+| GET | `/api/invitations/user/{userId}` | Listar invitaciones del jugador | Dueño / Admin |
+| POST | `/api/invitations/user/{userId}/team/{teamId}` | Enviar invitación a un jugador desde un equipo | Capitán |
+| PATCH | `/api/invitations/{id}/accept` | Aceptar invitación | Dueño / Admin |
+| PATCH | `/api/invitations/{id}/reject` | Rechazar invitación | Dueño / Admin |
+| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente | Capitán |
+
+### Perfiles deportivos
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/sport-profiles/{id}` | Obtener perfil deportivo por ID | Autenticado |
+| GET | `/api/sport-profiles/user/{userId}` | Obtener perfil deportivo por usuario | Dueño / Capitán / Admin |
+| POST | `/api/sport-profiles/user/{userId}` | Crear perfil deportivo (multipart: `profile`, `photo` opcional) | Dueño / Admin |
+| PUT | `/api/sport-profiles/{id}` | Actualizar perfil deportivo (multipart: `profile`, `photo` opcional) | Dueño / Admin |
+| PATCH | `/api/sport-profiles/{id}/availability?available={true\|false}` | Actualizar disponibilidad | Dueño / Admin |
+| GET | `/api/sport-profiles/photos/{photoId}` | Descargar foto del perfil deportivo | Autenticado |
+
+### Auditoría
+
+| Método | Endpoint | Descripción | Roles |
+|--------|----------|-------------|-------|
+| GET | `/api/audit-logs/sport-profiles/{sportProfileId}` | Consultar bitácora de cambios de un perfil deportivo | Admin |
+| GET | `/api/audit-logs/invitations/{invitationId}` | Consultar bitácora de cambios de una invitación | Admin |
 
 ---
 
 ## Pruebas y calidad
 
 ### Cobertura (JaCoCo)
-
-<!--
-  EDITAR: Actualiza los números cuando tengas el reporte generado.
--->
 
 ![JaCoCo Report](src/main/resources/docs/images/jacocoReport.png)
 
@@ -347,10 +356,6 @@ mvn clean test jacoco:report
 ```
 
 ### Calidad (SonarQube)
-
-<!--
-  EDITAR: Actualiza cuando tengas el análisis generado.
--->
 
 ![SonarQube](src/main/resources/docs/images/sonarQubeAnalysis.png)
 
@@ -370,10 +375,6 @@ mvn clean verify sonar:sonar \
 ## CI/CD
 
 ### Entorno de despliegue
-
-<!--
-  EDITAR: Actualiza las URLs cuando el servicio esté desplegado.
--->
 
 | Campo | Valor |
 |-------|-------|
