@@ -69,10 +69,10 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getAll() {
-        return ResponseEntity.ok(
-                userService.getAll().stream()
-                        .map(userMapper::toResponse)
-                        .toList());
+        List<UserResponse> users = userService.getAll().stream()
+                .map(userMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(users);
     }
 
     /**
