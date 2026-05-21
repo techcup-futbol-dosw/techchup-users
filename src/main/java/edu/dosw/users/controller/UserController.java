@@ -10,12 +10,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -149,18 +149,21 @@ public class UserController {
      * Actualiza el perfil del usuario autenticado actualmente.
      *
      * <p>Cualquier usuario autenticado puede actualizar su propia información básica.
-     * El identificador de usuario se extrae del encabezado {@code X-User-Id} propagado
-     * por el gateway.</p>
+     * El identificador de usuario se extrae directamente del {@code SecurityContext},
+     * donde {@link edu.dosw.users.security.JwtAuthenticationFilter} lo deposita al
+     * validar el JWT, sin depender de ningún header propagado por el gateway.</p>
      *
-     * @param userId  identificador del usuario autenticado (encabezado {@code X-User-Id})
      * @param request datos de actualización del propio perfil
      * @return respuesta con los datos del perfil actualizado
      */
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> updateMe(
-            @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody UserProfileUpdateRequest request) {
+        String principal = (String) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        Long userId = Long.parseLong(principal);
         return ResponseEntity.ok(
                 userMapper.toResponse(
                         userService.updateProfile(userId, userMapper.toModel(request))));
