@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * including successful operations and expected error mappings.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = {"ADMIN", "CAPITAN"})
+@WithMockUser(roles = {"ADMIN", "CAPTAIN"})
 class InvitationControllerTest {
 
     @Autowired private WebApplicationContext context;

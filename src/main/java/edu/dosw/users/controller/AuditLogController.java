@@ -14,12 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * REST controller for querying audit log entries.
+ * Controlador REST para la consulta de entradas del registro de auditoría.
  *
- * <p>Base path: {@code /api/audit-logs}</p>
+ * <p>Ruta base: {@code /api/audit-logs}</p>
  *
- * <p>Access restricted to administrators only, as audit logs contain
- * sensitive operational history of the system.</p>
+ * <p>El acceso está restringido exclusivamente a administradores, ya que los
+ * registros de auditoría contienen el historial operativo sensible del sistema.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/api/audit-logs")
@@ -30,10 +33,10 @@ public class AuditLogController {
     private final AuditLogMapper auditLogMapper;
 
     /**
-     * Returns all audit log entries associated with the given sport profile.
+     * Retorna todas las entradas de auditoría asociadas al perfil deportivo indicado.
      *
-     * @param sportProfileId identifier of the sport profile
-     * @return list of audit log entries ordered as stored
+     * @param sportProfileId identificador del perfil deportivo
+     * @return lista de entradas de auditoría en el orden de almacenamiento
      */
     @GetMapping("/sport-profiles/{sportProfileId}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -47,10 +50,10 @@ public class AuditLogController {
     }
 
     /**
-     * Returns all audit log entries associated with the given invitation.
+     * Retorna todas las entradas de auditoría asociadas a la invitación indicada.
      *
-     * @param invitationId identifier of the invitation
-     * @return list of audit log entries ordered as stored
+     * @param invitationId identificador de la invitación
+     * @return lista de entradas de auditoría en el orden de almacenamiento
      */
     @GetMapping("/invitations/{invitationId}")
     @PreAuthorize("hasRole('ADMIN')")

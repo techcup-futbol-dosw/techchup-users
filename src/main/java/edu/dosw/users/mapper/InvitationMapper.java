@@ -7,34 +7,41 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * MapStruct mapper for bidirectional conversion between
- * {@link InvitationEntity} and {@link InvitationModel}.
+ * Mapper MapStruct para la conversión bidireccional entre {@link InvitationEntity} y {@link InvitationModel}.
  *
- * <p>The entity stores the player identifier in a field named {@code userId}
- * (column {@code player_id}), while the model uses {@code playerId} for
- * API compatibility. Both directions are mapped explicitly.</p>
+ * <p>La entidad almacena el identificador del jugador en un campo llamado {@code userId}
+ * (columna {@code player_id}), mientras que el modelo utiliza {@code playerId} por
+ * compatibilidad con la API. Ambas direcciones se mapean de forma explícita.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Mapper(componentModel = "spring")
 public interface InvitationMapper {
 
     /**
-     * Converts an invitation entity to its domain model.
+     * Convierte una entidad de invitación a su modelo de dominio.
      *
-     * @param entity source entity; may be {@code null}
-     * @return resulting model, or {@code null} if the entity is {@code null}
+     * @param entity entidad fuente; puede ser {@code null}
+     * @return modelo resultante, o {@code null} si la entidad es {@code null}
      */
     @Mapping(source = "userId", target = "playerId")
     InvitationModel toModel(InvitationEntity entity);
 
     /**
-     * Converts an invitation model to its JPA entity.
+     * Convierte un modelo de invitación a su entidad JPA.
      *
-     * @param model source model; may be {@code null}
-     * @return resulting entity, or {@code null} if the model is {@code null}
+     * @param model modelo fuente; puede ser {@code null}
+     * @return entidad resultante, o {@code null} si el modelo es {@code null}
      */
     @Mapping(source = "playerId", target = "userId")
     InvitationEntity toEntity(InvitationModel model);
 
-    /** Converts a domain model to an {@link InvitationResponse}. */
+    /**
+     * Convierte un modelo de dominio a un {@link InvitationResponse}.
+     *
+     * @param model modelo fuente; puede ser {@code null}
+     * @return DTO de respuesta resultante, o {@code null} si el modelo es {@code null}
+     */
     InvitationResponse toResponse(InvitationModel model);
 }

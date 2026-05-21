@@ -11,10 +11,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Read-only view of a user profile returned by the API.
+ * Vista de solo lectura de un perfil de usuario retornada por la API.
  *
- * <p>Deliberately omits the {@code password} field so that credentials are
- * never sent over the wire in a response.</p>
+ * <p>Omite deliberadamente el campo {@code password} para que las credenciales
+ * nunca sean enviadas en una respuesta.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Getter
 @Builder

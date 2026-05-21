@@ -8,11 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Payload accepted for sport profile creation and update requests.
+ * Payload aceptado para las solicitudes de creación y actualización de perfil deportivo.
  *
- * <p>The {@code userId} and {@code photoId} are resolved by the service
- * layer (from the path variable and the uploaded file respectively) and
- * are therefore not part of this request body.</p>
+ * <p>Los campos {@code userId} y {@code photoId} son resueltos por la capa de servicio
+ * (desde la variable de ruta y el archivo subido, respectivamente) y por lo tanto
+ * no forman parte del cuerpo de este request.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Getter
 @Setter

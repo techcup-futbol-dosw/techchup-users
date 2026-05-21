@@ -14,12 +14,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Default implementation of {@link IAuditService}.
+ * Implementación por defecto de {@link IAuditService}.
  *
- * <p>Persists audit entries via {@link AuditLogRepository}. Because the
- * {@link AuditLogMapper} ignores the JPA relationships on {@code toEntity},
- * this class manually sets the partial entity references (id-only) so that
- * Hibernate writes the correct foreign-key values.</p>
+ * <p>Persiste las entradas de auditoría a través de {@link AuditLogRepository}.
+ * Dado que {@link AuditLogMapper} omite las relaciones JPA al convertir a entidad,
+ * esta clase establece manualmente las referencias parciales (solo con id) para que
+ * Hibernate escriba los valores correctos de clave foránea.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -31,8 +34,8 @@ public class AuditServiceImpl implements IAuditService {
     /**
      * {@inheritDoc}
      *
-     * <p>Creates an audit entry with an id-only {@link SportProfileEntity}
-     * reference to persist the foreign key without loading the full profile.</p>
+     * <p>Crea una entrada de auditoría con una referencia de solo id a {@link SportProfileEntity}
+     * para persistir la clave foránea sin cargar el perfil completo.</p>
      */
     @Override
     public void logSportProfile(Long sportProfileId, AuditAction action, String details) {
@@ -50,8 +53,8 @@ public class AuditServiceImpl implements IAuditService {
     /**
      * {@inheritDoc}
      *
-     * <p>Creates an audit entry with an id-only {@link InvitationEntity}
-     * reference to persist the foreign key without loading the full invitation.</p>
+     * <p>Crea una entrada de auditoría con una referencia de solo id a {@link InvitationEntity}
+     * para persistir la clave foránea sin cargar la invitación completa.</p>
      */
     @Override
     public void logInvitation(Long invitationId, AuditAction action, String details) {

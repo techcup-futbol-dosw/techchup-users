@@ -1,19 +1,22 @@
 package edu.dosw.users.client;
 
 /**
- * Client interface for communicating with the teams microservice.
+ * Interfaz de cliente para comunicarse con el microservicio de equipos.
  *
- * <p>Used by the sport profile and invitation services to query team
- * membership before performing operations that are restricted while a player
- * is assigned to an active team.</p>
+ * <p>Utilizada por los servicios de perfil deportivo e invitación para consultar
+ * la pertenencia a equipos antes de realizar operaciones que están restringidas
+ * mientras un jugador esté asignado a un equipo activo.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public interface TeamsServiceClient {
 
     /**
-     * Checks whether the given user is currently assigned to any team.
+     * Verifica si el usuario indicado está actualmente asignado a algún equipo.
      *
-     * @param userId identifier of the user to check
-     * @return {@code true} if the user belongs to at least one active team
+     * @param userId identificador del usuario a verificar
+     * @return {@code true} si el usuario pertenece a al menos un equipo activo
      */
     boolean isPlayerAssignedToTeam(Long userId);
 }

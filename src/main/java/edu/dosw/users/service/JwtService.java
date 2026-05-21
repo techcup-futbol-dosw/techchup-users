@@ -14,17 +14,21 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Service responsible for validating JWTs and extracting commonly used claims.
+ * Servicio responsable de validar JWT y extraer los claims de uso frecuente.
  *
- * <p>Expectations:
+ * <p>Requisitos:
  * <ul>
- *   <li>Configuration property `security.jwt.secret` contains a Base64-encoded HMAC secret.</li>
- *   <li>Tokens validated by this service must include a {@code tokenType} claim
- *       set to {@code "ACCESS"} to be considered valid for API access.</li>
+ *   <li>La propiedad de configuración {@code security.jwt.secret} debe contener un secreto
+ *       HMAC codificado en Base64.</li>
+ *   <li>Los tokens validados por este servicio deben incluir el claim {@code tokenType}
+ *       con valor {@code "ACCESS"} para ser considerados válidos para el acceso a la API.</li>
  * </ul>
  *
- * The class is thread-safe: it stores an immutable {@link javax.crypto.SecretKey}
- * constructed at startup and uses stateless parsing operations for each token.
+ * <p>La clase es thread-safe: almacena un {@link javax.crypto.SecretKey} inmutable
+ * construido al inicio y utiliza operaciones de parseo sin estado para cada token.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 public class JwtService {
@@ -37,11 +41,11 @@ public class JwtService {
     private final SecretKey secretKey;
 
     /**
-     * Construct the service using the Base64-encoded secret from configuration.
-     * The secret is decoded and turned into an HMAC signing key used to verify
-     * incoming JWT signatures.
+     * Construye el servicio usando el secreto codificado en Base64 de la configuración.
+     * El secreto se decodifica y transforma en una clave de firma HMAC usada para
+     * verificar las firmas de los JWT entrantes.
      *
-     * @param secret Base64-encoded HMAC secret (property `security.jwt.secret`)
+     * @param secret secreto HMAC codificado en Base64 (propiedad {@code security.jwt.secret})
      */
     public JwtService(@Value("${security.jwt.secret}") String secret) {
         // Keys.hmacShaKeyFor expects a raw byte array representing the secret
@@ -49,15 +53,15 @@ public class JwtService {
     }
 
     /**
-     * Returns true when the provided JWT meets these conditions:
+     * Retorna {@code true} cuando el JWT proporcionado cumple las siguientes condiciones:
      * <ol>
-     *   <li>signature is valid for the configured secret</li>
-     *   <li>token is not expired</li>
-     *   <li>{@code tokenType} claim equals {@code "ACCESS"}</li>
+     *   <li>La firma es válida para el secreto configurado.</li>
+     *   <li>El token no ha expirado.</li>
+     *   <li>El claim {@code tokenType} es igual a {@code "ACCESS"}.</li>
      * </ol>
      *
-     * @param token compact JWT string (must not be null)
-     * @return {@code true} when token is valid and of type {@code ACCESS}; {@code false} otherwise
+     * @param token cadena JWT compacta (no debe ser {@code null})
+     * @return {@code true} si el token es válido y de tipo {@code ACCESS}; {@code false} en caso contrario
      */
     public boolean isTokenValid(String token) {
         try {
@@ -69,30 +73,34 @@ public class JwtService {
     }
 
     /**
-     * Returns the JWT subject (the configured user/account id stored in {@code sub}).
+     * Retorna el sujeto del JWT (el id de usuario/cuenta almacenado en el claim {@code sub}).
      *
-     * @param token compact JWT string
-     * @return subject claim (may be {@code null} if not present)
-     * @throws io.jsonwebtoken.JwtException when the token is invalid or cannot be parsed
+     * @param token cadena JWT compacta
+     * @return claim de sujeto (puede ser {@code null} si no está presente)
+     * @throws io.jsonwebtoken.JwtException si el token es inválido o no puede parsearse
      */
     public String extractUserId(String token) {
         return extractAllClaims(token).getSubject();
     }
 
     /**
-     * Alias for {@link #extractUserId(String)} kept for teams using "account" terminology.
+     * Alias de {@link #extractUserId(String)} mantenido para equipos que usan la terminología "account".
+     *
+     * @param token cadena JWT compacta
+     * @return claim de sujeto del token
+     * @throws io.jsonwebtoken.JwtException si el token es inválido o no puede parsearse
      */
     public String extractAccountId(String token) {
         return extractAllClaims(token).getSubject();
     }
 
     /**
-     * Extracts the {@code roles} claim and returns it as a list of strings.
-     * If the claim is missing or not an array, an empty list is returned.
+     * Extrae el claim {@code roles} y lo retorna como lista de cadenas.
+     * Si el claim está ausente o no es un array, se retorna una lista vacía.
      *
-     * @param token compact JWT string
-     * @return list of role names or empty list
-     * @throws io.jsonwebtoken.JwtException when the token cannot be parsed
+     * @param token cadena JWT compacta
+     * @return lista de nombres de roles, o lista vacía si no hay roles
+     * @throws io.jsonwebtoken.JwtException si el token no puede parsearse
      */
     public List<String> extractRoles(String token) {
         Object rolesObj = extractAllClaims(token).get(ROLES_CLAIM);
@@ -109,12 +117,12 @@ public class JwtService {
     }
 
     /**
-     * Extracts the {@code permissions} claim and returns it as a list of strings.
-     * If the claim is missing or not an array, an empty list is returned.
+     * Extrae el claim {@code permissions} y lo retorna como lista de cadenas.
+     * Si el claim está ausente o no es un array, se retorna una lista vacía.
      *
-     * @param token compact JWT string
-     * @return list of permission names or empty list
-     * @throws io.jsonwebtoken.JwtException when the token cannot be parsed
+     * @param token cadena JWT compacta
+     * @return lista de nombres de permisos, o lista vacía si no hay permisos
+     * @throws io.jsonwebtoken.JwtException si el token no puede parsearse
      */
     public List<String> extractPermissions(String token) {
         Object permissionsObj = extractAllClaims(token).get(PERMISSIONS_CLAIM);
@@ -131,26 +139,25 @@ public class JwtService {
     }
 
     /**
-     * Reads the configured {@code tokenType} claim (typically {@code ACCESS} or other types).
+     * Lee el claim {@code tokenType} configurado (típicamente {@code ACCESS} u otros tipos).
      *
-     * @param token compact JWT string
-     * @return tokenType claim as string or {@code null} when absent
-     * @throws io.jsonwebtoken.JwtException when the token cannot be parsed
+     * @param token cadena JWT compacta
+     * @return valor del claim {@code tokenType} como cadena, o {@code null} si está ausente
+     * @throws io.jsonwebtoken.JwtException si el token no puede parsearse
      */
     public String extractTokenType(String token) {
         return extractAllClaims(token).get(TOKEN_TYPE_CLAIM, String.class);
     }
 
     /**
-     * Parses the JWT and returns its claims. Throws a JwtException on invalid tokens.
+     * Parsea el JWT y retorna sus claims. Lanza {@link io.jsonwebtoken.JwtException} en tokens inválidos.
      *
-     * Note: callers should handle {@link io.jsonwebtoken.JwtException} to
-     * control the authentication flow (this service leaves that responsibility
-     * to the caller or higher-level filters).
+     * <p>Los llamadores deben manejar {@link io.jsonwebtoken.JwtException} para controlar el flujo
+     * de autenticación; este servicio deja esa responsabilidad al llamador o a los filtros de nivel superior.</p>
      *
-     * @param token compact JWT string
-     * @return parsed claims
-     * @throws io.jsonwebtoken.JwtException when the token is invalid, expired or signature verification fails
+     * @param token cadena JWT compacta
+     * @return claims parseados del token
+     * @throws io.jsonwebtoken.JwtException si el token es inválido, ha expirado o falla la verificación de firma
      */
     private Claims extractAllClaims(String token) {
         // Parse and validate the signed JWT using the preconfigured secret key.

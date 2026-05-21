@@ -1,8 +1,8 @@
 package edu.dosw.users.security.policy;
 
 /**
- * @deprecated Use {@link UserAccessPolicy} instead.
- * <p>Kept only as a compatibility alias while teams migrate to the resource-specific name.</p>
+ * @deprecated Usar {@link UserAccessPolicy} en su lugar.
+ * <p>Conservado únicamente como alias de compatibilidad mientras los equipos migran al nombre específico del recurso.</p>
  */
 @Deprecated(forRemoval = false)
 final class ResourceAccessPolicy extends UserAccessPolicy {

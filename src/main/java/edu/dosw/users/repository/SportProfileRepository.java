@@ -7,45 +7,48 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Spring Data JPA repository for {@link SportProfileEntity} persistence operations.
+ * Repositorio Spring Data JPA para operaciones de persistencia de {@link SportProfileEntity}.
  *
- * <p>Provides standard CRUD operations inherited from {@link JpaRepository} and
- * derived queries to retrieve sport profiles by user identifier and position.</p>
+ * <p>Provee las operaciones CRUD estándar heredadas de {@link JpaRepository} y
+ * consultas derivadas para recuperar perfiles deportivos por identificador de usuario,
+ * posición y disponibilidad.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see SportProfileEntity
  */
 public interface SportProfileRepository extends JpaRepository<SportProfileEntity, Long> {
 
     /**
-     * Finds the sport profile associated with the given user.
+     * Busca el perfil deportivo asociado al usuario indicado.
      *
-     * @param userId identifier of the user who owns the sport profile
-     * @return optional containing the sport profile when it exists
+     * @param userId identificador del usuario propietario del perfil deportivo
+     * @return optional con el perfil deportivo si existe; vacío si no hay perfil para ese usuario
      */
     Optional<SportProfileEntity> findByUserId(Long userId);
 
     /**
-     * Finds all sport profiles with the given position.
+     * Busca todos los perfiles deportivos con la posición indicada.
      *
-     * @param position position string to filter by (e.g. {@code "FORWARD"})
-     * @return list of sport profiles with the requested position
+     * @param position cadena de posición por la que filtrar (p. ej. {@code "FORWARD"})
+     * @return lista de perfiles deportivos con la posición solicitada
      */
     List<SportProfileEntity> findByPosition(String position);
 
     /**
-     * Finds all sport profiles matching the given availability flag.
+     * Busca todos los perfiles deportivos que coincidan con el indicador de disponibilidad dado.
      *
-     * @param available {@code true} to return only available players
-     * @return list of sport profiles with the requested availability
+     * @param available {@code true} para retornar solo jugadores disponibles
+     * @return lista de perfiles deportivos con la disponibilidad solicitada
      */
     List<SportProfileEntity> findByAvailable(boolean available);
 
     /**
-     * Finds all sport profiles matching both position and availability.
+     * Busca todos los perfiles deportivos que coincidan con la posición y la disponibilidad indicadas.
      *
-     * @param position  position string to filter by
-     * @param available availability flag to filter by
-     * @return list of sport profiles matching both criteria
+     * @param position  cadena de posición por la que filtrar
+     * @param available indicador de disponibilidad por el que filtrar
+     * @return lista de perfiles deportivos que cumplen ambos criterios
      */
     List<SportProfileEntity> findByPositionAndAvailable(String position, boolean available);
 

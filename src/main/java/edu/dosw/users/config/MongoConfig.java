@@ -11,16 +11,26 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
 /**
- * MongoDB client configuration for the production profile.
+ * Configuración del cliente MongoDB para el perfil de producción.
  *
- * <p>Reads the connection URI directly from the {@code SPRING_DATA_MONGODB_URI}
- * environment variable via {@link System#getenv} to ensure the value is picked
- * up regardless of how Azure App Service resolves Spring property placeholders.</p>
+ * <p>Lee el URI de conexión directamente desde la variable de entorno
+ * {@code SPRING_DATA_MONGODB_URI} mediante {@link System#getenv} para garantizar
+ * que el valor se recoja independientemente de cómo Azure App Service resuelva
+ * los marcadores de posición de las propiedades de Spring.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Configuration
 @Profile("prod")
 public class MongoConfig {
 
+    /**
+     * Crea el cliente MongoDB a partir del URI leído de la variable de entorno.
+     *
+     * @return cliente MongoDB configurado
+     * @throws IllegalStateException si la variable de entorno no está definida o está vacía
+     */
     @Bean
     public MongoClient mongoClient() {
         String uri = System.getenv("SPRING_DATA_MONGODB_URI");
@@ -31,6 +41,12 @@ public class MongoConfig {
         return MongoClients.create(uri);
     }
 
+    /**
+     * Crea la fábrica de base de datos MongoDB extrayendo el nombre de la base de datos del URI.
+     *
+     * @param mongoClient cliente MongoDB ya configurado
+     * @return fábrica de base de datos MongoDB
+     */
     @Bean
     public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
         String uri = System.getenv("SPRING_DATA_MONGODB_URI");
@@ -39,6 +55,12 @@ public class MongoConfig {
         return new SimpleMongoClientDatabaseFactory(mongoClient, database);
     }
 
+    /**
+     * Crea el template de operaciones MongoDB para uso en repositorios y servicios.
+     *
+     * @param mongoDatabaseFactory fábrica de base de datos MongoDB
+     * @return template de MongoDB configurado
+     */
     @Bean
     public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory) {
         return new MongoTemplate(mongoDatabaseFactory);

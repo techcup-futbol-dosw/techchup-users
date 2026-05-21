@@ -6,45 +6,48 @@ import edu.dosw.users.model.AuditLogModel;
 import java.util.List;
 
 /**
- * Service for recording and querying audit log entries.
+ * Servicio para registrar y consultar entradas del log de auditoría.
  *
- * <p>Every relevant business event (creation, update, or deactivation of a
- * sport profile or invitation) must be recorded via this service so that
- * system history remains traceable.</p>
+ * <p>Todo evento de negocio relevante (creación, actualización o desactivación de
+ * un perfil deportivo o una invitación) debe registrarse a través de este servicio
+ * para mantener la trazabilidad del historial del sistema.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public interface IAuditService {
 
     /**
-     * Records an audit event associated with a sport profile.
+     * Registra un evento de auditoría asociado a un perfil deportivo.
      *
-     * @param sportProfileId identifier of the affected sport profile
-     * @param action         type of action performed
-     * @param details        additional description of the event
+     * @param sportProfileId identificador del perfil deportivo afectado
+     * @param action         tipo de acción realizada
+     * @param details        descripción adicional del evento
      */
     void logSportProfile(Long sportProfileId, AuditAction action, String details);
 
     /**
-     * Records an audit event associated with a team invitation.
+     * Registra un evento de auditoría asociado a una invitación de equipo.
      *
-     * @param invitationId identifier of the affected invitation
-     * @param action       type of action performed
-     * @param details      additional description of the event
+     * @param invitationId identificador de la invitación afectada
+     * @param action       tipo de acción realizada
+     * @param details      descripción adicional del evento
      */
     void logInvitation(Long invitationId, AuditAction action, String details);
 
     /**
-     * Returns all audit log entries related to the given sport profile.
+     * Retorna todas las entradas de auditoría relacionadas con el perfil deportivo indicado.
      *
-     * @param sportProfileId identifier of the sport profile
-     * @return list of matching audit log models, may be empty
+     * @param sportProfileId identificador del perfil deportivo
+     * @return lista de modelos de auditoría coincidentes; puede estar vacía
      */
     List<AuditLogModel> getLogsForSportProfile(Long sportProfileId);
 
     /**
-     * Returns all audit log entries related to the given invitation.
+     * Retorna todas las entradas de auditoría relacionadas con la invitación indicada.
      *
-     * @param invitationId identifier of the invitation
-     * @return list of matching audit log models, may be empty
+     * @param invitationId identificador de la invitación
+     * @return lista de modelos de auditoría coincidentes; puede estar vacía
      */
     List<AuditLogModel> getLogsForInvitation(Long invitationId);
 }

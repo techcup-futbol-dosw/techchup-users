@@ -4,36 +4,39 @@ import edu.dosw.users.model.PlayerPhoto;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Service for storing, retrieving and deleting player photo files.
+ * Servicio para almacenar, recuperar y eliminar fotos de perfil de jugadores.
  *
- * <p>Implementations are responsible for persisting image bytes outside the
- * relational database and returning a photo identifier that can be referenced
- * from the sport profile.</p>
+ * <p>Las implementaciones son responsables de persistir los bytes de la imagen fuera de
+ * la base de datos relacional y retornar un identificador de foto que pueda referenciarse
+ * desde el perfil deportivo.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public interface ImageService {
 
     /**
-     * Stores the uploaded image for the given sport profile.
+     * Almacena la imagen subida para el perfil deportivo indicado.
      *
-     * @param file image file received from the client
-     * @param sportProfileId identifier of the sport profile that owns the image
-     * @return generated identifier of the stored photo
-     * @throws java.io.UncheckedIOException if the file cannot be read
+     * @param file           archivo de imagen recibido del cliente
+     * @param sportProfileId identificador del perfil deportivo propietario de la imagen
+     * @return identificador generado de la foto almacenada
+     * @throws java.io.UncheckedIOException si el archivo no puede leerse
      */
     String upload(MultipartFile file, Long sportProfileId);
 
     /**
-     * Retrieves a previously stored photo by its identifier.
+     * Recupera una foto almacenada anteriormente por su identificador.
      *
-     * @param photoId identifier of the photo to retrieve
-     * @return the {@link PlayerPhoto} document, or {@code null} if not found
+     * @param photoId identificador de la foto a recuperar
+     * @return documento {@link PlayerPhoto}, o {@code null} si no existe
      */
     PlayerPhoto getPhoto(String photoId);
 
     /**
-     * Deletes a previously stored photo.
+     * Elimina una foto almacenada anteriormente.
      *
-     * @param photoId identifier of the photo to delete
+     * @param photoId identificador de la foto a eliminar
      */
     void delete(String photoId);
 }

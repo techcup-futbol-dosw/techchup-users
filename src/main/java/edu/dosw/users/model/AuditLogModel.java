@@ -10,12 +10,14 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Domain model representing a system audit log entry.
+ * Modelo de dominio que representa una entrada del log de auditoría del sistema.
  *
- * <p>Each entry documents a business event (creation, update or deactivation)
- * associated with a sport profile or a team invitation. At least one of the
- * two reference identifiers must be non-null.</p>
+ * <p>Cada entrada documenta un evento de negocio (creación, actualización o desactivación)
+ * asociado a un perfil deportivo o una invitación de equipo. Al menos uno de los dos
+ * identificadores de referencia debe ser no nulo.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see edu.dosw.users.entity.AuditLogEntity
  * @see edu.dosw.users.mapper.AuditLogMapper
  * @see AuditAction
@@ -27,16 +29,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AuditLogModel {
 
-    /** Unique identifier of the audit log entry. */
+    /** Identificador único de la entrada de auditoría. */
     private Long id;
-    /** Identifier of the sport profile related to the audited event. */
+    /** Identificador del perfil deportivo relacionado con el evento auditado. */
     private Long sportProfileId;
-    /** Identifier of the invitation related to the audited event. */
+    /** Identificador de la invitación relacionada con el evento auditado. */
     private Long invitationId;
-    /** Type of action that originated this audit log entry. */
+    /** Tipo de acción que originó esta entrada de auditoría. */
     private AuditAction action;
-    /** Date and time when the audited event occurred. */
+    /** Fecha y hora en que ocurrió el evento auditado. */
     private LocalDateTime timestamp;
-    /** Additional description or context of the audited event. */
+    /** Descripción adicional o contexto del evento auditado. */
     private String details;
 }

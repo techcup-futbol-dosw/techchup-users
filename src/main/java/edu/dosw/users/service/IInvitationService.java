@@ -5,68 +5,71 @@ import edu.dosw.users.model.InvitationModel;
 import java.util.List;
 
 /**
- * Service for managing team invitations sent to players.
+ * Servicio para gestionar las invitaciones de equipo enviadas a jugadores.
  *
- * <p>Handles the full lifecycle of an invitation: sending, accepting,
- * rejecting, and cancelling. Every state change is recorded in the audit log.</p>
+ * <p>Gestiona el ciclo de vida completo de una invitación: envío, aceptación,
+ * rechazo y cancelación. Cada cambio de estado queda registrado en el log de auditoría.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public interface IInvitationService {
 
     /**
-     * Retrieves an invitation by its identifier.
+     * Recupera una invitación por su identificador.
      *
-     * @param id identifier of the invitation
-     * @return the corresponding model
-     * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
+     * @param id identificador de la invitación
+     * @return modelo de la invitación correspondiente
+     * @throws edu.dosw.users.exception.ResourceNotFoundException si no se encuentra la invitación
      */
     InvitationModel getById(Long id);
 
     /**
-     * Returns all invitations received by the given player.
+     * Retorna todas las invitaciones recibidas por el jugador indicado.
      *
-     * @param playerId identifier of the player
-     * @return list of matching invitation models, may be empty
+     * @param playerId identificador del jugador
+     * @return lista de modelos de invitación coincidentes; puede estar vacía
      */
     List<InvitationModel> getByPlayerId(Long playerId);
 
     /**
-     * Sends a new invitation to a player from the specified team.
+     * Envía una nueva invitación al jugador indicado desde el equipo especificado.
      *
-     * @param playerId identifier of the player receiving the invitation
-     * @param teamId   identifier of the team extending the invitation
-     * @return the saved invitation model
-     * @throws edu.dosw.users.exception.ResourceNotFoundException if the player does not exist
-     * @throws edu.dosw.users.exception.BusinessException         if the player already has a pending invitation from the same team
+     * @param playerId identificador del jugador que recibe la invitación
+     * @param teamId   identificador del equipo que extiende la invitación
+     * @return modelo de la invitación guardada
+     * @throws edu.dosw.users.exception.ResourceNotFoundException si el jugador no existe
+     * @throws edu.dosw.users.exception.BusinessException         si el jugador ya tiene una invitación pendiente del mismo equipo
      */
     InvitationModel send(Long playerId, Long teamId);
 
     /**
-     * Accepts a pending invitation.
+     * Acepta una invitación pendiente.
      *
-     * @param id identifier of the invitation
-     * @return the updated invitation model
-     * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
-     * @throws edu.dosw.users.exception.BusinessException         if the invitation is not in {@code PENDING} status
+     * @param id identificador de la invitación
+     * @return modelo de la invitación actualizada
+     * @throws edu.dosw.users.exception.ResourceNotFoundException si no se encuentra la invitación
+     * @throws edu.dosw.users.exception.BusinessException         si la invitación no está en estado {@code PENDING}
      */
     InvitationModel accept(Long id);
 
     /**
-     * Rejects a pending invitation.
+     * Rechaza una invitación pendiente.
      *
-     * @param id identifier of the invitation
-     * @return the updated invitation model
-     * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
-     * @throws edu.dosw.users.exception.BusinessException         if the invitation is not in {@code PENDING} status
+     * @param id identificador de la invitación
+     * @return modelo de la invitación actualizada
+     * @throws edu.dosw.users.exception.ResourceNotFoundException si no se encuentra la invitación
+     * @throws edu.dosw.users.exception.BusinessException         si la invitación no está en estado {@code PENDING}
      */
     InvitationModel reject(Long id);
 
     /**
-     * Cancels a pending invitation.
+     * Cancela una invitación pendiente.
      *
-     * @param id identifier of the invitation
-     * @return the updated invitation model
-     * @throws edu.dosw.users.exception.ResourceNotFoundException if not found
-     * @throws edu.dosw.users.exception.BusinessException         if the invitation is not in {@code PENDING} status
+     * @param id identificador de la invitación
+     * @return modelo de la invitación actualizada
+     * @throws edu.dosw.users.exception.ResourceNotFoundException si no se encuentra la invitación
+     * @throws edu.dosw.users.exception.BusinessException         si la invitación no está en estado {@code PENDING}
      */
     InvitationModel cancel(Long id);
 }
