@@ -63,7 +63,7 @@ public class UserController {
      */
     @GetMapping("/search")
     @PreAuthorize("hasRole('CAPTAIN') or hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponse>> search(
+    public ResponseEntity<List<PlayerSearchResponse>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String position,
             @RequestParam(required = false) String status,
