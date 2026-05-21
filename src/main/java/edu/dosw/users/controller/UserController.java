@@ -160,10 +160,15 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> updateMe(
             @Valid @RequestBody UserProfileUpdateRequest request) {
-        String principal = (String) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        Long userId = Long.parseLong(principal);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId;
+        if (principal instanceof String s) {
+            userId = Long.parseLong(s);
+        } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+            userId = Long.parseLong(ud.getUsername());
+        } else {
+            throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
+        }
         return ResponseEntity.ok(
                 userMapper.toResponse(
                         userService.updateProfile(userId, userMapper.toModel(request))));
