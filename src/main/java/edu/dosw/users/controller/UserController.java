@@ -197,4 +197,19 @@ public class UserController {
         userService.inactivate(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Reactiva una cuenta de usuario previamente inactivada (operación de administrador).
+     *
+     * <p>Solo los administradores pueden reactivar cuentas.</p>
+     *
+     * @param id identificador del usuario a reactivar
+     * @return respuesta vacía con HTTP 204
+     */
+    @PatchMapping("/{id}/reactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reactivate(@PathVariable Long id) {
+        userService.reactivate(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -150,6 +150,16 @@ public class FallbackBeansConfig {
             }
 
             @Override
+            public void reactivateUser(Long id) {
+                UserModel existing = store.get(id);
+                if (existing == null) {
+                    throw new ResourceNotFoundException("User not found with id: " + id);
+                }
+                existing.setStatus("ACTIVE");
+                existing.setUpdatedAt(LocalDateTime.now());
+            }
+
+            @Override
             public List<UserModel> searchUsers(String name, String status) {
                 return store.values().stream()
                         .filter(u -> name == null || (u.getFullName() != null

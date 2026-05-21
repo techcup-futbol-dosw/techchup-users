@@ -144,6 +144,14 @@ public class IdentityServiceClientImpl implements IdentityServiceClient {
     }
 
     @Override
+    public void reactivateUser(Long id) {
+        restTemplate.patchForObject(
+                identityServiceUrl + usersBasePath + "/" + id + "/reactivate",
+                null,
+                Void.class);
+    }
+
+    @Override
     public List<UserModel> searchUsers(String name, String status) {
         UriComponentsBuilder uri = UriComponentsBuilder
                 .fromUriString(identityServiceUrl + usersBasePath + "/search");
