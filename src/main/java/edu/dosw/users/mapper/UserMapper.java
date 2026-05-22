@@ -3,6 +3,7 @@ package edu.dosw.users.mapper;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.dto.UserResponse;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.model.UserModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -64,4 +65,20 @@ public interface UserMapper {
      * @return DTO de respuesta resultante, o {@code null} si el modelo es {@code null}
      */
     UserResponse toResponse(UserModel model);
+
+    /**
+     * Convierte una entidad JPA {@link UserEntity} al modelo de dominio {@link UserModel}.
+     *
+     * @param entity entidad fuente; puede ser {@code null}
+     * @return modelo resultante, o {@code null} si la entidad es {@code null}
+     */
+    UserModel toModel(UserEntity entity);
+
+    /**
+     * Convierte un modelo de dominio {@link UserModel} a entidad JPA {@link UserEntity}.
+     *
+     * @param model modelo fuente; puede ser {@code null}
+     * @return entidad resultante, o {@code null} si el modelo es {@code null}
+     */
+    UserEntity toEntity(UserModel model);
 }

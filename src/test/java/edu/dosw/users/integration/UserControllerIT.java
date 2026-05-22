@@ -2,12 +2,12 @@ package edu.dosw.users.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
-import edu.dosw.users.model.UserModel;
+import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.repository.AuditLogRepository;
 import edu.dosw.users.repository.InvitationRepository;
 import edu.dosw.users.repository.SportProfileRepository;
+import edu.dosw.users.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +20,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -34,9 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for {@code UserController}.
  *
- * <p>The identity service is replaced with a {@link MockitoBean} so that the
- * Controller → Service → Client chain is exercised end-to-end without requiring
- * a running identity service.</p>
+ * <p>The user repository is replaced with a {@link MockitoBean} so that the
+ * Controller → Service → Repository chain is exercised end-to-end without
+ * requiring a real database.</p>
  */
 @SpringBootTest
 @WithMockUser(roles = "ADMIN")
@@ -46,7 +46,7 @@ class UserControllerIT {
     @Autowired private SportProfileRepository sportProfileRepository;
     @Autowired private InvitationRepository invitationRepository;
     @Autowired private AuditLogRepository auditLogRepository;
-    @MockitoBean private IdentityServiceClient identityServiceClient;
+    @MockitoBean private UserRepository userRepository;
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -64,9 +64,9 @@ class UserControllerIT {
 
     @Test
     void getAll_returnsUserList() throws Exception {
-        when(identityServiceClient.getAllUsers()).thenReturn(List.of(
-                UserModel.builder().id(1L).fullName("Ana Lopez").build(),
-                UserModel.builder().id(2L).fullName("Pedro Gomez").build()));
+        UserEntity e1 = UserEntity.builder().id(1L).fullName("Ana Lopez").status("ACTIVE").build();
+        UserEntity e2 = UserEntity.builder().id(2L).fullName("Pedro Gomez").status("ACTIVE").build();
+        when(userRepository.findAll()).thenReturn(List.of(e1, e2));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -77,8 +77,8 @@ class UserControllerIT {
 
     @Test
     void getById_returnsUser() throws Exception {
-        when(identityServiceClient.getUserById(1L)).thenReturn(
-                UserModel.builder().id(1L).fullName("Luis Torres").build());
+        UserEntity entity = UserEntity.builder().id(1L).fullName("Luis Torres").status("ACTIVE").build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
 
         mockMvc.perform(get("/api/users/1"))
                 .andExpect(status().isOk())
@@ -89,7 +89,7 @@ class UserControllerIT {
 
     @Test
     void getById_nonExistent_returns404() throws Exception {
-        when(identityServiceClient.getUserById(9999L)).thenReturn(null);
+        when(userRepository.findById(9999L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/users/9999"))
                 .andExpect(status().isNotFound())
@@ -100,8 +100,9 @@ class UserControllerIT {
 
     @Test
     void getByIdentification_returnsCorrectUser() throws Exception {
-        when(identityServiceClient.getUserByIdentification("55556666")).thenReturn(
-                UserModel.builder().id(1L).identification("55556666").fullName("Maria Ruiz").build());
+        UserEntity entity = UserEntity.builder().id(1L).identification("55556666")
+                .fullName("Maria Ruiz").status("ACTIVE").build();
+        when(userRepository.findByIdentification("55556666")).thenReturn(Optional.of(entity));
 
         mockMvc.perform(get("/api/users/identification/55556666"))
                 .andExpect(status().isOk())
@@ -111,7 +112,7 @@ class UserControllerIT {
 
     @Test
     void getByIdentification_nonExistent_returns404() throws Exception {
-        when(identityServiceClient.getUserByIdentification("NOEXISTE")).thenReturn(null);
+        when(userRepository.findByIdentification("NOEXISTE")).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/users/identification/NOEXISTE"))
                 .andExpect(status().isNotFound());
@@ -121,10 +122,11 @@ class UserControllerIT {
 
     @Test
     void updateUser_returnsUpdatedData() throws Exception {
-        when(identityServiceClient.getUserById(1L)).thenReturn(
-                UserModel.builder().id(1L).fullName("Nombre Viejo").status("ACTIVE").build());
-        when(identityServiceClient.updateUser(eq(1L), any())).thenReturn(
-                UserModel.builder().id(1L).fullName("Nombre Nuevo").build());
+        UserEntity entity = UserEntity.builder().id(1L).fullName("Nombre Viejo")
+                .status("ACTIVE").build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(userRepository.save(any())).thenReturn(
+                UserEntity.builder().id(1L).fullName("Nombre Nuevo").status("ACTIVE").build());
 
         AdminUserUpdateRequest updated = AdminUserUpdateRequest.builder()
                 .fullName("Nombre Nuevo")
@@ -139,7 +141,7 @@ class UserControllerIT {
 
     @Test
     void updateUser_nonExistent_returns404() throws Exception {
-        when(identityServiceClient.getUserById(9999L)).thenReturn(null);
+        when(userRepository.findById(9999L)).thenReturn(Optional.empty());
         AdminUserUpdateRequest request = AdminUserUpdateRequest.builder()
                 .fullName("X")
                 .build();
@@ -154,9 +156,9 @@ class UserControllerIT {
 
     @Test
     void deactivateUser_returnsNoContent() throws Exception {
-        when(identityServiceClient.getUserById(1L)).thenReturn(
-                UserModel.builder().id(1L).status("ACTIVE").build());
-        doNothing().when(identityServiceClient).deactivateUser(1L);
+        UserEntity entity = UserEntity.builder().id(1L).status("ACTIVE").build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(userRepository.save(any())).thenReturn(entity);
 
         mockMvc.perform(patch("/api/users/1/deactivate"))
                 .andExpect(status().isNoContent());
@@ -164,7 +166,7 @@ class UserControllerIT {
 
     @Test
     void deactivateUser_nonExistent_returns404() throws Exception {
-        when(identityServiceClient.getUserById(9999L)).thenReturn(null);
+        when(userRepository.findById(9999L)).thenReturn(Optional.empty());
 
         mockMvc.perform(patch("/api/users/9999/deactivate"))
                 .andExpect(status().isNotFound());

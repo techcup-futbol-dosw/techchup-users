@@ -1,6 +1,6 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.client.IdentityServiceClient;
+import edu.dosw.users.repository.UserRepository;
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.InvitationStatus;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 class InvitationServiceImplTest {
 
     @Mock private InvitationRepository invitationRepository;
-    @Mock private IdentityServiceClient identityServiceClient;
+    @Mock private UserRepository userRepository;
     @Mock private InvitationMapper invitationMapper;
     @Mock private IAuditService auditService;
 
@@ -84,7 +84,7 @@ class InvitationServiceImplTest {
         InvitationModel savedModel = InvitationModel.builder().id(1L)
                 .playerId(10L).teamId(5L).status(InvitationStatus.PENDING).build();
 
-        when(identityServiceClient.userExists(10L)).thenReturn(true);
+        when(userRepository.existsById(10L)).thenReturn(true);
         when(invitationRepository.findByUserIdAndStatus(10L, "PENDING"))
                 .thenReturn(List.of());
         when(invitationRepository.save(any())).thenReturn(savedEntity);
@@ -98,7 +98,7 @@ class InvitationServiceImplTest {
 
     @Test
     void send_playerNotFound_throwsResourceNotFoundException() {
-        when(identityServiceClient.userExists(99L)).thenReturn(false);
+        when(userRepository.existsById(99L)).thenReturn(false);
 
         assertThrows(ResourceNotFoundException.class, () -> service.send(99L, 5L));
     }
@@ -108,7 +108,7 @@ class InvitationServiceImplTest {
         InvitationEntity existing = InvitationEntity.builder()
                 .id(3L).teamId(5L).status("PENDING").build();
 
-        when(identityServiceClient.userExists(10L)).thenReturn(true);
+        when(userRepository.existsById(10L)).thenReturn(true);
         when(invitationRepository.findByUserIdAndStatus(10L, "PENDING"))
                 .thenReturn(List.of(existing));
 

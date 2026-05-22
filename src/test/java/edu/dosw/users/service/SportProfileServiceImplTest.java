@@ -1,6 +1,6 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.client.IdentityServiceClient;
+import edu.dosw.users.repository.UserRepository;
 import edu.dosw.users.client.TeamsServiceClient;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.enums.AuditAction;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 class SportProfileServiceImplTest {
 
     @Mock private SportProfileRepository sportProfileRepository;
-    @Mock private IdentityServiceClient identityServiceClient;
+    @Mock private UserRepository userRepository;
     @Mock private SportProfileMapper sportProfileMapper;
     @Mock private IAuditService auditService;
     @Mock private ImageService imageService;
@@ -89,7 +89,7 @@ class SportProfileServiceImplTest {
         SportProfileEntity savedEntity = SportProfileEntity.builder().id(5L).build();
         SportProfileModel savedModel = SportProfileModel.builder().id(5L).userId(1L).build();
 
-        when(identityServiceClient.userExists(1L)).thenReturn(true);
+        when(userRepository.existsById(1L)).thenReturn(true);
         when(sportProfileRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(sportProfileMapper.toEntity(input)).thenReturn(mappedEntity);
         when(sportProfileRepository.save(any())).thenReturn(savedEntity);
@@ -111,7 +111,7 @@ class SportProfileServiceImplTest {
         SportProfileEntity savedEntity = SportProfileEntity.builder().id(6L).build();
         SportProfileModel savedModel = SportProfileModel.builder().id(6L).build();
 
-        when(identityServiceClient.userExists(1L)).thenReturn(true);
+        when(userRepository.existsById(1L)).thenReturn(true);
         when(sportProfileRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(sportProfileMapper.toEntity(input)).thenReturn(mappedEntity);
         when(imageService.upload(photo, null)).thenReturn("abc123");
@@ -125,7 +125,7 @@ class SportProfileServiceImplTest {
 
     @Test
     void create_userNotFound_throwsResourceNotFoundException() {
-        when(identityServiceClient.userExists(99L)).thenReturn(false);
+        when(userRepository.existsById(99L)).thenReturn(false);
 
         SportProfileModel emptyModel = SportProfileModel.builder().build();
         assertThrows(ResourceNotFoundException.class,
@@ -134,7 +134,7 @@ class SportProfileServiceImplTest {
 
     @Test
     void create_profileAlreadyExists_throwsBusinessException() {
-        when(identityServiceClient.userExists(1L)).thenReturn(true);
+        when(userRepository.existsById(1L)).thenReturn(true);
         when(sportProfileRepository.findByUserId(1L))
                 .thenReturn(Optional.of(SportProfileEntity.builder().id(3L).build()));
 

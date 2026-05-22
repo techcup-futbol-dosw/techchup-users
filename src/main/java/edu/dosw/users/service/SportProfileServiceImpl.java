@@ -1,7 +1,7 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.repository.UserRepository;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.exception.BusinessException;
@@ -33,7 +33,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
     private static final String SPORT_PROFILE_NOT_FOUND_ID = "Sport profile not found with id: ";
 
     private final SportProfileRepository sportProfileRepository;
-    private final IdentityServiceClient identityServiceClient;
+    private final UserRepository userRepository;
     private final SportProfileMapper sportProfileMapper;
     private final IAuditService auditService;
     private final ImageService imageService;
@@ -70,7 +70,7 @@ public class SportProfileServiceImpl implements ISportProfileService {
      */
     @Override
     public SportProfileModel create(Long userId, SportProfileModel model, MultipartFile photo) {
-        if (!identityServiceClient.userExists(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException(
                     "User profile not found with id: " + userId);
         }

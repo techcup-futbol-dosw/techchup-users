@@ -2,7 +2,7 @@ package edu.dosw.users.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import edu.dosw.users.client.IdentityServiceClient;
+import edu.dosw.users.repository.UserRepository;
 import edu.dosw.users.dto.SportProfileRequest;
 import edu.dosw.users.enums.Position;
 import edu.dosw.users.repository.AuditLogRepository;
@@ -43,7 +43,7 @@ class SportProfileControllerIT {
     @Autowired private SportProfileRepository sportProfileRepository;
     @Autowired private InvitationRepository invitationRepository;
     @Autowired private AuditLogRepository auditLogRepository;
-    @MockitoBean private IdentityServiceClient identityServiceClient;
+    @MockitoBean private UserRepository userRepository;
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -56,7 +56,7 @@ class SportProfileControllerIT {
         invitationRepository.deleteAll();
         sportProfileRepository.deleteAll();
         // All user IDs are considered valid by default
-        when(identityServiceClient.userExists(any(Long.class))).thenReturn(true);
+        when(userRepository.existsById(any(Long.class))).thenReturn(true);
     }
 
     // ── POST /api/sport-profiles/user/{userId} ────────────────────────────────
@@ -77,7 +77,7 @@ class SportProfileControllerIT {
 
     @Test
     void createSportProfile_nonExistentUser_returns404() throws Exception {
-        when(identityServiceClient.userExists(9999L)).thenReturn(false);
+        when(userRepository.existsById(9999L)).thenReturn(false);
         MockMultipartFile profilePart = buildProfilePart(Position.DEFENDER, 5, false);
 
         mockMvc.perform(multipart("/api/sport-profiles/user/9999")
