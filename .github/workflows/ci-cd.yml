@@ -95,7 +95,13 @@ jobs:
           cache: maven
 
       - name: SonarCloud analysis
-        run: mvn -B -ntp verify sonar:sonar -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/App.java,**/entity/**,**/enums/**,**/*MapperImpl.java,**/config/MongoConfig.java,**/security/LocalSecurityConfig.java -Dsonar.exclusions=**/*MapperImpl.java
+        run: |
+          mvn -B -ntp verify sonar:sonar `
+            "-Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}" `
+            "-Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}" `
+            "-Dsonar.host.url=https://sonarcloud.io" `
+            "-Dsonar.coverage.exclusions=**/App.java,**/entity/**,**/enums/**,**/*MapperImpl.java,**/config/MongoConfig.java,**/security/LocalSecurityConfig.java" `
+            "-Dsonar.exclusions=**/*MapperImpl.java"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
