@@ -54,8 +54,13 @@ public class JwtService {
         if (secret == null || secret.isBlank()) {
             secret = System.getenv("SECURITY_JWT_SECRET");
         }
+        // JWT_SECRET is the env var used by the Identity Service — try it as fallback
+        // so both services share the same signing key in Azure without extra config.
         if (secret == null || secret.isBlank()) {
-            secret = "bWktY2xhdmUtc3VwZXItc2VjcmV0YS1wYXJhLWp3dC0xMjM0NTY3ODkwMTIzNDU2";
+            secret = System.getenv("JWT_SECRET");
+        }
+        if (secret == null || secret.isBlank()) {
+            secret = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         }
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }

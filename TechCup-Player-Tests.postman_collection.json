@@ -1,0 +1,450 @@
+{
+  "info": {
+    "name": "TechCup - Player Tests",
+    "_postman_id": "player-tests-collection",
+    "description": "Pruebas de integración para endpoints accesibles por el rol PLAYER. userId = 23 (extraído del token).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://techchup-apigateway-evajc4dzaagbf4dd.brazilsouth-01.azurewebsites.net"
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJIUzM4NCJ9.eyJ0b2tlblR5cGUiOiJBQ0NFU1MiLCJwZXJtaXNzaW9ucyI6WyJyZWd1bGF0aW9uOnJlYWQ6YW55Iiwic2Vzc2lvbjpyZWZyZXNoOnNlbGYiLCJzcG9ydC1wcm9maWxlOnJlYWQ6c2VsZiIsInVzZXI6cmVhZDpzZWxmIiwic3BvcnQtcHJvZmlsZTpjcmVhdGU6c2VsZiIsInNwb3J0LXByb2ZpbGU6dXBkYXRlOnNlbGYiLCJyZXN1bHQ6cmVhZDphbnkiLCJ0b3Atc2NvcmVyOnJlYWQ6YW55IiwiaW52aXRhdGlvbjpyZXNwb25kOnNlbGYiLCJzdGF0czpyZWFkOmFueSIsImludml0YXRpb246cmVhZDpzZWxmIiwic2Vzc2lvbjpsb2dvdXQ6c2VsZiIsImFjY291bnQ6cmVhZDpzZWxmIiwiYnJhY2tldDpyZWFkOmFueSIsInN0YW5kaW5nczpyZWFkOmFueSIsInVzZXI6dXBkYXRlOnNlbGYiLCJoaXN0b3J5OnJlYWQ6YW55Il0sInJvbGVzIjpbIlBMQVlFUiJdLCJzdWIiOiIyMyIsImp0aSI6IjI1OGFmYWQ1LWNhMDUtNDcwZC1hNDJjLTlkYmIwMDY0MWIxOCIsImlhdCI6MTc3OTQ2OTQ3MSwiZXhwIjoxNzc5NDcwMzcxfQ.k2iU43kp7gzP0s60C-lX7fa7VFtxJh573xWNGJ27LQ-nhWRL9vMXMNDFZ8ErZwUm",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "23",
+      "type": "string"
+    },
+    {
+      "key": "sportProfileId",
+      "value": "",
+      "description": "Se llena automáticamente al crear el perfil deportivo",
+      "type": "string"
+    },
+    {
+      "key": "invitationId",
+      "value": "",
+      "description": "Se llena manualmente con el ID de una invitación pendiente",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Users - Perfil propio",
+      "item": [
+        {
+          "name": "01 - Obtener mi perfil (GET /api/users/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "PLAYER puede leer su propio perfil. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "02 - Actualizar mi perfil (PUT /api/users/me)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Edwin Suarez\",\n  \"identification\": \"1234567890\",\n  \"birthDate\": \"2000-05-15\",\n  \"gender\": \"MALE\",\n  \"schoolRelation\": \"STUDENT\",\n  \"academicProgram\": \"Ingenieria de Sistemas\",\n  \"semester\": 6\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "PLAYER actualiza su propio perfil. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "03 - Actualizar perfil con datos inválidos (PUT /api/users/me)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Body vacío debe retornar 400 Bad Request."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sport Profile - Perfil deportivo",
+      "item": [
+        {
+          "name": "04 - Crear perfil deportivo (POST /api/sport-profiles/user/{userId})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('sportProfileId', json.id);",
+                  "    console.log('sportProfileId guardado:', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profile",
+                  "value": "{\"position\": \"MIDFIELDER\", \"dorsalNumber\": 10, \"available\": true}",
+                  "type": "text",
+                  "contentType": "application/json"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "user", "{{userId}}"]
+            },
+            "description": "Crea un perfil deportivo. Guarda el ID en sportProfileId. Espera 201 Created."
+          },
+          "response": []
+        },
+        {
+          "name": "05 - Crear perfil deportivo duplicado (debe dar 409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profile",
+                  "value": "{\"position\": \"FORWARD\", \"dorsalNumber\": 9, \"available\": true}",
+                  "type": "text",
+                  "contentType": "application/json"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "user", "{{userId}}"]
+            },
+            "description": "Crear un segundo perfil para el mismo usuario debe retornar 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "06 - Obtener mi perfil deportivo (GET /api/sport-profiles/user/{userId})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "user", "{{userId}}"]
+            },
+            "description": "Obtiene el perfil deportivo por userId. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "07 - Obtener perfil deportivo por ID (GET /api/sport-profiles/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "{{sportProfileId}}"]
+            },
+            "description": "Obtiene el perfil deportivo por su propio ID. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "08 - Actualizar perfil deportivo (PUT /api/sport-profiles/{id})",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profile",
+                  "value": "{\"position\": \"DEFENDER\", \"dorsalNumber\": 5, \"available\": false}",
+                  "type": "text",
+                  "contentType": "application/json"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "{{sportProfileId}}"]
+            },
+            "description": "Actualiza posición y dorsal del perfil deportivo. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "09 - Cambiar disponibilidad a true (PATCH /api/sport-profiles/{id}/availability)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}/availability?available=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "{{sportProfileId}}", "availability"],
+              "query": [
+                {
+                  "key": "available",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Marca el jugador como disponible. Espera 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "10 - Cambiar disponibilidad a false (PATCH /api/sport-profiles/{id}/availability)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sport-profiles/{{sportProfileId}}/availability?available=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sport-profiles", "{{sportProfileId}}", "availability"],
+              "query": [
+                {
+                  "key": "available",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Marca el jugador como no disponible. Espera 204 No Content."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Invitations - Invitaciones recibidas",
+      "item": [
+        {
+          "name": "11 - Listar mis invitaciones (GET /api/invitations/user/{userId})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invitations", "user", "{{userId}}"]
+            },
+            "description": "Lista todas las invitaciones recibidas por el jugador. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "12 - Obtener invitación por ID (GET /api/invitations/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invitations", "{{invitationId}}"]
+            },
+            "description": "Obtiene el detalle de una invitación específica. Llenar invitationId manualmente. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "13 - Aceptar invitación (PATCH /api/invitations/{id}/accept)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invitations", "{{invitationId}}", "accept"]
+            },
+            "description": "Acepta una invitación pendiente. Espera 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "14 - Aceptar invitación ya aceptada (debe dar 409)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invitations", "{{invitationId}}", "accept"]
+            },
+            "description": "Intentar aceptar una invitación ya aceptada debe retornar 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "15 - Rechazar invitación (PATCH /api/invitations/{id}/reject)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/{{invitationId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invitations", "{{invitationId}}", "reject"]
+            },
+            "description": "Rechaza una invitación pendiente. Espera 200 OK."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Acceso denegado - PLAYER no puede (403)",
+      "item": [
+        {
+          "name": "16 - Buscar jugadores (solo CAPTAIN/ADMIN) → 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search?name=carlos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "search"],
+              "query": [{ "key": "name", "value": "carlos" }]
+            },
+            "description": "PLAYER no tiene permiso. Debe retornar 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "17 - Listar todos los usuarios (solo ADMIN) → 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "PLAYER no tiene permiso. Debe retornar 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "18 - Actualizar usuario (solo ADMIN) → 403",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Intento admin\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "PLAYER no tiene permiso para actualizar como admin. Debe retornar 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "19 - Desactivar usuario (solo ADMIN) → 403",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}", "deactivate"]
+            },
+            "description": "PLAYER no tiene permiso. Debe retornar 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "20 - Enviar invitación (solo CAPTAIN) → 403",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invitations/user/1/team/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "invitations", "user", "1", "team", "1"]
+            },
+            "description": "PLAYER no puede enviar invitaciones, solo el CAPTAIN. Debe retornar 403 Forbidden."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "21 - Inactivar mi cuenta (PATCH /api/users/{id}/inactivate)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/inactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}", "inactivate"]
+            },
+            "description": "El jugador inactiva su propia cuenta. Espera 204 No Content. EJECUTAR AL FINAL."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
