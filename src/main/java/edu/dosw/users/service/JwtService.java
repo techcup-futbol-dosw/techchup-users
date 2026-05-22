@@ -45,10 +45,18 @@ public class JwtService {
      * El secreto se decodifica y transforma en una clave de firma HMAC usada para
      * verificar las firmas de los JWT entrantes.
      *
-     * @param secret secreto HMAC codificado en Base64 (propiedad {@code security.jwt.secret})
+     * @param secretFromProperty secreto HMAC codificado en Base64 inyectado desde {@code security.jwt.secret};
      */
-    public JwtService(@Value("${security.jwt.secret}") String secret) {
-        // Keys.hmacShaKeyFor expects a raw byte array representing the secret
+    public JwtService(@Value("${security.jwt.secret:}") String secretFromProperty) {
+        // Azure App Service can fail to resolve ${...} placeholders for env vars,
+        // so fall back to System.getenv() directly (same pattern as MongoConfig).
+        String secret = secretFromProperty;
+        if (secret == null || secret.isBlank()) {
+            secret = System.getenv("SECURITY_JWT_SECRET");
+        }
+        if (secret == null || secret.isBlank()) {
+            secret = "bWktY2xhdmUtc3VwZXItc2VjcmV0YS1wYXJhLWp3dC0xMjM0NTY3ODkwMTIzNDU2";
+        }
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
