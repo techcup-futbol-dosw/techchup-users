@@ -73,26 +73,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        // Solo ADMIN puede gestionar usuarios de forma administrativa
-                        .requestMatchers(
-                                "GET /api/users",
-                                "PUT /api/users/{id}",
-                                "PATCH /api/users/{id}/deactivate",
-                                "PATCH /api/users/{id}/reactivate"
-                        ).hasRole("ADMIN")
-                        // ADMIN y CAPTAIN pueden buscar jugadores
-                        .requestMatchers(
-                                "GET /api/users/search",
-                                "GET /api/users/identification/{identification}"
-                        ).hasAnyRole("ADMIN", "CAPTAIN")
-                        // Solo CAPTAIN puede enviar/cancelar invitaciones
-                        .requestMatchers(
-                                "POST /api/invitations/**",
-                                "PATCH /api/invitations/*/cancel"
-                        ).hasAnyRole("ADMIN", "CAPTAIN")
-                        // Solo ADMIN puede consultar audit-logs
-                        .requestMatchers("/api/audit-logs/**").hasRole("ADMIN")
-                        // El resto requiere autenticación; la lógica fina queda en @PreAuthorize
+                        // El resto requiere autenticación; el control de roles queda en @PreAuthorize
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
