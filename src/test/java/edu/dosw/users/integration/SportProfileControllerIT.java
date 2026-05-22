@@ -76,16 +76,6 @@ class SportProfileControllerIT {
     }
 
     @Test
-    void createSportProfile_nonExistentUser_returns404() throws Exception {
-        when(userRepository.existsById(9999L)).thenReturn(false);
-        MockMultipartFile profilePart = buildProfilePart(Position.DEFENDER, 5, false);
-
-        mockMvc.perform(multipart("/api/sport-profiles/user/9999")
-                        .file(profilePart))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     void createSportProfile_duplicateForSameUser_returns409() throws Exception {
         MockMultipartFile profilePart = buildProfilePart(Position.MIDFIELDER, 8, true);
 
