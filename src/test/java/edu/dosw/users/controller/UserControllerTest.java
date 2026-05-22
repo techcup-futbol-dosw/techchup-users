@@ -263,4 +263,32 @@ class UserControllerTest {
         mockMvc.perform(patch("/api/users/1/inactivate"))
                 .andExpect(status().isConflict());
     }
+
+    // ── PATCH /api/users/{id}/reactivate ───────────────────────────────────
+
+    @Test
+    void reactivate_returnsNoContent() throws Exception {
+        doNothing().when(userService).reactivate(1L);
+
+        mockMvc.perform(patch("/api/users/1/reactivate"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void reactivate_notFound_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("not found"))
+                .when(userService).reactivate(99L);
+
+        mockMvc.perform(patch("/api/users/99/reactivate"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void reactivate_alreadyActive_returns409() throws Exception {
+        doThrow(new BusinessException("La cuenta ya se encuentra activa"))
+                .when(userService).reactivate(1L);
+
+        mockMvc.perform(patch("/api/users/1/reactivate"))
+                .andExpect(status().isConflict());
+    }
 }
