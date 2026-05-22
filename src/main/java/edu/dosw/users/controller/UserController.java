@@ -103,7 +103,7 @@ public class UserController {
      * @return respuesta con los datos del perfil de usuario
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(
                 userMapper.toResponse(userService.getById(id)));
@@ -205,7 +205,7 @@ public class UserController {
      * @return respuesta vacía con HTTP 204
      */
     @PatchMapping("/{id}/inactivate")
-    @PreAuthorize("hasRole('ADMIN') or @userAccessPolicy.canAccessOwnUser(#id, authentication)")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> inactivate(@PathVariable Long id) {
         userService.inactivate(id);
         return ResponseEntity.noContent().build();
