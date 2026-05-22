@@ -46,7 +46,7 @@ public class LocalSecurityConfig {
      */
     @Bean
     @Order(1)
-    public SecurityFilterChain localFilterChain(HttpSecurity http) {
+    public SecurityFilterChain localPermitAllFilterChain(HttpSecurity http) {
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->

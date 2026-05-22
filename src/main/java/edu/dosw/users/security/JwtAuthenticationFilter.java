@@ -95,9 +95,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (roles != null) {
             roles.forEach(role -> {
-                // Normalize: strip any existing ROLE_ prefix to avoid double-prefixing
-                String normalized = role.startsWith("ROLE_") ? role.substring(5) : role;
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + normalized));
+                // Normalize: uppercase + strip any existing ROLE_ prefix to avoid double-prefixing
+                // and handle lowercase roles from some identity providers (e.g. "captain" → "ROLE_CAPTAIN")
+                String upper = role.toUpperCase();
+                String bare = upper.startsWith("ROLE_") ? upper.substring(5) : upper;
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + bare));
             });
         }
 
