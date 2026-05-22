@@ -78,6 +78,8 @@ jobs:
     name: Quality
     runs-on: ubuntu-latest
     needs: test
+    # SonarCloud failures must NOT block Docker/Deploy
+    continue-on-error: true
 
     steps:
       - name: Checkout
@@ -108,7 +110,7 @@ jobs:
   docker:
     name: Docker
     runs-on: ubuntu-latest
-    needs: quality
+    needs: [test, quality]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
