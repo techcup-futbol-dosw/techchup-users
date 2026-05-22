@@ -46,7 +46,7 @@ public class SecurityConfig {
     }
 
     /**
-     * Cadena de filtros para producción ({@code prod}).
+     * Cadena de filtros para cualquier perfil excepto {@code local} (incluye tests y producción).
      *
      * <p>CSRF deshabilitado: API REST sin estado con JWT — sin cookies de sesión.</p>
      *
@@ -54,7 +54,7 @@ public class SecurityConfig {
      * @return cadena de filtros de seguridad configurada
      */
     @Bean
-    @Profile("prod")
+    @Profile("!local")
     @SuppressWarnings("java:S4502")
     public SecurityFilterChain prodFilterChain(HttpSecurity http) throws Exception {
         return http
