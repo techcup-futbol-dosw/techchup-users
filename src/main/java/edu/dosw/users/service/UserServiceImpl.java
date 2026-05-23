@@ -17,6 +17,7 @@ import edu.dosw.users.repository.SportProfileRepository;
 import edu.dosw.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -85,6 +86,7 @@ public class UserServiceImpl implements IUserService {
     // ── Escritura ─────────────────────────────────────────────────────────────
 
     @Override
+    @Transactional
     public UserModel update(Long id, UserModel model) {
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ID + id));
@@ -116,6 +118,7 @@ public class UserServiceImpl implements IUserService {
      * Gateway, crea el registro local y luego aplica los cambios del request.
      */
     @Override
+    @Transactional
     public UserModel updateProfile(Long userId, UserModel model) {
         UserEntity entity = userRepository.findById(userId)
                 .orElseGet(() -> {
@@ -141,6 +144,7 @@ public class UserServiceImpl implements IUserService {
      * entrantes desde el Identity Service nunca fallen con 404.
      */
     @Override
+    @Transactional
     public void deactivate(Long id) {
         UserEntity entity = userRepository.findById(id)
                 .orElseGet(() -> UserEntity.builder()
@@ -159,6 +163,7 @@ public class UserServiceImpl implements IUserService {
      * localmente.
      */
     @Override
+    @Transactional
     public void inactivate(Long id) {
         UserEntity entity = userRepository.findById(id)
                 .orElseGet(() -> {
@@ -186,6 +191,7 @@ public class UserServiceImpl implements IUserService {
      * usuario no existe localmente.
      */
     @Override
+    @Transactional
     public void reactivate(Long id) {
         UserEntity entity = userRepository.findById(id)
                 .orElseGet(() -> {
