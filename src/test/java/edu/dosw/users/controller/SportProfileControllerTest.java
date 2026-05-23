@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,8 +26,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -111,12 +111,9 @@ class SportProfileControllerTest {
         SportProfileModel saved = SportProfileModel.builder().id(3L).userId(1L).build();
         when(sportProfileService.create(eq(1L), any(), any())).thenReturn(saved);
 
-        MockMultipartFile profilePart = new MockMultipartFile(
-                "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
-
-        mockMvc.perform(multipart("/api/sport-profiles/user/1")
-                        .file(profilePart))
+        mockMvc.perform(post("/api/sport-profiles/user/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(SportProfileRequest.builder().build())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(3));
     }
@@ -126,12 +123,9 @@ class SportProfileControllerTest {
         when(sportProfileService.create(eq(99L), any(), any()))
                 .thenThrow(new ResourceNotFoundException("user not found"));
 
-        MockMultipartFile profilePart = new MockMultipartFile(
-                "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
-
-        mockMvc.perform(multipart("/api/sport-profiles/user/99")
-                        .file(profilePart))
+        mockMvc.perform(post("/api/sport-profiles/user/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(SportProfileRequest.builder().build())))
                 .andExpect(status().isNotFound());
     }
 
@@ -140,12 +134,9 @@ class SportProfileControllerTest {
         when(sportProfileService.create(eq(1L), any(), any()))
                 .thenThrow(new BusinessException("already has profile"));
 
-        MockMultipartFile profilePart = new MockMultipartFile(
-                "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
-
-        mockMvc.perform(multipart("/api/sport-profiles/user/1")
-                        .file(profilePart))
+        mockMvc.perform(post("/api/sport-profiles/user/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(SportProfileRequest.builder().build())))
                 .andExpect(status().isConflict());
     }
 
@@ -156,13 +147,9 @@ class SportProfileControllerTest {
         SportProfileModel updated = SportProfileModel.builder().id(1L).build();
         when(sportProfileService.update(eq(1L), any(), any())).thenReturn(updated);
 
-        MockMultipartFile profilePart = new MockMultipartFile(
-                "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
-
-        mockMvc.perform(multipart("/api/sport-profiles/1")
-                        .file(profilePart)
-                        .with(request -> { request.setMethod("PUT"); return request; }))
+        mockMvc.perform(put("/api/sport-profiles/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(SportProfileRequest.builder().build())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
     }
@@ -172,13 +159,9 @@ class SportProfileControllerTest {
         when(sportProfileService.update(eq(1L), any(), any()))
                 .thenThrow(new BusinessException("player in team"));
 
-        MockMultipartFile profilePart = new MockMultipartFile(
-                "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(SportProfileRequest.builder().build()));
-
-        mockMvc.perform(multipart("/api/sport-profiles/1")
-                        .file(profilePart)
-                        .with(request -> { request.setMethod("PUT"); return request; }))
+        mockMvc.perform(put("/api/sport-profiles/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(SportProfileRequest.builder().build())))
                 .andExpect(status().isConflict());
     }
 

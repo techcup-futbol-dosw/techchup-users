@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,8 +22,9 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,10 +63,9 @@ class SportProfileControllerIT {
 
     @Test
     void createSportProfile_persistsAndReturns201() throws Exception {
-        MockMultipartFile profilePart = buildProfilePart(Position.GOALKEEPER, 1, true);
-
-        mockMvc.perform(multipart("/api/sport-profiles/user/1")
-                        .file(profilePart))
+        mockMvc.perform(post("/api/sport-profiles/user/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(buildProfileJson(Position.GOALKEEPER, 1, true)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.userId").value(1))
@@ -77,12 +76,13 @@ class SportProfileControllerIT {
 
     @Test
     void createSportProfile_duplicateForSameUser_returns409() throws Exception {
-        MockMultipartFile profilePart = buildProfilePart(Position.MIDFIELDER, 8, true);
+        mockMvc.perform(post("/api/sport-profiles/user/2")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(buildProfileJson(Position.MIDFIELDER, 8, true)));
 
-        mockMvc.perform(multipart("/api/sport-profiles/user/2").file(profilePart));
-
-        mockMvc.perform(multipart("/api/sport-profiles/user/2")
-                        .file(profilePart))
+        mockMvc.perform(post("/api/sport-profiles/user/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(buildProfileJson(Position.MIDFIELDER, 8, true)))
                 .andExpect(status().isConflict());
     }
 
@@ -127,11 +127,10 @@ class SportProfileControllerIT {
     @Test
     void updateSportProfile_changesData() throws Exception {
         long profileId = createSportProfile(6L, Position.GOALKEEPER, 1, true);
-        MockMultipartFile updatedPart = buildProfilePart(Position.FORWARD, 11, false);
 
-        mockMvc.perform(multipart("/api/sport-profiles/" + profileId)
-                        .file(updatedPart)
-                        .with(req -> { req.setMethod("PUT"); return req; }))
+        mockMvc.perform(put("/api/sport-profiles/" + profileId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(buildProfileJson(Position.FORWARD, 11, false)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.position").value("FORWARD"))
                 .andExpect(jsonPath("$.dorsalNumber").value(11))
@@ -163,20 +162,18 @@ class SportProfileControllerIT {
 
     private long createSportProfile(Long userId, Position position, int dorsal, boolean available)
             throws Exception {
-        MockMultipartFile profilePart = buildProfilePart(position, dorsal, available);
-        String response = mockMvc.perform(multipart("/api/sport-profiles/user/" + userId)
-                        .file(profilePart))
+        String response = mockMvc.perform(post("/api/sport-profiles/user/" + userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(buildProfileJson(position, dorsal, available)))
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asLong();
     }
 
-    private MockMultipartFile buildProfilePart(Position position, int dorsal, boolean available)
+    private String buildProfileJson(Position position, int dorsal, boolean available)
             throws Exception {
-        SportProfileRequest request = SportProfileRequest.builder()
-                .position(position).dorsalNumber(dorsal).available(available)
-                .build();
-        return new MockMultipartFile(
-                "profile", "", MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(request));
+        return objectMapper.writeValueAsString(
+                SportProfileRequest.builder()
+                        .position(position).dorsalNumber(dorsal).available(available)
+                        .build());
     }
 }
