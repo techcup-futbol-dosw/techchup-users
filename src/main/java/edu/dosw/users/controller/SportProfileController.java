@@ -84,8 +84,7 @@ public class SportProfileController {
      * <p>Solo el propietario puede crear su propio perfil deportivo.</p>
      *
      * @param userId  identificador del usuario propietario (parámetro de ruta)
-     * @param request datos del perfil como parte JSON del multipart
-     * @param photo   foto del jugador (opcional)
+     * @param request datos del perfil en formato JSON
      * @return respuesta con los datos del perfil creado (HTTP 201)
      */
     @PostMapping("/user/{userId}")
@@ -105,8 +104,7 @@ public class SportProfileController {
      * impone la regla de "no pertenecer a un equipo activo".</p>
      *
      * @param id      identificador del perfil deportivo
-     * @param request nuevos datos del perfil como parte JSON del multipart
-     * @param photo   nueva foto del jugador (opcional); si se omite se conserva la existente
+     * @param request nuevos datos del perfil en formato JSON
      * @return respuesta con los datos del perfil actualizado
      */
     @PutMapping("/{id}")
