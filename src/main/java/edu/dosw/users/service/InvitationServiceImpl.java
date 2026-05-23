@@ -1,6 +1,5 @@
 package edu.dosw.users.service;
 
-import edu.dosw.users.repository.UserRepository;
 import edu.dosw.users.entity.InvitationEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.InvitationStatus;
@@ -31,7 +30,6 @@ import java.util.List;
 public class InvitationServiceImpl implements IInvitationService {
 
     private final InvitationRepository invitationRepository;
-    private final UserRepository userRepository;
     private final InvitationMapper invitationMapper;
     private final IAuditService auditService;
 
@@ -65,11 +63,6 @@ public class InvitationServiceImpl implements IInvitationService {
      */
     @Override
     public InvitationModel send(Long playerId, Long teamId) {
-        if (!userRepository.existsById(playerId)) {
-            throw new ResourceNotFoundException(
-                    "Player not found with id: " + playerId);
-        }
-
         boolean hasPending = invitationRepository
                 .findByUserIdAndStatus(playerId, InvitationStatus.PENDING.name())
                 .stream()

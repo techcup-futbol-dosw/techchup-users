@@ -68,14 +68,6 @@ class InvitationControllerIT {
     }
 
     @Test
-    void sendInvitation_playerNotFound_returns404() throws Exception {
-        when(userRepository.existsById(9999L)).thenReturn(false);
-
-        mockMvc.perform(post("/api/invitations/user/9999/team/100"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     void sendDuplicateInvitation_returns409() throws Exception {
         mockMvc.perform(post("/api/invitations/user/2/team/200"));
 
