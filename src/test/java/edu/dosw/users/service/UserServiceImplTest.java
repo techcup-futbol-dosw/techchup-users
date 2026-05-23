@@ -1,6 +1,8 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.dto.AccountDto;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
@@ -25,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +38,7 @@ class UserServiceImplTest {
     @Mock private TeamsServiceClient teamsServiceClient;
     @Mock private SportProfileRepository sportProfileRepository;
     @Mock private IAuditService auditService;
+    @Mock private IdentityServiceClient identityServiceClient;
 
     @InjectMocks private UserServiceImpl service;
 
@@ -52,9 +56,31 @@ class UserServiceImplTest {
 
     @Test
     void getById_notFound_throwsResourceNotFoundException() {
+        // No está en local Y Identity devuelve null → 404
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getAccountById(99L)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class, () -> service.getById(99L));
+    }
+
+    @Test
+    void getById_notInLocal_fallsBackToIdentity_returnsModel() {
+        AccountDto account = new AccountDto();
+        account.setId(10L);
+        account.setName("Ana");
+        account.setLastName("Lopez");
+        account.setEmail("ana@escuelaing.edu.co");
+        account.setStatus("ACTIVE");
+
+        when(userRepository.findById(10L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getAccountById(10L)).thenReturn(account);
+
+        UserModel result = service.getById(10L);
+
+        assertEquals(10L, result.getId());
+        assertEquals("Ana Lopez", result.getFullName());
+        assertEquals("ACTIVE", result.getStatus());
+        verify(userRepository, never()).save(any()); // read-through: no persiste
     }
 
     // ── getByIdentification ───────────────────────────────────────────────────
@@ -183,10 +209,36 @@ class UserServiceImplTest {
 
     @Test
     void updateProfile_notFound_throwsResourceNotFoundException() {
+        // No está en local Y Identity devuelve null → 404
         when(userRepository.findById(55L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getAccountById(55L)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class,
                 () -> service.updateProfile(55L, new UserModel()));
+    }
+
+    @Test
+    void updateProfile_notInLocal_upsertsFromIdentityThenUpdates() {
+        AccountDto account = new AccountDto();
+        account.setId(20L);
+        account.setName("Carlos");
+        account.setLastName("Ruiz");
+        account.setEmail("carlos@escuelaing.edu.co");
+        account.setStatus("ACTIVE");
+
+        UserEntity savedEntity = UserEntity.builder().id(20L).fullName("Carlos Ruiz")
+                .email("carlos@escuelaing.edu.co").status("ACTIVE").build();
+        UserModel savedModel = UserModel.builder().id(20L).fullName("Carlos Ruiz").build();
+
+        when(userRepository.findById(20L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getAccountById(20L)).thenReturn(account);
+        when(userRepository.save(any())).thenReturn(savedEntity);
+        when(userMapper.toModel(savedEntity)).thenReturn(savedModel);
+
+        UserModel result = service.updateProfile(20L, new UserModel());
+
+        assertEquals(20L, result.getId());
+        verify(userRepository).save(any()); // debe persistir el nuevo registro
     }
 
     // ── deactivate ───────────────────────────────────────────────────────────
@@ -203,10 +255,17 @@ class UserServiceImplTest {
     }
 
     @Test
-    void deactivate_notFound_throwsResourceNotFoundException() {
+    void deactivate_notFound_createsStubAndSetsInactive() {
+        // El usuario no existe localmente (registrado solo en Identity Service).
+        // deactivate() crea un registro mínimo con el ID recibido para poder
+        // persistir el estado INACTIVE — esto garantiza que las llamadas de
+        // sincronización desde Identity Service nunca fallen con 404.
         when(userRepository.findById(5L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.deactivate(5L));
+        service.deactivate(5L);
+
+        verify(userRepository).save(argThat(e ->
+                "INACTIVE".equals(e.getStatus()) && Long.valueOf(5L).equals(e.getId())));
     }
 
     // ── inactivate ─────────────────────────────────────────────────────────

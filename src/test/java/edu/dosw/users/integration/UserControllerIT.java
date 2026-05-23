@@ -2,6 +2,8 @@ package edu.dosw.users.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.dosw.users.client.IdentityServiceClient;
+import edu.dosw.users.dto.AccountDto;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
 import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.repository.AuditLogRepository;
@@ -23,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -47,6 +48,7 @@ class UserControllerIT {
     @Autowired private InvitationRepository invitationRepository;
     @Autowired private AuditLogRepository auditLogRepository;
     @MockitoBean private UserRepository userRepository;
+    @MockitoBean private IdentityServiceClient identityServiceClient;
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -88,8 +90,27 @@ class UserControllerIT {
     }
 
     @Test
+    void getById_notInLocal_fallsBackToIdentity() throws Exception {
+        AccountDto account = new AccountDto();
+        account.setId(5L);
+        account.setName("Pedro");
+        account.setLastName("Ramirez");
+        account.setEmail("pedro@escuelaing.edu.co");
+        account.setStatus("ACTIVE");
+
+        when(userRepository.findById(5L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getAccountById(5L)).thenReturn(account);
+
+        mockMvc.perform(get("/api/users/5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(jsonPath("$.fullName").value("Pedro Ramirez"));
+    }
+
+    @Test
     void getById_nonExistent_returns404() throws Exception {
         when(userRepository.findById(9999L)).thenReturn(Optional.empty());
+        when(identityServiceClient.getAccountById(9999L)).thenReturn(null);
 
         mockMvc.perform(get("/api/users/9999"))
                 .andExpect(status().isNotFound())
@@ -165,10 +186,14 @@ class UserControllerIT {
     }
 
     @Test
-    void deactivateUser_nonExistent_returns404() throws Exception {
+    void deactivateUser_notInLocal_createsStubAndReturnsNoContent() throws Exception {
+        // Cuando Identity Service llama a deactivate y el usuario no existe localmente,
+        // debe crear un registro mínimo y retornar 204 (sin error).
         when(userRepository.findById(9999L)).thenReturn(Optional.empty());
+        when(userRepository.save(any())).thenReturn(
+                UserEntity.builder().id(9999L).status("INACTIVE").build());
 
         mockMvc.perform(patch("/api/users/9999/deactivate"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNoContent());
     }
 }

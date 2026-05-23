@@ -1,10 +1,13 @@
 package edu.dosw.users.service;
 
+import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.dto.AccountDto;
 import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.entity.UserEntity;
 import edu.dosw.users.enums.AuditAction;
+import edu.dosw.users.enums.Gender;
 import edu.dosw.users.enums.SchoolRelation;
 import edu.dosw.users.exception.BusinessException;
 import edu.dosw.users.exception.ResourceNotFoundException;
@@ -35,14 +38,32 @@ public class UserServiceImpl implements IUserService {
     private final TeamsServiceClient teamsServiceClient;
     private final SportProfileRepository sportProfileRepository;
     private final IAuditService auditService;
+    private final IdentityServiceClient identityServiceClient;
 
+    // ── Lectura ──────────────────────────────────────────────────────────────
+
+    /**
+     * Busca el usuario en la base de datos local; si no existe, lo solicita al
+     * Identity Service vía API Gateway (read-through). No persiste el resultado
+     * de Identity para no generar registros incompletos.
+     */
     @Override
     public UserModel getById(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toModel)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ID + id));
+                .orElseGet(() -> {
+                    AccountDto account = identityServiceClient.getAccountById(id);
+                    if (account == null) {
+                        throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+                    }
+                    return mapAccountToModel(account);
+                });
     }
 
+    /**
+     * Busca solo en la base de datos local. Los usuarios aparecen aquí una vez que
+     * han completado su perfil mediante {@link #updateProfile}.
+     */
     @Override
     public UserModel getByIdentification(String identification) {
         return userRepository.findByIdentification(identification)
@@ -51,12 +72,17 @@ public class UserServiceImpl implements IUserService {
                         "User profile not found with identification: " + identification));
     }
 
+    /**
+     * Retorna los usuarios presentes en la base de datos local.
+     */
     @Override
     public List<UserModel> getAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toModel)
                 .toList();
     }
+
+    // ── Escritura ─────────────────────────────────────────────────────────────
 
     @Override
     public UserModel update(Long id, UserModel model) {
@@ -84,29 +110,65 @@ public class UserServiceImpl implements IUserService {
         return updated;
     }
 
+    /**
+     * Actualiza el perfil del usuario. Si no existe en la base de datos local,
+     * realiza un upsert: obtiene los datos base del Identity Service vía API
+     * Gateway, crea el registro local y luego aplica los cambios del request.
+     */
     @Override
     public UserModel updateProfile(Long userId, UserModel model) {
         UserEntity entity = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ID + userId));
+                .orElseGet(() -> {
+                    AccountDto account = identityServiceClient.getAccountById(userId);
+                    if (account == null) {
+                        throw new ResourceNotFoundException(USER_NOT_FOUND_ID + userId);
+                    }
+                    return mapAccountToEntity(account);
+                });
 
         applyProfileUpdate(entity, model);
         entity.setUpdatedAt(LocalDateTime.now());
+        if (entity.getProfileCreatedAt() == null) {
+            entity.setProfileCreatedAt(LocalDateTime.now());
+        }
         return userMapper.toModel(userRepository.save(entity));
     }
 
+    /**
+     * Marca la cuenta como INACTIVE. Si el usuario no existe en la base de datos
+     * local (registrado solo en Identity Service), crea un registro mínimo para
+     * poder almacenar el estado. Esto garantiza que las llamadas de sincronización
+     * entrantes desde el Identity Service nunca fallen con 404.
+     */
     @Override
     public void deactivate(Long id) {
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ID + id));
+                .orElseGet(() -> UserEntity.builder()
+                        .id(id)
+                        .status(STATUS_ACTIVE)
+                        .profileCreatedAt(LocalDateTime.now())
+                        .build());
         entity.setStatus("INACTIVE");
         entity.setUpdatedAt(LocalDateTime.now());
         userRepository.save(entity);
     }
 
+    /**
+     * Inactiva la cuenta del usuario tras validar que no pertenece a un equipo
+     * activo. Realiza upsert desde Identity Service si el usuario no existe
+     * localmente.
+     */
     @Override
     public void inactivate(Long id) {
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ID + id));
+                .orElseGet(() -> {
+                    AccountDto account = identityServiceClient.getAccountById(id);
+                    if (account == null) {
+                        throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+                    }
+                    return mapAccountToEntity(account);
+                });
+
         if (!STATUS_ACTIVE.equalsIgnoreCase(entity.getStatus())) {
             throw new BusinessException("La cuenta ya se encuentra inactiva");
         }
@@ -119,10 +181,21 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(entity);
     }
 
+    /**
+     * Reactiva la cuenta del usuario. Realiza upsert desde Identity Service si el
+     * usuario no existe localmente.
+     */
     @Override
     public void reactivate(Long id) {
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_ID + id));
+                .orElseGet(() -> {
+                    AccountDto account = identityServiceClient.getAccountById(id);
+                    if (account == null) {
+                        throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+                    }
+                    return mapAccountToEntity(account);
+                });
+
         if (STATUS_ACTIVE.equalsIgnoreCase(entity.getStatus())) {
             throw new BusinessException("La cuenta ya se encuentra activa");
         }
@@ -130,6 +203,8 @@ public class UserServiceImpl implements IUserService {
         entity.setUpdatedAt(LocalDateTime.now());
         userRepository.save(entity);
     }
+
+    // ── Búsqueda ─────────────────────────────────────────────────────────────
 
     @Override
     public List<UserModel> search(String name, String position, String status,
@@ -147,7 +222,7 @@ public class UserServiceImpl implements IUserService {
                 .filter(u -> statusParam == null || statusParam.equalsIgnoreCase(u.getStatus()))
                 .collect(Collectors.toList());
 
-        // ── Sport-profile filters ─────────────────────────────────────────────
+        // ── Filtros sobre el perfil deportivo ─────────────────────────────────
         boolean filterPosition  = positionParam != null;
         boolean filterAvailable = Boolean.TRUE.equals(onlyAvailable);
 
@@ -156,7 +231,7 @@ public class UserServiceImpl implements IUserService {
             entities = entities.stream().filter(u -> ids.contains(u.getId())).toList();
         }
 
-        // ── Entity-level local filters ────────────────────────────────────────
+        // ── Filtros locales adicionales ────────────────────────────────────────
         if (identification != null && !identification.isBlank()) {
             String id = identification.trim();
             entities = entities.stream().filter(u -> id.equals(u.getIdentification())).toList();
@@ -177,18 +252,6 @@ public class UserServiceImpl implements IUserService {
         }
 
         return entities.stream().map(userMapper::toModel).toList();
-    }
-
-    private Set<Long> getSportProfileUserIds(String position, boolean filterPosition, boolean filterAvailable) {
-        List<SportProfileEntity> profiles;
-        if (filterPosition && filterAvailable) {
-            profiles = sportProfileRepository.findByPositionAndAvailable(position, true);
-        } else if (filterPosition) {
-            profiles = sportProfileRepository.findByPosition(position);
-        } else {
-            profiles = sportProfileRepository.findByAvailable(true);
-        }
-        return profiles.stream().map(SportProfileEntity::getUserId).collect(Collectors.toSet());
     }
 
     @Override
@@ -228,7 +291,75 @@ public class UserServiceImpl implements IUserService {
         }).toList();
     }
 
-    // ── helpers ───────────────────────────────────────────────────────────────
+    // ── Mapeo desde Identity Service ─────────────────────────────────────────
+
+    private UserModel mapAccountToModel(AccountDto account) {
+        return UserModel.builder()
+                .id(account.getId())
+                .fullName(resolveFullName(account))
+                .email(account.getEmail())
+                .identification(account.getIdentification())
+                .birthDate(account.getBirthDate())
+                .gender(mapGender(account.getGender()))
+                .schoolRelation(mapRelation(account.getRelation()))
+                .semester(account.getSemester())
+                .academicProgram(account.getProgram())
+                .status(account.getStatus() != null ? account.getStatus() : STATUS_ACTIVE)
+                .profileCreatedAt(account.getCreatedAt())
+                .build();
+    }
+
+    private UserEntity mapAccountToEntity(AccountDto account) {
+        return UserEntity.builder()
+                .id(account.getId())
+                .fullName(resolveFullName(account))
+                .email(account.getEmail())
+                .identification(account.getIdentification())
+                .birthDate(account.getBirthDate())
+                .gender(mapGender(account.getGender()))
+                .schoolRelation(mapRelation(account.getRelation()))
+                .semester(account.getSemester())
+                .academicProgram(account.getProgram())
+                .status(account.getStatus() != null ? account.getStatus() : STATUS_ACTIVE)
+                .profileCreatedAt(account.getCreatedAt() != null
+                        ? account.getCreatedAt() : LocalDateTime.now())
+                .build();
+    }
+
+    private String resolveFullName(AccountDto account) {
+        if (account.getFullName() != null && !account.getFullName().isBlank()) {
+            return account.getFullName();
+        }
+        String name = account.getName();
+        String lastName = account.getLastName();
+        if (name == null && lastName == null) return null;
+        if (name == null) return lastName;
+        if (lastName == null) return name;
+        return name + " " + lastName;
+    }
+
+    private Gender mapGender(String gender) {
+        if (gender == null) return null;
+        try {
+            return Gender.valueOf(gender);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private SchoolRelation mapRelation(String relation) {
+        if (relation == null) return null;
+        return switch (relation) {
+            case "ESTUDIANTE"    -> SchoolRelation.STUDENT;
+            case "GRADUADO"      -> SchoolRelation.GRADUATE;
+            case "PROFESOR"      -> SchoolRelation.PROFESSOR;
+            case "PERSONAL_ADMIN"-> SchoolRelation.ADMINISTRATIVE;
+            case "FAMILIAR"      -> SchoolRelation.FAMILY;
+            default              -> null;
+        };
+    }
+
+    // ── Helpers generales ─────────────────────────────────────────────────────
 
     private void applyAdminUpdate(UserEntity entity, UserModel model) {
         if (model.getFullName() != null) entity.setFullName(model.getFullName());
@@ -245,6 +376,18 @@ public class UserServiceImpl implements IUserService {
         if (model.getSchoolRelation() != null) entity.setSchoolRelation(model.getSchoolRelation());
         if (model.getAcademicProgram() != null) entity.setAcademicProgram(model.getAcademicProgram());
         if (model.getSemester() != null) entity.setSemester(model.getSemester());
+    }
+
+    private Set<Long> getSportProfileUserIds(String position, boolean filterPosition, boolean filterAvailable) {
+        List<SportProfileEntity> profiles;
+        if (filterPosition && filterAvailable) {
+            profiles = sportProfileRepository.findByPositionAndAvailable(position, true);
+        } else if (filterPosition) {
+            profiles = sportProfileRepository.findByPosition(position);
+        } else {
+            profiles = sportProfileRepository.findByAvailable(true);
+        }
+        return profiles.stream().map(SportProfileEntity::getUserId).collect(Collectors.toSet());
     }
 
     private int computeAge(LocalDate birthDate) {
