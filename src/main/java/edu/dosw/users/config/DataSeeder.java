@@ -32,6 +32,7 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         UserEntity testUser = UserEntity.builder()
+                .id(1L)
                 .fullName("Carlos Rodríguez")
                 .email("carlos.rodriguez@escuelaing.edu.co")
                 .password("Password123")
