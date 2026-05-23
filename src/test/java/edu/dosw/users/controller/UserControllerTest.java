@@ -291,4 +291,24 @@ class UserControllerTest {
         mockMvc.perform(patch("/api/users/1/reactivate"))
                 .andExpect(status().isConflict());
     }
+
+    // ── GlobalExceptionHandler extra paths ────────────────────────────────────
+
+    @Test
+    void updateMe_malformedJson_returns400() throws Exception {
+        mockMvc.perform(put("/api/users/me")
+                        .header("X-User-Id", 7L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{invalid json"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getById_unexpectedException_returns500() throws Exception {
+        when(userService.getById(42L)).thenThrow(new RuntimeException("unexpected"));
+
+        mockMvc.perform(get("/api/users/42"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("RuntimeException: unexpected"));
+    }
 }

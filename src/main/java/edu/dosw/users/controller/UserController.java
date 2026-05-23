@@ -172,7 +172,12 @@ public class UserController {
             String raw = (principal instanceof UserDetails ud)
                     ? ud.getUsername()
                     : principal.toString();
-            userId = Long.parseLong(raw);
+            try {
+                userId = Long.parseLong(raw);
+            } catch (NumberFormatException e) {
+                throw new edu.dosw.users.exception.BusinessException(
+                        "Cannot resolve numeric user id from token subject: " + raw);
+            }
         }
         return ResponseEntity.ok(
                 userMapper.toResponse(
