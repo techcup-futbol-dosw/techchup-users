@@ -42,14 +42,15 @@
 
 | Funcionalidad | Descripción | Roles permitidos |
 |---------------|-------------|-----------------|
-| **Actualizar usuario** | El usuario y el administrador podrán actualizar la información básica del usuario: nombre completo, relación con la Escuela (estudiante, profesor, administrativo, graduado o familiar), programa académico, semestre (si es estudiante). El correo y la contraseña no se podrán modificar. | Jugador / Capitán / Organizador / Árbitro / Admin |
-| **Inactivar usuario** | El usuario podrá inactivar su propia cuenta y el administrador podrá inactivar cualquier cuenta, validando previamente que no esté participando en un torneo. | Jugador / Capitán / Organizador / Árbitro / Admin |
-| **Crear perfil deportivo** | Cada jugador podrá crear un perfil deportivo indicando: posición de juego predefinida (portero, defensa, volante, delantero), número dorsal predefinido, foto y si se encuentra disponible o no para ser convocado por algún equipo. | Jugador / Admin |
-| **Actualizar perfil deportivo** | El jugador podrá actualizar todos los datos de su perfil deportivo siempre y cuando no esté asignado a un equipo. | Jugador / Admin |
+| **Actualizar usuario** | El usuario y el administrador podrán actualizar la información básica del usuario: nombre completo, relación con la Escuela (estudiante, profesor, administrativo, graduado o familiar), programa académico, semestre (si es estudiante). El correo y la contraseña no se podrán modificar. | Autenticado |
+| **Inactivar usuario** | El usuario podrá inactivar su propia cuenta y el administrador podrá inactivar cualquier cuenta, validando previamente que no esté participando en un torneo. | Autenticado |
+| **Reactivar usuario** | El administrador podrá reactivar una cuenta que haya sido previamente inactivada. | ADMIN |
+| **Crear perfil deportivo** | Cada jugador podrá crear un perfil deportivo indicando: posición de juego predefinida (portero, defensa, volante, delantero), número dorsal predefinido, foto y si se encuentra disponible o no para ser convocado por algún equipo. | Autenticado |
+| **Actualizar perfil deportivo** | El jugador podrá actualizar todos los datos de su perfil deportivo siempre y cuando no esté asignado a un equipo. | Autenticado |
 | **Eliminar perfil deportivo** | El sistema no permitirá eliminar un perfil deportivo. | — |
-| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. | Capitán / Admin |
-| **Invitaciones** | Los capitanes envían invitaciones a jugadores; los jugadores pueden aceptar o rechazar; el capitán puede cancelar las que están pendientes. | Capitán (envía/cancela) · Jugador (acepta/rechaza) · Admin |
-| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios y de gestión del perfil deportivo e invitaciones. | Admin (consulta) |
+| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. Retorna también datos del perfil deportivo de cada jugador. | CAPTAIN / ADMIN |
+| **Invitaciones** | Los capitanes envían invitaciones a jugadores; los jugadores pueden aceptar o rechazar; el capitán puede cancelar las que están pendientes. | CAPTAIN (envía/cancela) · Autenticado (acepta/rechaza) · ADMIN |
+| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios y de gestión del perfil deportivo e invitaciones. | ADMIN (consulta) |
 
 ---
 
@@ -117,7 +118,8 @@
 │   │   │       │   ├── 📄 UserController.java
 │   │   │       │   ├── 📄 InvitationController.java
 │   │   │       │   ├── 📄 SportProfileController.java
-│   │   │       │   └── 📄 AuditLogController.java
+│   │   │       │   ├── 📄 AuditLogController.java
+│   │   │       │   └── 📄 RootController.java
 │   │   │       ├── 📁 dto/                     # DTOs de entrada/salida
 │   │   │       ├── 📁 entity/                  # Entidades JPA / documentos Mongo
 │   │   │       ├── 📁 enums/                   # Enumeraciones de dominio
@@ -127,11 +129,10 @@
 │   │   │       ├── 📁 repository/              # Repositorios Spring Data
 │   │   │       ├── 📁 security/                # JWT, filtros, autorización
 │   │   │       │   ├── 📄 SecurityConfig.java
+│   │   │       │   ├── 📄 LocalSecurityConfig.java
 │   │   │       │   ├── 📄 JwtAuthenticationFilter.java
-│   │   │       │   ├── 📄 ServiceApiKeyAuthFilter.java
 │   │   │       │   ├── 📄 AccessDeniedHandlerImpl.java
 │   │   │       │   ├── 📄 AuthenticationEntryPointImpl.java
-│   │   │       │   ├── 📄 JwtService.java
 │   │   │       │   └── 📁 policy/              # Policies de acceso por recurso
 │   │   │       └── 📁 service/                 # Lógica de negocio
 │   │   └── 📁 resources/
@@ -261,7 +262,7 @@ docker run -d \
 
 ![ContainerDiagram](src/main/resources/docs/uml/containerDiagram.png)
 
-> Los actores **Jugador**, **Capitán** y **Administrador** acceden vía HTTPS al **Frontend** (React + TypeScript), que envía todas las peticiones REST/HTTPS al **Orchestrator API Gateway** (punto de entrada con enrutamiento y seguridad). El gateway enruta a este **Users and Players Service** (Spring Boot), responsable de la lógica de negocio y persistencia de perfiles de usuario, perfiles deportivos e invitaciones. El servicio se integra con el **Entity service** (sincronización de usuarios y notificación de inactivación) y con el **Team service** (consulta del equipo activo del jugador y notificación de aceptación/rechazo de invitaciones). Persiste datos relacionales en **PostgreSQL** (`user_profiles`, `sport_profiles`, `invitations`) y archivos multimedia (fotos de jugadores) en **MongoDB**.
+> Los actores **Jugador**, **Capitán** y **Administrador** acceden vía HTTPS al **Frontend** (React + TypeScript), que envía todas las peticiones REST/HTTPS al **Orchestrator API Gateway** (punto de entrada con enrutamiento y seguridad). El gateway enruta a este **Users and Players Service** (Spring Boot), responsable de la lógica de negocio y persistencia de perfiles deportivos e invitaciones. El servicio se integra con el **Identity Service** (fuente de verdad de usuarios: creación, actualización, inactivación y reactivación de cuentas) y con el **Team service** (consulta del equipo activo del jugador antes de inactivar o procesar invitaciones). Persiste datos relacionales en **PostgreSQL** (`sport_profiles`, `invitations`, `audit_log`) y archivos multimedia (fotos de jugadores) en **MongoDB**.
 
 ### Diagrama de clases
 
@@ -269,25 +270,26 @@ docker run -d \
 
 > El diseño sigue una **arquitectura por capas** con separación estricta entre capas:
 >
-> - **ControllerLayer**: expone los endpoints REST (`UserProfileController`, `SportProfileController`, `InvitationController`) y delega en la capa de servicio.
-> - **ServiceLayer**: interfaces (`IUserProfileService`, `ISportProfileService`, `IInvitationService`, `IAuditService`) e implementaciones que concentran la lógica de negocio. `AuditServiceImpl` es transversal y lo invocan los demás servicios para registrar acciones.
+> - **ControllerLayer**: expone los endpoints REST (`UserController`, `SportProfileController`, `InvitationController`, `AuditLogController`, `RootController`) y delega en la capa de servicio.
+> - **ServiceLayer**: interfaces (`IUserService`, `ISportProfileService`, `IInvitationService`, `IAuditService`, `ImageService`) e implementaciones que concentran la lógica de negocio. `UserServiceImpl` delega la persistencia de usuarios al `IdentityServiceClient`; `AuditServiceImpl` es transversal y lo invocan los demás servicios para registrar acciones.
+> - **ClientLayer**: `IdentityServiceClient` (HTTP al Identity Service para CRUD de usuarios) y `TeamsServiceClient` (consulta de asignación de jugadores a equipos).
 > - **MapperLayer**: mappers basados en MapStruct que convierten entre `Model` (dominio) y `Entity` (persistencia), aislando ambas representaciones.
-> - **RepositoryLayer**: interfaces Spring Data (`UserProfileRepository`, `SportProfileRepository`, `InvitationRepository`, `AuditLogRepository`) que abstraen el acceso a datos.
-> - **ModelLayer**: modelos de dominio (`UserProfileModel`, `SportProfileModel`, `InvitationModel`, `AuditLogModel`) y enumeraciones del negocio (`SchoolRelation`, `Gender`, `Position`, `InvitationStatus`, `AuditAction`).
-> - **EntityLayer**: entidades JPA (`UserProfileEntity`, `SportProfileEntity`, `InvitationEntity`, `AuditLogEntity`) que reflejan el esquema relacional.
+> - **RepositoryLayer**: interfaces Spring Data (`SportProfileRepository`, `InvitationRepository`, `AuditLogRepository`, `PlayerPhotoRepository`) que abstraen el acceso a datos locales.
+> - **ModelLayer**: modelos de dominio (`UserModel`, `SportProfileModel`, `InvitationModel`, `AuditLogModel`) y enumeraciones del negocio (`SchoolRelation`, `Gender`, `Position`, `InvitationStatus`, `AuditAction`).
+> - **EntityLayer**: entidades JPA (`SportProfileEntity`, `InvitationEntity`, `AuditLogEntity`) que reflejan el esquema relacional local.
 >
-> Las relaciones clave del dominio: un `UserProfile` tiene 1:1 un `SportProfile` y 1:N `Invitation`; cada cambio sobre perfiles e invitaciones genera registros en `AuditLog`.
+> Las relaciones clave del dominio: un usuario (gestionado por Identity Service) tiene 1:1 un `SportProfile` y 1:N `Invitation`; cada cambio sobre perfiles e invitaciones genera registros en `AuditLog`.
 
 ### Diagrama Entidad-Relación
 
 ![DatabaseDiagram](src/main/resources/docs/uml/dataBaseDiagram.png)
 
-> El modelo relacional gira en torno a la tabla **`Users`** (identidad, datos académicos y de contacto), con dos relaciones principales:
+> El modelo relacional local de este servicio contiene únicamente tres tablas. Los datos de identidad del usuario (nombre, correo, contraseña, etc.) residen en el **Identity Service** y se referencian a través de un `user_id` externo:
 >
-> - **`Users` 1 — 1 `SportProfile`**: cada usuario puede tener un único perfil deportivo (posición, dorsal, foto referenciada por `photo_id` en MongoDB, disponibilidad).
-> - **`Users` 1 — 0..* `Invitation`**: un jugador puede recibir múltiples invitaciones a equipos (`team_id`, `status`, `send_at`, `responded_at`).
+> - **`sport_profiles`**: perfil deportivo de cada jugador (`user_id`, `position`, `dorsal_number`, `photo_id` referenciado en MongoDB, `available`). Relación 1:1 con el usuario del Identity Service.
+> - **`invitations`**: invitaciones de un equipo a un jugador (`player_id`, `team_id`, `status`, `sent_at`, `responded_at`). Relación 0..* por usuario.
 >
-> La tabla **`audit_log`** registra de forma transversal las acciones realizadas sobre `SportProfile` e `Invitation` (relaciones 1 — 0..*), guardando `performed_by`, `action`, `timestamp` y `details` para trazabilidad. Las llaves únicas en `Users` (`mail`, `identificationType`+`identificationNumber`) garantizan que no haya duplicados de identidad ni de correo institucional.
+> La tabla **`audit_log`** registra de forma transversal las acciones realizadas sobre `sport_profiles` e `invitations` (relaciones 1 — 0..*), guardando `performed_by`, `action`, `timestamp` y `details` para trazabilidad.
 
 ---
 
@@ -303,43 +305,44 @@ http://localhost:8080/swagger-ui.html
 
 | Método | Endpoint | Descripción | Roles |
 |--------|----------|-------------|-------|
-| GET | `/api/users` | Listar todos los usuarios | Admin |
-| GET | `/api/users/search` | Búsqueda con filtros (nombre, posición, identificación, género, semestre, edad, disponibilidad) | Capitán / Admin |
-| GET | `/api/users/{id}` | Obtener usuario por ID | Dueño / Admin |
-| GET | `/api/users/identification/{identification}` | Obtener usuario por número de identificación | Capitán / Admin |
-| PUT | `/api/users/{id}` | Reemplazar usuario completo | Admin |
-| PUT | `/api/users/me` | Actualizar el perfil del usuario actual (`X-User-Id`) | Autenticado |
-| PATCH | `/api/users/{id}/deactivate` | Desactivar cuenta (estado INACTIVE) | Admin |
-| PATCH | `/api/users/{id}/inactivate` | Inactivar cuenta validando participación en torneo | Dueño / Admin |
+| GET | `/api/users` | Listar todos los usuarios | ADMIN |
+| GET | `/api/users/search` | Búsqueda con filtros (nombre, posición, estado, identificación, género, semestre, edad, disponibilidad) — retorna datos del perfil deportivo | CAPTAIN / ADMIN |
+| GET | `/api/users/{id}` | Obtener usuario por ID | Autenticado |
+| GET | `/api/users/identification/{identification}` | Obtener usuario por número de identificación | CAPTAIN / ADMIN |
+| PUT | `/api/users/{id}` | Reemplazar datos de usuario (operación de administrador) | ADMIN |
+| PUT | `/api/users/me` | Actualizar el perfil del usuario actual (ID desde JWT o header `X-User-Id`) | Autenticado |
+| PATCH | `/api/users/{id}/deactivate` | Desactivar cuenta (estado INACTIVE) | ADMIN |
+| PATCH | `/api/users/{id}/inactivate` | Inactivar cuenta validando participación en torneo activo | Autenticado |
+| PATCH | `/api/users/{id}/reactivate` | Reactivar cuenta previamente inactivada | ADMIN |
 
 ### Invitaciones
 
 | Método | Endpoint | Descripción | Roles |
 |--------|----------|-------------|-------|
 | GET | `/api/invitations/{id}` | Obtener invitación por ID | Autenticado |
-| GET | `/api/invitations/user/{userId}` | Listar invitaciones del jugador | Dueño / Admin |
-| POST | `/api/invitations/user/{userId}/team/{teamId}` | Enviar invitación a un jugador desde un equipo | Capitán |
-| PATCH | `/api/invitations/{id}/accept` | Aceptar invitación | Dueño / Admin |
-| PATCH | `/api/invitations/{id}/reject` | Rechazar invitación | Dueño / Admin |
-| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente | Capitán |
+| GET | `/api/invitations/user/{userId}` | Listar invitaciones del jugador | Autenticado |
+| POST | `/api/invitations/user/{userId}/team/{teamId}` | Enviar invitación a un jugador desde un equipo | CAPTAIN |
+| PATCH | `/api/invitations/{id}/accept` | Aceptar invitación | Autenticado |
+| PATCH | `/api/invitations/{id}/reject` | Rechazar invitación | Autenticado |
+| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente | CAPTAIN |
 
 ### Perfiles deportivos
 
 | Método | Endpoint | Descripción | Roles |
 |--------|----------|-------------|-------|
 | GET | `/api/sport-profiles/{id}` | Obtener perfil deportivo por ID | Autenticado |
-| GET | `/api/sport-profiles/user/{userId}` | Obtener perfil deportivo por usuario | Dueño / Capitán / Admin |
-| POST | `/api/sport-profiles/user/{userId}` | Crear perfil deportivo (multipart: `profile`, `photo` opcional) | Dueño / Admin |
-| PUT | `/api/sport-profiles/{id}` | Actualizar perfil deportivo (multipart: `profile`, `photo` opcional) | Dueño / Admin |
-| PATCH | `/api/sport-profiles/{id}/availability?available={true\|false}` | Actualizar disponibilidad | Dueño / Admin |
+| GET | `/api/sport-profiles/user/{userId}` | Obtener perfil deportivo por usuario | Autenticado |
+| POST | `/api/sport-profiles/user/{userId}` | Crear perfil deportivo (multipart: `profile`, `photo` opcional) | Autenticado |
+| PUT | `/api/sport-profiles/{id}` | Actualizar perfil deportivo (multipart: `profile`, `photo` opcional) | Autenticado |
+| PATCH | `/api/sport-profiles/{id}/availability?available={true\|false}` | Actualizar disponibilidad | Autenticado |
 | GET | `/api/sport-profiles/photos/{photoId}` | Descargar foto del perfil deportivo | Autenticado |
 
 ### Auditoría
 
 | Método | Endpoint | Descripción | Roles |
 |--------|----------|-------------|-------|
-| GET | `/api/audit-logs/sport-profiles/{sportProfileId}` | Consultar bitácora de cambios de un perfil deportivo | Admin |
-| GET | `/api/audit-logs/invitations/{invitationId}` | Consultar bitácora de cambios de una invitación | Admin |
+| GET | `/api/audit-logs/sport-profiles/{sportProfileId}` | Consultar bitácora de cambios de un perfil deportivo | ADMIN |
+| GET | `/api/audit-logs/invitations/{invitationId}` | Consultar bitácora de cambios de una invitación | ADMIN |
 
 ---
 
@@ -381,4 +384,4 @@ mvn clean verify sonar:sonar \
 | Plataforma | Azure Web Apps |
 | URL del servicio | [https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net](https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net) |
 | Swagger desplegado | [https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net/swagger-ui/index.html](https://techcupuserwebservice-bca6dmfbgqd9bkaq.canadacentral-01.azurewebsites.net/swagger-ui/index.html) |
-| Última versión | ![Deploy](https://github.com/techcup-futbol-dosw/techchup-users/actions/workflows/cd.yml/badge.svg) |
+| Última versión | ![Deploy](https://github.com/techcup-futbol-dosw/techchup-users/actions/workflows/ci-cd.yml/badge.svg) |
