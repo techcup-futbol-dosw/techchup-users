@@ -3,6 +3,7 @@ package edu.dosw.users.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.dosw.users.dto.AdminUserUpdateRequest;
+import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.dto.UserProfileUpdateRequest;
 import edu.dosw.users.exception.ResourceNotFoundException;
 import edu.dosw.users.enums.Gender;
@@ -44,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * deactivating user profiles.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "ADMIN")
 class UserControllerTest {
 
     @Autowired private WebApplicationContext context;
@@ -68,9 +69,9 @@ class UserControllerTest {
 
     @Test
     void search_noParams_returnsOkWithList() throws Exception {
-        when(userService.search(null, null, null, null, null, null, null, null)).thenReturn(List.of(
-                UserModel.builder().id(1L).fullName("Carlos").build(),
-                UserModel.builder().id(2L).fullName("Ana").build()));
+        when(userService.searchPlayers(null, null, null, null, null, null, null, null)).thenReturn(List.of(
+                PlayerSearchResponse.builder().id(1L).fullName("Carlos").build(),
+                PlayerSearchResponse.builder().id(2L).fullName("Ana").build()));
 
         mockMvc.perform(get("/api/users/search"))
                 .andExpect(status().isOk())
@@ -79,21 +80,22 @@ class UserControllerTest {
 
     @Test
     void search_withNameAndPosition_returnsFilteredList() throws Exception {
-        when(userService.search("carlos", "FORWARD", null, null, null, null, null, null)).thenReturn(List.of(
-                UserModel.builder().id(1L).fullName("Carlos").build()));
+        when(userService.searchPlayers("carlos", "FORWARD", null, null, null, null, null, null)).thenReturn(List.of(
+                PlayerSearchResponse.builder().id(1L).fullName("Carlos").position("FORWARD").build()));
 
         mockMvc.perform(get("/api/users/search")
                         .param("name", "carlos")
                         .param("position", "FORWARD"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].fullName").value("Carlos"));
+                .andExpect(jsonPath("$[0].fullName").value("Carlos"))
+                .andExpect(jsonPath("$[0].position").value("FORWARD"));
     }
 
     @Test
     void search_withStatus_returnsFilteredList() throws Exception {
-        when(userService.search(null, null, "ACTIVE", null, null, null, null, null)).thenReturn(List.of(
-                UserModel.builder().id(3L).fullName("Luis").build()));
+        when(userService.searchPlayers(null, null, "ACTIVE", null, null, null, null, null)).thenReturn(List.of(
+                PlayerSearchResponse.builder().id(3L).fullName("Luis").status("ACTIVE").build()));
 
         mockMvc.perform(get("/api/users/search")
                         .param("status", "ACTIVE"))
@@ -259,6 +261,34 @@ class UserControllerTest {
                 .when(userService).inactivate(1L);
 
         mockMvc.perform(patch("/api/users/1/inactivate"))
+                .andExpect(status().isConflict());
+    }
+
+    // ── PATCH /api/users/{id}/reactivate ───────────────────────────────────
+
+    @Test
+    void reactivate_returnsNoContent() throws Exception {
+        doNothing().when(userService).reactivate(1L);
+
+        mockMvc.perform(patch("/api/users/1/reactivate"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void reactivate_notFound_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("not found"))
+                .when(userService).reactivate(99L);
+
+        mockMvc.perform(patch("/api/users/99/reactivate"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void reactivate_alreadyActive_returns409() throws Exception {
+        doThrow(new BusinessException("La cuenta ya se encuentra activa"))
+                .when(userService).reactivate(1L);
+
+        mockMvc.perform(patch("/api/users/1/reactivate"))
                 .andExpect(status().isConflict());
     }
 }

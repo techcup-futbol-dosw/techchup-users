@@ -12,12 +12,13 @@ import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 
 /**
- * MongoDB-backed implementation of {@link ImageService}.
+ * Implementación de {@link ImageService} respaldada por MongoDB.
  *
- * <p>Active only in the {@code prod} profile, where MongoDB Atlas is
- * configured. In other profiles the stub from {@code FallbackBeansConfig}
- * is used instead.</p>
+ * <p>Activa únicamente en el perfil {@code prod}, donde está configurado MongoDB Atlas.
+ * En otros perfiles se utiliza el stub definido en {@code FallbackBeansConfig}.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see PlayerPhotoRepository
  * @see PlayerPhoto
  */
@@ -31,9 +32,9 @@ public class ImageServiceImpl implements ImageService {
     /**
      * {@inheritDoc}
      *
-     * <p>Reads the multipart file into a {@link PlayerPhoto} document and
-     * stores its content type, binary data, owner sport profile identifier,
-     * and upload timestamp.</p>
+     * <p>Lee el archivo multipart hacia un documento {@link PlayerPhoto} y almacena
+     * su tipo de contenido, datos binarios, identificador del perfil deportivo
+     * propietario y marca de tiempo de subida.</p>
      */
     @Override
     public String upload(MultipartFile file, Long sportProfileId) {

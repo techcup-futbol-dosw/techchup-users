@@ -9,18 +9,29 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración central de seguridad del servicio.
+ *
+ * <p>Establece autenticación sin estado basada en JWT registrando el
+ * {@link JwtAuthenticationFilter} antes del filtro estándar de Spring Security
+ * {@link UsernamePasswordAuthenticationFilter}.</p>
+ *
+ * <p>Control de acceso por rol (roles exactos del JWT):
+ * <ul>
+ *   <li>{@code ADMIN}   — acceso completo a todos los endpoints administrativos.</li>
+ *   <li>{@code CAPTAIN} — puede buscar jugadores, consultar por identificación y gestionar invitaciones.</li>
+ *   <li>Cualquier usuario autenticado — puede leer/actualizar su propio perfil y sport-profile.</li>
+ * </ul>
+ * La autorización detallada por endpoint se aplica mediante {@code @PreAuthorize}
+ * con {@code hasRole()} e {@code isAuthenticated()}.
+ * </p>
+ *
+ * @author CodeForge
+ * @since 1.0
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    /**
-     * Central security configuration for the service.
-     *
-     * <p>Configures stateless JWT-based authentication by registering the
-     * {@link JwtAuthenticationFilter} before Spring Security's
-     * {@link UsernamePasswordAuthenticationFilter}.
-     * It also defines exception handling and which endpoints are public.</p>
-     */
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
@@ -34,36 +45,72 @@ public class SecurityConfig {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
+    /**
+     * Cadena de filtros para cualquier perfil excepto {@code local} (incluye tests y producción).
+     *
+     * <p>CSRF deshabilitado: API REST sin estado con JWT — sin cookies de sesión.</p>
+     *
+     * @param http constructor de configuración HTTP de Spring Security
+     * @return cadena de filtros de seguridad configurada
+     */
     @Bean
     @Profile("!local")
     @SuppressWarnings("java:S4502")
-    public SecurityFilterChain filterChain(HttpSecurity http) {
-        // CSRF disabled: stateless JWT API — no session cookies, so CSRF protection is unnecessary.
+    public SecurityFilterChain prodFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
-
-                // Use stateless session management: every request must carry auth info
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Configure handlers for auth failures and access denied
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
+                .authorizeHttpRequests(auth -> auth
+                        // Documentación pública
+                        .requestMatchers(
+                                "/",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        // El resto requiere autenticación; el control de roles queda en @PreAuthorize
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
 
-                // Public endpoints (API docs) and require authentication for the rest
+    /**
+     * Cadena de filtros para desarrollo local ({@code local}).
+     *
+     * <p>Permite acceso sin autenticación a la consola H2 y Swagger.
+     * Los demás endpoints siguen requiriendo token JWT para que las pruebas
+     * con Postman funcionen igual que en producción.</p>
+     *
+     * @param http constructor de configuración HTTP de Spring Security
+     * @return cadena de filtros de seguridad para entorno local
+     */
+    @Bean
+    @Profile("local")
+    @SuppressWarnings("java:S4502")
+    public SecurityFilterChain localFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/h2-console/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated())
-
-                // Register JWT filter before the standard username/password filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
-

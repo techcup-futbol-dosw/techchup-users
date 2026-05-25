@@ -1,18 +1,21 @@
 package edu.dosw.users.enums;
 
 /**
- * Playing positions available for a football player.
+ * Posiciones de juego disponibles para un jugador de fútbol.
  *
- * <p>Used in {@code SportProfileModel} and {@code SportProfileEntity}
- * to classify the player's tactical role on the field.</p>
+ * <p>Se usa en {@code SportProfileModel} y {@code SportProfileEntity}
+ * para clasificar el rol táctico del jugador en el campo.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public enum Position {
-    /** Goalkeeper — responsible for defending the team's goal. */
+    /** Portero — responsable de defender la portería del equipo. */
     GOALKEEPER,
-    /** Defender — defensive position close to the own goal. */
+    /** Defensa — posición defensiva cercana a la portería propia. */
     DEFENDER,
-    /** Midfielder — link between defence and attack. */
+    /** Centrocampista — enlace entre la defensa y el ataque. */
     MIDFIELDER,
-    /** Forward — offensive position responsible for scoring goals. */
+    /** Delantero — posición ofensiva encargada de marcar goles. */
     FORWARD
 }

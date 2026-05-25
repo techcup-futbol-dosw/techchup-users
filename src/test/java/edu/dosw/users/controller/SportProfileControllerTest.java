@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * mappings for sport profile operations.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "ADMIN")
 class SportProfileControllerTest {
 
     @Autowired private WebApplicationContext context;

@@ -5,92 +5,101 @@ import edu.dosw.users.model.UserModel;
 import java.util.List;
 
 /**
- * Client interface for communicating with the identity microservice.
+ * Interfaz de cliente para comunicarse con el microservicio de identidad.
  *
- * <p>Used by the service layer to delegate all user-data operations (CRUD,
- * deactivation, inactivation, and search) to the identity service rather than
- * persisting user data locally.</p>
+ * <p>Utilizada por la capa de servicio para delegar todas las operaciones de datos de usuario
+ * (CRUD, desactivación, inactivación y búsqueda) al servicio de identidad en lugar de
+ * persistir los datos de usuario localmente.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 public interface IdentityServiceClient {
 
     /**
-     * Returns {@code true} when a user with the given identifier exists in the
-     * identity service.
+     * Retorna {@code true} cuando existe un usuario con el identificador dado en el servicio de identidad.
      *
-     * @param id user identifier to check
-     * @return {@code true} if the user exists
+     * @param id identificador de usuario a verificar
+     * @return {@code true} si el usuario existe
      */
     boolean userExists(Long id);
 
     /**
-     * Retrieves a user by its identifier.
+     * Recupera un usuario por su identificador.
      *
-     * @param id user identifier
-     * @return the user model, or {@code null} if not found
+     * @param id identificador del usuario
+     * @return modelo del usuario, o {@code null} si no se encuentra
      */
     UserModel getUserById(Long id);
 
     /**
-     * Retrieves a user by their official identification number.
+     * Recupera un usuario por su número de identificación oficial.
      *
-     * @param identification official identification number
-     * @return the user model, or {@code null} if not found
+     * @param identification número de identificación oficial
+     * @return modelo del usuario, o {@code null} si no se encuentra
      */
     UserModel getUserByIdentification(String identification);
 
     /**
-     * Returns all users registered in the identity service.
+     * Retorna todos los usuarios registrados en el servicio de identidad.
      *
-     * @return list of all user models, may be empty
+     * @return lista de todos los modelos de usuario; puede estar vacía
      */
     List<UserModel> getAllUsers();
 
     /**
-     * Creates a new user in the identity service.
+     * Crea un nuevo usuario en el servicio de identidad.
      *
-     * @param model user data to create
-     * @return the created user model with its generated identifier
+     * @param model datos del usuario a crear
+     * @return modelo del usuario creado con su identificador generado
      */
     UserModel createUser(UserModel model);
 
     /**
-     * Replaces an existing user's data in the identity service.
+     * Reemplaza los datos de un usuario existente en el servicio de identidad.
      *
-     * @param id    identifier of the user to update
-     * @param model new user data
-     * @return the updated user model
+     * @param id    identificador del usuario a actualizar
+     * @param model nuevos datos del usuario
+     * @return modelo del usuario actualizado
      */
     UserModel updateUser(Long id, UserModel model);
 
     /**
-     * Updates the current user's own profile in the identity service.
+     * Actualiza el perfil propio del usuario actual en el servicio de identidad.
      *
-     * @param userId identifier of the authenticated user
-     * @param model  new profile data (without credentials)
-     * @return the updated user model
+     * @param userId identificador del usuario autenticado
+     * @param model  nuevos datos del perfil (sin credenciales)
+     * @return modelo del usuario actualizado
      */
     UserModel updateUserProfile(Long userId, UserModel model);
 
     /**
-     * Sets a user's status to {@code INACTIVE} in the identity service.
+     * Establece el estado de un usuario a {@code INACTIVE} en el servicio de identidad.
      *
-     * @param id identifier of the user to deactivate
+     * @param id identificador del usuario a desactivar
      */
     void deactivateUser(Long id);
 
     /**
-     * Inactivates a user in the identity service.
+     * Inactiva un usuario en el servicio de identidad.
      *
-     * @param id identifier of the user to inactivate
+     * @param id identificador del usuario a inactivar
      */
     void inactivateUser(Long id);
 
     /**
-     * Searches for users in the identity service matching the given filters.
+     * Reactiva un usuario en el servicio de identidad estableciendo su estado a {@code ACTIVE}.
      *
-     * @param name   optional partial name filter (case-insensitive); {@code null} returns all
-     * @param status optional status filter (e.g. {@code "ACTIVE"}); {@code null} returns all
-     * @return list of matching user models, may be empty
+     * @param id identificador del usuario a reactivar
+     */
+    void reactivateUser(Long id);
+
+    /**
+     * Busca usuarios en el servicio de identidad que coincidan con los filtros indicados.
+     *
+     * @param name   filtro parcial de nombre (insensible a mayúsculas, opcional); {@code null} retorna todos
+     * @param status filtro de estado (p. ej. {@code "ACTIVE"}, opcional); {@code null} retorna todos
+     * @return lista de modelos de usuario coincidentes; puede estar vacía
      */
     List<UserModel> searchUsers(String name, String status);
 }

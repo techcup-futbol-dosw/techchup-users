@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * a running identity service.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "ADMIN")
 class UserControllerIT {
 
     @Autowired private WebApplicationContext context;

@@ -6,29 +6,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * Spring Data JPA repository for {@link InvitationEntity} persistence operations.
+ * Repositorio Spring Data JPA para operaciones de persistencia de {@link InvitationEntity}.
  *
- * <p>Includes the standard CRUD operations inherited from {@link JpaRepository}
- * and derived queries for retrieving invitations by user identifier and status.</p>
+ * <p>Incluye las operaciones CRUD estándar heredadas de {@link JpaRepository} y
+ * consultas derivadas para recuperar invitaciones por identificador de usuario y estado.</p>
  *
+ * @author CodeForge
+ * @since 1.0
  * @see InvitationEntity
  */
 public interface InvitationRepository extends JpaRepository<InvitationEntity, Long> {
 
     /**
-     * Finds all invitations received by the given user.
+     * Busca todas las invitaciones recibidas por el usuario indicado.
      *
-     * @param userId identifier of the user whose invitations are requested
-     * @return list of invitations associated with the user
+     * @param userId identificador del usuario cuyas invitaciones se solicitan
+     * @return lista de invitaciones asociadas al usuario
      */
     List<InvitationEntity> findByUserId(Long userId);
 
     /**
-     * Finds all invitations received by the given user with the requested status.
+     * Busca todas las invitaciones recibidas por el usuario indicado que coincidan con el estado solicitado.
      *
-     * @param userId identifier of the user whose invitations are requested
-     * @param status invitation status to filter by
-     * @return list of invitations associated with the user and matching status
+     * @param userId identificador del usuario cuyas invitaciones se solicitan
+     * @param status estado de la invitación por el que filtrar
+     * @return lista de invitaciones asociadas al usuario con el estado indicado
      */
     List<InvitationEntity> findByUserIdAndStatus(Long userId, String status);
 }

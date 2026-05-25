@@ -2,6 +2,7 @@ package edu.dosw.users.service;
 
 import edu.dosw.users.client.IdentityServiceClient;
 import edu.dosw.users.client.TeamsServiceClient;
+import edu.dosw.users.dto.PlayerSearchResponse;
 import edu.dosw.users.entity.SportProfileEntity;
 import edu.dosw.users.enums.AuditAction;
 import edu.dosw.users.enums.SchoolRelation;
@@ -13,16 +14,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link IUserService} that delegates all user-data
- * operations to the identity microservice via {@link IdentityServiceClient}.
+ * Implementación de {@link IUserService} que delega todas las operaciones de datos
+ * de usuario al microservicio de identidad a través de {@link IdentityServiceClient}.
  *
- * <p>Business rules that belong to this service (team participation checks,
- * sport-profile audit logging, position-based search filtering) are applied
- * locally before or after the identity-service call.</p>
+ * <p>Las reglas de negocio propias de este servicio (validación de participación en
+ * equipos, registro de auditoría del perfil deportivo, filtrado de búsqueda por posición)
+ * se aplican localmente antes o después de la llamada al servicio de identidad.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -72,9 +77,9 @@ public class UserServiceImpl implements IUserService {
     /**
      * {@inheritDoc}
      *
-     * <p>Enforces that the user is active and applies the semester/school-relation
-     * constraint before delegating the update to the identity service. If the
-     * user has a sport profile, an audit entry is recorded.</p>
+     * <p>Verifica que el usuario esté activo y aplica la restricción de semestre/relación
+     * escolar antes de delegar la actualización al servicio de identidad. Si el usuario
+     * tiene un perfil deportivo, se registra una entrada de auditoría.</p>
      */
     @Override
     public UserModel update(Long id, UserModel model) {
@@ -129,8 +134,8 @@ public class UserServiceImpl implements IUserService {
     /**
      * {@inheritDoc}
      *
-     * <p>Validates the user's current status and team participation before
-     * delegating the inactivation to the identity service.</p>
+     * <p>Valida el estado actual del usuario y su participación en equipos antes
+     * de delegar la inactivación al servicio de identidad.</p>
      */
     @Override
     public void inactivate(Long id) {
@@ -148,12 +153,24 @@ public class UserServiceImpl implements IUserService {
         identityServiceClient.inactivateUser(id);
     }
 
+    @Override
+    public void reactivate(Long id) {
+        UserModel user = identityServiceClient.getUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException(USER_NOT_FOUND_ID + id);
+        }
+        if (STATUS_ACTIVE.equalsIgnoreCase(user.getStatus())) {
+            throw new BusinessException("La cuenta ya se encuentra activa");
+        }
+        identityServiceClient.reactivateUser(id);
+    }
+
     /**
      * {@inheritDoc}
      *
-     * <p>Fetches users from the identity service filtered by name and status,
-     * then applies local filters for position, availability, identification,
-     * gender, semester and age.</p>
+     * <p>Obtiene usuarios del servicio de identidad filtrados por nombre y estado,
+     * y luego aplica filtros locales de posición, disponibilidad, identificación,
+     * género, semestre y edad.</p>
      */
     @Override
     public List<UserModel> search(String name, String position, String status,
@@ -205,6 +222,44 @@ public class UserServiceImpl implements IUserService {
             profiles = sportProfileRepository.findByAvailable(true);
         }
         return profiles.stream().map(SportProfileEntity::getUserId).collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<PlayerSearchResponse> searchPlayers(String name, String position, String status,
+                                                     String identification, String gender,
+                                                     Integer semester, Integer age, Boolean onlyAvailable) {
+        List<UserModel> users = search(name, position, status, identification, gender, semester, age, onlyAvailable);
+
+        if (users.isEmpty()) {
+            return List.of();
+        }
+
+        // Batch-load sport profiles and index by userId for O(1) lookup
+        Set<Long> userIds = users.stream().map(UserModel::getId).collect(Collectors.toSet());
+        Map<Long, SportProfileEntity> profileByUserId = sportProfileRepository.findByUserIdIn(userIds)
+                .stream()
+                .collect(Collectors.toMap(SportProfileEntity::getUserId, sp -> sp));
+
+        return users.stream().map(u -> {
+            SportProfileEntity sp = profileByUserId.get(u.getId());
+            return PlayerSearchResponse.builder()
+                    .id(u.getId())
+                    .fullName(u.getFullName())
+                    .email(u.getEmail())
+                    .identification(u.getIdentification())
+                    .birthDate(u.getBirthDate())
+                    .gender(u.getGender())
+                    .schoolRelation(u.getSchoolRelation())
+                    .academicProgram(u.getAcademicProgram())
+                    .semester(u.getSemester())
+                    .status(u.getStatus())
+                    .profileCreatedAt(u.getProfileCreatedAt())
+                    .updatedAt(u.getUpdatedAt())
+                    .position(sp != null ? sp.getPosition() : null)
+                    .dorsalNumber(sp != null ? sp.getDorsalNumber() : null)
+                    .available(sp != null ? sp.isAvailable() : null)
+                    .build();
+        }).toList();
     }
 
     private boolean blank(String s) {

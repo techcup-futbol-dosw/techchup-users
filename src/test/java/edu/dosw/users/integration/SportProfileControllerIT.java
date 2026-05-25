@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * for valid IDs and denies it for unknown ones.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "ADMIN")
 class SportProfileControllerIT {
 
     @Autowired private WebApplicationContext context;

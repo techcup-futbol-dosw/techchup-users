@@ -10,9 +10,14 @@ import lombok.Setter;
 import java.io.Serializable;
 
 /**
- * DTO accepted by administrators when updating a user's basic information.
+ * DTO aceptado por los administradores para actualizar la información básica de un usuario.
  *
- * <p>Contains only the fields that an administrator is allowed to change.</p>
+ * <p>Contiene únicamente los campos que un administrador tiene permitido modificar.
+ * Los demás campos (correo, contraseña, identificación, género, etc.) son ignorados
+ * por el mapper y no se incluyen en este request.</p>
+ *
+ * @author CodeForge
+ * @since 1.0
  */
 @Getter
 @Setter

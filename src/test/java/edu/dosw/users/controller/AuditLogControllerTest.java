@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * HTTP status codes and JSON responses for audit log queries.</p>
  */
 @SpringBootTest
-@WithMockUser(roles = "ADMINISTRADOR")
+@WithMockUser(roles = "ADMIN")
 class AuditLogControllerTest {
 
     @Autowired private WebApplicationContext context;
