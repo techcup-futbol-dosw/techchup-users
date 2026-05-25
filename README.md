@@ -44,13 +44,13 @@
 |---------------|-------------|-----------------|
 | **Actualizar usuario** | El usuario y el administrador podrán actualizar la información básica del usuario: nombre completo, relación con la Escuela (estudiante, profesor, administrativo, graduado o familiar), programa académico, semestre (si es estudiante). El correo y la contraseña no se podrán modificar. | Autenticado |
 | **Inactivar usuario** | El usuario podrá inactivar su propia cuenta y el administrador podrá inactivar cualquier cuenta, validando previamente que no esté participando en un torneo. | Autenticado |
-| **Reactivar usuario** | El administrador podrá reactivar una cuenta que haya sido previamente inactivada. | ADMIN |
+| **Reactivar usuario** | El administrador podrá reactivar una cuenta que haya sido previamente inactivada. | Administrador |
 | **Crear perfil deportivo** | Cada jugador podrá crear un perfil deportivo indicando: posición de juego predefinida (portero, defensa, volante, delantero), número dorsal predefinido, foto y si se encuentra disponible o no para ser convocado por algún equipo. | Autenticado |
 | **Actualizar perfil deportivo** | El jugador podrá actualizar todos los datos de su perfil deportivo siempre y cuando no esté asignado a un equipo. | Autenticado |
 | **Eliminar perfil deportivo** | El sistema no permitirá eliminar un perfil deportivo. | — |
-| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. Retorna también datos del perfil deportivo de cada jugador. | CAPTAIN / ADMIN |
-| **Invitaciones** | Los capitanes envían invitaciones a jugadores; los jugadores pueden aceptar o rechazar; el capitán puede cancelar las que están pendientes. | CAPTAIN (envía/cancela) · Autenticado (acepta/rechaza) · ADMIN |
-| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios y de gestión del perfil deportivo e invitaciones. | ADMIN (consulta) |
+| **Búsqueda de jugadores** | Los capitanes podrán buscar jugadores por: posición, edad, género, nombre, identificación y/o semestre. Retorna también datos del perfil deportivo de cada jugador. | Capitán / Administrador |
+| **Invitaciones** | Los capitanes envían invitaciones a jugadores; los jugadores pueden aceptar o rechazar; el capitán puede cancelar las que están pendientes. | Capitán (envía/cancela) · Autenticado (acepta/rechaza) · Administrador |
+| **Auditoría** | Registrar las acciones de actualización e inactivación de usuarios y de gestión del perfil deportivo e invitaciones. | Administrador (consulta) |
 
 ---
 
@@ -305,15 +305,15 @@ http://localhost:8080/swagger-ui.html
 
 | Método | Endpoint | Descripción | Roles |
 |--------|----------|-------------|-------|
-| GET | `/api/users` | Listar todos los usuarios | ADMIN |
-| GET | `/api/users/search` | Búsqueda con filtros (nombre, posición, estado, identificación, género, semestre, edad, disponibilidad) — retorna datos del perfil deportivo | CAPTAIN / ADMIN |
+| GET | `/api/users` | Listar todos los usuarios | Administrador |
+| GET | `/api/users/search` | Búsqueda con filtros (nombre, posición, estado, identificación, género, semestre, edad, disponibilidad) — retorna datos del perfil deportivo | Capitán / Administrador |
 | GET | `/api/users/{id}` | Obtener usuario por ID | Autenticado |
-| GET | `/api/users/identification/{identification}` | Obtener usuario por número de identificación | CAPTAIN / ADMIN |
-| PUT | `/api/users/{id}` | Reemplazar datos de usuario (operación de administrador) | ADMIN |
+| GET | `/api/users/identification/{identification}` | Obtener usuario por número de identificación | Capitán / Administrador |
+| PUT | `/api/users/{id}` | Reemplazar datos de usuario (operación de administrador) | Administrador |
 | PUT | `/api/users/me` | Actualizar el perfil del usuario actual (ID desde JWT o header `X-User-Id`) | Autenticado |
-| PATCH | `/api/users/{id}/deactivate` | Desactivar cuenta (estado INACTIVE) | ADMIN |
+| PATCH | `/api/users/{id}/deactivate` | Desactivar cuenta (estado INACTIVE) | Administrador |
 | PATCH | `/api/users/{id}/inactivate` | Inactivar cuenta validando participación en torneo activo | Autenticado |
-| PATCH | `/api/users/{id}/reactivate` | Reactivar cuenta previamente inactivada | ADMIN |
+| PATCH | `/api/users/{id}/reactivate` | Reactivar cuenta previamente inactivada | Administrador |
 
 ### Invitaciones
 
@@ -321,10 +321,10 @@ http://localhost:8080/swagger-ui.html
 |--------|----------|-------------|-------|
 | GET | `/api/invitations/{id}` | Obtener invitación por ID | Autenticado |
 | GET | `/api/invitations/user/{userId}` | Listar invitaciones del jugador | Autenticado |
-| POST | `/api/invitations/user/{userId}/team/{teamId}` | Enviar invitación a un jugador desde un equipo | CAPTAIN |
+| POST | `/api/invitations/user/{userId}/team/{teamId}` | Enviar invitación a un jugador desde un equipo | Capitán |
 | PATCH | `/api/invitations/{id}/accept` | Aceptar invitación | Autenticado |
 | PATCH | `/api/invitations/{id}/reject` | Rechazar invitación | Autenticado |
-| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente | CAPTAIN |
+| PATCH | `/api/invitations/{id}/cancel` | Cancelar invitación pendiente | Capitán |
 
 ### Perfiles deportivos
 
@@ -341,8 +341,8 @@ http://localhost:8080/swagger-ui.html
 
 | Método | Endpoint | Descripción | Roles |
 |--------|----------|-------------|-------|
-| GET | `/api/audit-logs/sport-profiles/{sportProfileId}` | Consultar bitácora de cambios de un perfil deportivo | ADMIN |
-| GET | `/api/audit-logs/invitations/{invitationId}` | Consultar bitácora de cambios de una invitación | ADMIN |
+| GET | `/api/audit-logs/sport-profiles/{sportProfileId}` | Consultar bitácora de cambios de un perfil deportivo | Administrador |
+| GET | `/api/audit-logs/invitations/{invitationId}` | Consultar bitácora de cambios de una invitación | Administrador |
 
 ---
 
